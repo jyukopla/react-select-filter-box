@@ -4,6 +4,7 @@
  * Renders a single token (field, operator, value, or connector) in the filter box.
  */
 
+import { memo } from 'react'
 import { clsx } from 'clsx'
 import type {
   TokenData,
@@ -71,8 +72,10 @@ function getTokenAriaLabel(data: TokenData): string {
 
 /**
  * Token component that displays a single token in the filter expression
+ * 
+ * Memoized to prevent unnecessary re-renders when parent updates.
  */
-export function Token({
+export const Token = memo(function Token({
   data,
   isEditable,
   isEditing: _isEditing,
@@ -110,4 +113,4 @@ export function Token({
       {display}
     </span>
   )
-}
+})
