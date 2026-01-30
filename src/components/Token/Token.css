@@ -1,5 +1,17 @@
 /* Token Component Styles */
 
+/* Keyframe Animations */
+@keyframes token-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .token {
   display: inline-flex;
   align-items: center;
@@ -13,7 +25,13 @@
   white-space: nowrap;
   cursor: default;
   user-select: none;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: 
+    background-color 0.15s ease, 
+    border-color 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+  animation: token-fade-in 0.2s ease-out;
 }
 
 .token--editable {
@@ -22,6 +40,11 @@
 
 .token--editable:hover {
   filter: brightness(0.95);
+  transform: scale(1.02);
+}
+
+.token--editable:active {
+  transform: scale(0.98);
 }
 
 /* Field Token */
@@ -58,9 +81,33 @@
   outline: none;
 }
 
+/* Focus State (for keyboard navigation) */
+.token:focus-visible {
+  box-shadow: 0 0 0 2px var(--filter-token-focus-ring, #1976d2);
+  outline: none;
+}
+
+/* Hover State Enhancement */
+.token--field:hover {
+  border-color: var(--filter-token-field-border-hover, #1976d2);
+}
+
+.token--operator:hover {
+  border-color: var(--filter-token-operator-border-hover, #c2185b);
+}
+
+.token--value:hover {
+  border-color: var(--filter-token-value-border-hover, #388e3c);
+}
+
+.token--connector:hover {
+  border-color: var(--filter-token-connector-border-hover, #ef6c00);
+}
+
 /* Editing Mode */
 .token--editing {
   padding: 0;
+  animation: none;
 }
 
 .token__edit-input {
@@ -74,4 +121,17 @@
   outline: none;
   width: auto;
   min-width: 50px;
+}
+
+/* Reduced Motion - respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  .token {
+    animation: none;
+    transition: none;
+  }
+  
+  .token--editable:hover,
+  .token--editable:active {
+    transform: none;
+  }
 }

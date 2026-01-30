@@ -351,6 +351,7 @@ export function useFilterState({
       setCurrentField(undefined)
       setCurrentOperator(undefined)
       setIsDropdownOpen(true)
+      setAnnouncement(`Filter added: value "${inputValue.trim()}". Select AND, OR, or press Enter to finish.`)
     }
   }, [machine, inputValue, onChange])
 
@@ -423,11 +424,13 @@ export function useFilterState({
             setSelectedTokenIndex(-1)
             setAllTokensSelected(false)
             onChange([])
+            setAnnouncement('All filters cleared.')
           } else if (inputValue === '' && state === 'entering-value') {
             machine.transition({ type: 'DELETE_LAST' })
             setState(machine.getState())
             setCurrentOperator(undefined)
             setIsDropdownOpen(true)
+            setAnnouncement('Operator removed. Select operator.')
           }
           break
         case 'Delete':
@@ -440,6 +443,7 @@ export function useFilterState({
               const newExpressions = value.filter((_, i) => i !== expressionIndex)
               onChange(newExpressions)
               setSelectedTokenIndex(-1)
+              setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
             }
           }
           break
@@ -476,6 +480,7 @@ export function useFilterState({
     setCurrentOperator(undefined)
     setEditingTokenIndex(-1)
     onChange([])
+    setAnnouncement('All filters cleared.')
   }, [machine, onChange])
 
   // Token editing handlers

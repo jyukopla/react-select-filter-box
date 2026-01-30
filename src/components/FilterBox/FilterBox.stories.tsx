@@ -636,3 +636,131 @@ function ClearButtonFilterBox(props: { schema: FilterSchema }) {
 export const ClearButton: Story = {
   render: () => <ClearButtonFilterBox schema={basicSchema} />,
 }
+
+// External Value Updates - demonstrating controlled component behavior
+function ExternalValueUpdatesFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([])
+
+  const addStatusFilter = () => {
+    setValue([
+      ...value,
+      {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'eq', label: 'is', symbol: '=' },
+          value: { raw: 'active', display: 'active', serialized: 'active' },
+        },
+        connector: value.length > 0 ? 'AND' : undefined,
+      },
+    ])
+  }
+
+  const addNameFilter = () => {
+    setValue([
+      ...value,
+      {
+        condition: {
+          field: { key: 'name', label: 'Name', type: 'string' },
+          operator: { key: 'contains', label: 'contains' },
+          value: { raw: 'test', display: 'test', serialized: 'test' },
+        },
+        connector: value.length > 0 ? 'OR' : undefined,
+      },
+    ])
+  }
+
+  const clearFilters = () => {
+    setValue([])
+  }
+
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>
+        Click the buttons below to add filters programmatically, demonstrating 
+        that the FilterBox is a controlled component.
+      </p>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+        <button onClick={addStatusFilter} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
+          Add Status Filter
+        </button>
+        <button onClick={addNameFilter} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
+          Add Name Filter
+        </button>
+        <button onClick={clearFilters} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
+          Clear All
+        </button>
+      </div>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} />
+      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const ExternalValueUpdates: Story = {
+  render: () => <ExternalValueUpdatesFilterBox schema={basicSchema} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates how FilterBox responds to external value updates, confirming it works as a controlled component.',
+      },
+    },
+  },
+}
+
+// All Token Types Story
+function AllTokenTypesFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'Active', serialized: 'active' },
+      },
+      connector: 'AND',
+    },
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'John', display: 'John', serialized: 'John' },
+      },
+      connector: 'OR',
+    },
+    {
+      condition: {
+        field: { key: 'age', label: 'Age', type: 'number' },
+        operator: { key: 'gt', label: 'greater than', symbol: '>' },
+        value: { raw: 25, display: '25', serialized: '25' },
+      },
+    },
+  ])
+
+  return (
+    <div style={{ maxWidth: '700px' }}>
+      <h4 style={{ marginBottom: '0.5rem' }}>All Token Types Display</h4>
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        <p>This example shows all four token types with their distinct colors:</p>
+        <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
+          <li><span style={{ color: '#1565c0' }}>■ Field tokens</span> (blue) - the field being filtered</li>
+          <li><span style={{ color: '#c2185b' }}>■ Operator tokens</span> (pink) - the comparison operator</li>
+          <li><span style={{ color: '#2e7d32' }}>■ Value tokens</span> (green) - the filter value (editable!)</li>
+          <li><span style={{ color: '#e65100' }}>■ Connector tokens</span> (orange) - AND/OR connectors</li>
+        </ul>
+      </div>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} />
+    </div>
+  )
+}
+
+export const AllTokenTypes: Story = {
+  render: () => <AllTokenTypesFilterBox schema={basicSchema} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows all four token types (field, operator, value, connector) with their distinct color coding.',
+      },
+    },
+  },
+}

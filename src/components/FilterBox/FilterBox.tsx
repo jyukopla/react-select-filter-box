@@ -11,7 +11,7 @@ import { TokenContainer } from '@/components/TokenContainer'
 import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
 import { DropdownPortal } from '@/components/DropdownPortal'
 import { LiveRegion } from '@/components/LiveRegion'
-import { useFilterState, useDropdownPosition, type UseFilterStateProps } from '@/hooks'
+import { useFilterState, useDropdownPosition, useFocusManagement, type UseFilterStateProps } from '@/hooks'
 import './FilterBox.css'
 
 export interface FilterBoxHandle {
@@ -83,10 +83,18 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     handleTokenEditCancel,
   } = useFilterState({ schema, value, onChange })
 
+  // Focus management for trap and restoration
+  const { focusInput } = useFocusManagement({
+    isDropdownOpen,
+    isEditing: editingTokenIndex >= 0,
+    inputRef,
+    containerRef,
+  })
+
   // Expose imperative handle
   useImperativeHandle(ref, () => ({
     focus: () => {
-      inputRef.current?.focus()
+      focusInput()
     },
     blur: () => {
       inputRef.current?.blur()
@@ -94,7 +102,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     clear: () => {
       handleClear()
     },
-  }), [handleClear])
+  }), [handleClear, focusInput])
 
   // Auto-focus on mount
   useEffect(() => {
@@ -127,8 +135,17 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       ref={containerRef}
       className={clsx('filter-box', className)}
       data-disabled={disabled || undefined}
+      role="group"
+      aria-label={ariaLabel ?? 'Filter expression builder'}
+      aria-describedby={tokens.length > 0 ? `${generatedId}-status` : undefined}
     >
       <LiveRegion>{announcement}</LiveRegion>
+      {/* Hidden status for screen readers */}
+      {tokens.length > 0 && (
+        <div id={`${generatedId}-status`} className="sr-only">
+          {`${Math.ceil(tokens.length / 4)} filter expression${Math.ceil(tokens.length / 4) !== 1 ? 's' : ''} applied`}
+        </div>
+      )}
       <div className="filter-box__content">
         <TokenContainer
           tokens={tokens}

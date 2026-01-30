@@ -6,3 +6,8 @@ export {
   type DropdownPosition,
   type DropdownPlacement,
 } from './useDropdownPosition'
+export {
+  useFocusManagement,
+  type UseFocusManagementProps,
+  type UseFocusManagementReturn,
+} from './useFocusManagement'
