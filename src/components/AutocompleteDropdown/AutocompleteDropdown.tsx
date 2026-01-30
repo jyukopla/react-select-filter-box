@@ -10,6 +10,8 @@ import type { AutocompleteItem } from '@/types'
 import './AutocompleteDropdown.css'
 
 export interface AutocompleteDropdownProps {
+  /** Unique ID for the dropdown */
+  id?: string
   /** Whether the dropdown is open */
   isOpen: boolean
   /** Items to display */
@@ -70,6 +72,7 @@ function DefaultItem({
  * AutocompleteDropdown component
  */
 export function AutocompleteDropdown({
+  id,
   isOpen,
   items,
   highlightedIndex,
@@ -99,17 +102,25 @@ export function AutocompleteDropdown({
 
   const handleItemClick = (item: AutocompleteItem, e: React.MouseEvent) => {
     e.stopPropagation()
+    e.preventDefault()
     if (!item.disabled) {
       onSelect(item)
     }
   }
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Prevent focus loss on the input when clicking dropdown items
+    e.preventDefault()
+  }
+
   return (
     <ul
+      id={id}
       role="listbox"
       aria-label="Suggestions"
       className={clsx('autocomplete-dropdown', className)}
       style={style}
+      onMouseDown={handleMouseDown}
     >
       {isLoading ? (
         <li className="autocomplete-dropdown__message">{loadingMessage}</li>

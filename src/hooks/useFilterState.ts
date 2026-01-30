@@ -1,0 +1,388 @@
+/**
+ * useFilterState Hook
+ *
+ * Manages the state for the FilterBox component, integrating the state machine
+ * with React state management.
+ */
+
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { FilterStateMachine, type FilterStep } from '@/core'
+import type {
+  FilterSchema,
+  FilterExpression,
+  AutocompleteItem,
+  TokenData,
+  FieldValue,
+  OperatorValue,
+  ConditionValue,
+} from '@/types'
+
+export interface UseFilterStateProps {
+  /** Schema defining available fields and operators */
+  schema: FilterSchema
+  /** Current filter expressions (controlled) */
+  value: FilterExpression[]
+  /** Called when expressions change */
+  onChange: (expressions: FilterExpression[]) => void
+}
+
+export interface UseFilterStateReturn {
+  /** Current state machine state */
+  state: FilterStep
+  /** Tokens to display */
+  tokens: TokenData[]
+  /** Whether dropdown is open */
+  isDropdownOpen: boolean
+  /** Current suggestions */
+  suggestions: AutocompleteItem[]
+  /** Currently highlighted suggestion index */
+  highlightedIndex: number
+  /** Current input value */
+  inputValue: string
+  /** Placeholder text */
+  placeholder: string
+  /** Handle focus event */
+  handleFocus: () => void
+  /** Handle blur event */
+  handleBlur: () => void
+  /** Handle input change */
+  handleInputChange: (value: string) => void
+  /** Handle key down */
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  /** Handle suggestion selection */
+  handleSelect: (item: AutocompleteItem) => void
+  /** Handle highlighting a suggestion */
+  handleHighlight: (index: number) => void
+  /** Confirm the current value */
+  handleConfirmValue: () => void
+  /** Clear all expressions */
+  handleClear: () => void
+}
+
+/**
+ * Convert expressions to tokens for display
+ */
+function expressionsToTokens(expressions: FilterExpression[]): TokenData[] {
+  const tokens: TokenData[] = []
+  let position = 0
+
+  expressions.forEach((expr, exprIndex) => {
+    // Field token
+    tokens.push({
+      id: `${exprIndex}-field`,
+      type: 'field',
+      value: expr.condition.field,
+      position: position++,
+      expressionIndex: exprIndex,
+    })
+
+    // Operator token
+    tokens.push({
+      id: `${exprIndex}-operator`,
+      type: 'operator',
+      value: expr.condition.operator,
+      position: position++,
+      expressionIndex: exprIndex,
+    })
+
+    // Value token
+    tokens.push({
+      id: `${exprIndex}-value`,
+      type: 'value',
+      value: expr.condition.value,
+      position: position++,
+      expressionIndex: exprIndex,
+    })
+
+    // Connector token (if present)
+    if (expr.connector) {
+      tokens.push({
+        id: `${exprIndex}-connector`,
+        type: 'connector',
+        value: { key: expr.connector, label: expr.connector },
+        position: position++,
+        expressionIndex: exprIndex,
+      })
+    }
+  })
+
+  return tokens
+}
+
+/**
+ * Get suggestions based on current state
+ */
+function getSuggestions(
+  state: FilterStep,
+  schema: FilterSchema,
+  currentField?: FieldValue,
+  inputValue: string = ''
+): AutocompleteItem[] {
+  const filterByInput = (items: AutocompleteItem[]) => {
+    if (!inputValue) return items
+    const lower = inputValue.toLowerCase()
+    return items.filter(
+      (item) =>
+        item.label.toLowerCase().includes(lower) ||
+        (item.description?.toLowerCase().includes(lower) ?? false)
+    )
+  }
+
+  switch (state) {
+    case 'selecting-field':
+      return filterByInput(
+        schema.fields.map((field) => ({
+          type: 'field' as const,
+          key: field.key,
+          label: field.label,
+          description: field.description,
+          icon: field.icon,
+          group: field.group,
+        }))
+      )
+
+    case 'selecting-operator':
+      if (!currentField) return []
+      const fieldConfig = schema.fields.find((f) => f.key === currentField.key)
+      if (!fieldConfig) return []
+      return filterByInput(
+        fieldConfig.operators.map((op) => ({
+          type: 'operator' as const,
+          key: op.key,
+          label: op.label,
+          description: op.symbol ? `Symbol: ${op.symbol}` : undefined,
+        }))
+      )
+
+    case 'selecting-connector':
+      const connectors = schema.connectors ?? [
+        { key: 'AND' as const, label: 'AND' },
+        { key: 'OR' as const, label: 'OR' },
+      ]
+      return filterByInput(
+        connectors.map((conn) => ({
+          type: 'connector' as const,
+          key: conn.key,
+          label: conn.label,
+        }))
+      )
+
+    default:
+      return []
+  }
+}
+
+/**
+ * Get placeholder text based on current state
+ */
+function getPlaceholder(state: FilterStep): string {
+  switch (state) {
+    case 'selecting-field':
+      return 'Select field...'
+    case 'selecting-operator':
+      return 'Select operator...'
+    case 'entering-value':
+      return 'Enter value...'
+    case 'selecting-connector':
+      return 'AND or OR?'
+    default:
+      return 'Add filter...'
+  }
+}
+
+/**
+ * Hook for managing filter box state
+ */
+export function useFilterState({
+  schema,
+  value,
+  onChange,
+}: UseFilterStateProps): UseFilterStateReturn {
+  // State machine instance (stable reference)
+  const [machine] = useState(() => new FilterStateMachine())
+
+  // React state
+  const [state, setState] = useState<FilterStep>('idle')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const [highlightedIndex, setHighlightedIndex] = useState(0)
+  const [currentField, setCurrentField] = useState<FieldValue | undefined>()
+  const [currentOperator, setCurrentOperator] = useState<OperatorValue | undefined>()
+
+  // Sync machine with external value on mount
+  useEffect(() => {
+    machine.loadExpressions(value)
+  }, [machine, value])
+
+  // Derived state
+  const tokens = useMemo(() => expressionsToTokens(value), [value])
+
+  const suggestions = useMemo(
+    () => getSuggestions(state, schema, currentField, inputValue),
+    [state, schema, currentField, inputValue]
+  )
+
+  const placeholder = useMemo(() => getPlaceholder(state), [state])
+
+  // Reset highlighted index when state changes (new suggestions context)
+  useEffect(() => {
+    setHighlightedIndex(0)
+  }, [state])
+
+  // Handlers
+  const handleFocus = useCallback(() => {
+    machine.transition({ type: 'FOCUS' })
+    setState(machine.getState())
+    setIsDropdownOpen(true)
+  }, [machine])
+
+  const handleBlur = useCallback(() => {
+    machine.transition({ type: 'BLUR' })
+    setState(machine.getState())
+    setIsDropdownOpen(false)
+    setInputValue('')
+    setCurrentField(undefined)
+    setCurrentOperator(undefined)
+  }, [machine])
+
+  const handleInputChange = useCallback((newValue: string) => {
+    setInputValue(newValue)
+  }, [])
+
+  const handleHighlight = useCallback((index: number) => {
+    setHighlightedIndex(index)
+  }, [])
+
+  const handleSelect = useCallback(
+    (item: AutocompleteItem) => {
+      const currentState = machine.getState()
+
+      if (currentState === 'selecting-field') {
+        const fieldConfig = schema.fields.find((f) => f.key === item.key)
+        if (fieldConfig) {
+          const fieldValue: FieldValue = {
+            key: fieldConfig.key,
+            label: fieldConfig.label,
+            type: fieldConfig.type,
+          }
+          setCurrentField(fieldValue)
+          machine.transition({ type: 'SELECT_FIELD', payload: fieldValue })
+          setState(machine.getState())
+          setInputValue('')
+        }
+      } else if (currentState === 'selecting-operator') {
+        const fieldConfig = schema.fields.find((f) => f.key === currentField?.key)
+        const opConfig = fieldConfig?.operators.find((op) => op.key === item.key)
+        if (opConfig) {
+          const operatorValue: OperatorValue = {
+            key: opConfig.key,
+            label: opConfig.label,
+            symbol: opConfig.symbol,
+          }
+          setCurrentOperator(operatorValue)
+          machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
+          setState(machine.getState())
+          setInputValue('')
+          // Close dropdown for value entry (free text)
+          setIsDropdownOpen(false)
+        }
+      } else if (currentState === 'selecting-connector') {
+        machine.transition({ type: 'SELECT_CONNECTOR', payload: item.key as 'AND' | 'OR' })
+        const newExpressions = machine.getContext().completedExpressions
+        onChange([...newExpressions])
+        setState(machine.getState())
+        setInputValue('')
+      }
+    },
+    [machine, schema, currentField, onChange]
+  )
+
+  const handleConfirmValue = useCallback(() => {
+    if (machine.getState() === 'entering-value' && inputValue.trim()) {
+      const conditionValue: ConditionValue = {
+        raw: inputValue.trim(),
+        display: inputValue.trim(),
+        serialized: inputValue.trim(),
+      }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: conditionValue })
+      const newExpressions = machine.getContext().completedExpressions
+      onChange([...newExpressions])
+      setState(machine.getState())
+      setInputValue('')
+      setCurrentField(undefined)
+      setCurrentOperator(undefined)
+      setIsDropdownOpen(true)
+    }
+  }, [machine, inputValue, onChange])
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault()
+          setHighlightedIndex((prev) => Math.min(prev + 1, suggestions.length - 1))
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setHighlightedIndex((prev) => Math.max(prev - 1, 0))
+          break
+        case 'Enter':
+          e.preventDefault()
+          if (isDropdownOpen && suggestions[highlightedIndex]) {
+            handleSelect(suggestions[highlightedIndex])
+          } else if (state === 'entering-value') {
+            handleConfirmValue()
+          }
+          break
+        case 'Escape':
+          setIsDropdownOpen(false)
+          break
+        case 'Backspace':
+          if (inputValue === '' && state === 'entering-value') {
+            machine.transition({ type: 'DELETE_LAST' })
+            setState(machine.getState())
+            setCurrentOperator(undefined)
+            setIsDropdownOpen(true)
+          }
+          break
+      }
+    },
+    [
+      suggestions,
+      highlightedIndex,
+      isDropdownOpen,
+      state,
+      inputValue,
+      handleSelect,
+      handleConfirmValue,
+      machine,
+    ]
+  )
+
+  const handleClear = useCallback(() => {
+    machine.clear()
+    setState('idle')
+    setInputValue('')
+    setCurrentField(undefined)
+    setCurrentOperator(undefined)
+    onChange([])
+  }, [machine, onChange])
+
+  return {
+    state,
+    tokens,
+    isDropdownOpen,
+    suggestions,
+    highlightedIndex,
+    inputValue,
+    placeholder,
+    handleFocus,
+    handleBlur,
+    handleInputChange,
+    handleKeyDown,
+    handleSelect,
+    handleHighlight,
+    handleConfirmValue,
+    handleClear,
+  }
+}

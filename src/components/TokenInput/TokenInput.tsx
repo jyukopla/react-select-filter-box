@@ -4,11 +4,11 @@
  * Auto-sizing input for entering new token values.
  */
 
-import type { KeyboardEvent, RefObject } from 'react'
+import type { KeyboardEvent, RefObject, InputHTMLAttributes } from 'react'
 import { clsx } from 'clsx'
 import './TokenInput.css'
 
-export interface TokenInputProps {
+export interface TokenInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onKeyDown' | 'onFocus' | 'onBlur'> {
   /** Current input value */
   value: string
   /** Called when value changes */
@@ -16,9 +16,9 @@ export interface TokenInputProps {
   /** Called on keydown events */
   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
   /** Called when input gains focus */
-  onFocus: () => void
+  onFocus?: () => void
   /** Called when input loses focus */
-  onBlur: () => void
+  onBlur?: () => void
   /** Placeholder text */
   placeholder?: string
   /** Whether to auto-focus on mount */
@@ -45,6 +45,7 @@ export function TokenInput({
   inputRef,
   className,
   disabled,
+  ...restProps
 }: TokenInputProps) {
   return (
     <input
@@ -63,6 +64,7 @@ export function TokenInput({
       disabled={disabled}
       className={clsx('token-input', className)}
       style={{ minWidth: '50px' }}
+      {...restProps}
     />
   )
 }

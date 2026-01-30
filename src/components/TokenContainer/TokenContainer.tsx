@@ -4,7 +4,7 @@
  * Container that holds all tokens and the input field.
  */
 
-import type { KeyboardEvent, RefObject } from 'react'
+import type { KeyboardEvent, RefObject, InputHTMLAttributes } from 'react'
 import { clsx } from 'clsx'
 import { Token } from '../Token'
 import { TokenInput } from '../TokenInput'
@@ -21,11 +21,15 @@ export interface TokenContainerProps {
   /** Called on input keydown */
   onInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
   /** Called when a token is clicked */
-  onTokenClick: (position: number) => void
-  /** Called when container gains focus */
-  onFocus: () => void
-  /** Called when container loses focus */
-  onBlur: () => void
+  onTokenClick?: (position: number) => void
+  /** Called when input gains focus */
+  onInputFocus?: () => void
+  /** Called when input loses focus */
+  onInputBlur?: () => void
+  /** Called when container gains focus (legacy) */
+  onFocus?: () => void
+  /** Called when container loses focus (legacy) */
+  onBlur?: () => void
   /** Ref to the input element */
   inputRef: RefObject<HTMLInputElement | null>
   /** Placeholder for the input */
@@ -34,6 +38,8 @@ export interface TokenContainerProps {
   disabled?: boolean
   /** Additional CSS class */
   className?: string
+  /** Additional props for the input element */
+  inputProps?: Partial<InputHTMLAttributes<HTMLInputElement>>
 }
 
 /**
@@ -45,15 +51,22 @@ export function TokenContainer({
   onInputChange,
   onInputKeyDown,
   onTokenClick,
+  onInputFocus,
+  onInputBlur,
   onFocus,
   onBlur,
   inputRef,
   placeholder,
   disabled,
   className,
+  inputProps,
 }: TokenContainerProps) {
+  // Support both onInputFocus/onInputBlur and legacy onFocus/onBlur
+  const handleFocus = onInputFocus ?? onFocus
+  const handleBlur = onInputBlur ?? onBlur
+
   const handleContainerClick = () => {
-    onFocus()
+    handleFocus?.()
     inputRef.current?.focus()
   }
 
@@ -69,7 +82,7 @@ export function TokenContainer({
           isEditable={token.type === 'value'}
           isEditing={false}
           isDeletable={false}
-          onEdit={() => onTokenClick(token.position)}
+          onEdit={() => onTokenClick?.(token.position)}
           onDelete={() => {}}
           onEditComplete={() => {}}
           onEditCancel={() => {}}
@@ -79,11 +92,12 @@ export function TokenContainer({
         value={inputValue}
         onChange={onInputChange}
         onKeyDown={onInputKeyDown}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         inputRef={inputRef}
         placeholder={tokens.length === 0 ? placeholder : undefined}
         disabled={disabled}
+        {...inputProps}
       />
     </div>
   )

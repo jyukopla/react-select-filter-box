@@ -1,0 +1,10 @@
+.filter-box {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.filter-box[data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}

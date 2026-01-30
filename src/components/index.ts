@@ -13,3 +13,6 @@ export type { TokenContainerProps } from './TokenContainer'
 
 export { AutocompleteDropdown } from './AutocompleteDropdown'
 export type { AutocompleteDropdownProps } from './AutocompleteDropdown'
+
+export { FilterBox } from './FilterBox'
+export type { FilterBoxProps } from './FilterBox'
