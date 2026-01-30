@@ -66,6 +66,8 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     placeholder,
     announcement,
     editingTokenIndex,
+    selectedTokenIndex,
+    allTokensSelected,
     handleFocus,
     handleBlur,
     handleInputChange,
@@ -135,6 +137,8 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
         onInputKeyDown={handleKeyDown}
         onTokenClick={handleTokenEdit}
         editingTokenIndex={editingTokenIndex}
+        selectedTokenIndex={selectedTokenIndex}
+        allTokensSelected={allTokensSelected}
         onTokenEditComplete={handleTokenEditComplete}
         onTokenEditCancel={handleTokenEditCancel}
         disabled={disabled}

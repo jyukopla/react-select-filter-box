@@ -44,6 +44,7 @@ describe('Token', () => {
     data: createFieldToken(),
     isEditable: false,
     isEditing: false,
+    isSelected: false,
     isDeletable: false,
     onEdit: vi.fn(),
     onDelete: vi.fn(),
@@ -121,6 +122,30 @@ describe('Token', () => {
       render(<Token {...defaultProps} data={createFieldToken()} />)
       const token = screen.getByRole('option')
       expect(token).toHaveAttribute('aria-label', 'field: Status')
+    })
+
+    it('should have aria-selected false when not selected', () => {
+      render(<Token {...defaultProps} data={createFieldToken()} isSelected={false} />)
+      const token = screen.getByRole('option')
+      expect(token).toHaveAttribute('aria-selected', 'false')
+    })
+
+    it('should have aria-selected true when selected', () => {
+      render(<Token {...defaultProps} data={createFieldToken()} isSelected={true} />)
+      const token = screen.getByRole('option')
+      expect(token).toHaveAttribute('aria-selected', 'true')
+    })
+  })
+
+  describe('Selection Styling', () => {
+    it('should have selected class when isSelected is true', () => {
+      const { container } = render(<Token {...defaultProps} data={createFieldToken()} isSelected={true} />)
+      expect(container.querySelector('.token--selected')).toBeInTheDocument()
+    })
+
+    it('should not have selected class when isSelected is false', () => {
+      const { container } = render(<Token {...defaultProps} data={createFieldToken()} isSelected={false} />)
+      expect(container.querySelector('.token--selected')).not.toBeInTheDocument()
     })
   })
 

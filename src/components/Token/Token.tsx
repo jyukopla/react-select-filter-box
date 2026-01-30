@@ -22,6 +22,8 @@ export interface TokenProps {
   isEditable: boolean
   /** Whether this token is currently being edited */
   isEditing: boolean
+  /** Whether this token is selected */
+  isSelected: boolean
   /** Whether this token can be deleted */
   isDeletable: boolean
   /** Called when the token is clicked to edit */
@@ -79,6 +81,7 @@ export const Token = memo(function Token({
   data,
   isEditable,
   isEditing,
+  isSelected,
   isDeletable: _isDeletable,
   onEdit,
   onDelete: _onDelete,
@@ -158,13 +161,14 @@ export const Token = memo(function Token({
   return (
     <span
       role="option"
-      aria-selected={false}
+      aria-selected={isSelected}
       aria-label={ariaLabel}
       className={clsx(
         'token',
         `token--${data.type}`,
         {
           'token--editable': isEditable,
+          'token--selected': isSelected,
         },
         className
       )}

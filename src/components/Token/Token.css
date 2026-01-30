@@ -52,6 +52,12 @@
   color: var(--filter-token-connector-text, #e65100);
 }
 
+/* Selected State */
+.token--selected {
+  box-shadow: 0 0 0 2px var(--filter-token-selected-ring, #1976d2);
+  outline: none;
+}
+
 /* Editing Mode */
 .token--editing {
   padding: 0;

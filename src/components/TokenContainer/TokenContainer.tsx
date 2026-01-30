@@ -42,6 +42,10 @@ export interface TokenContainerProps {
   inputProps?: Partial<InputHTMLAttributes<HTMLInputElement>>
   /** Index of token currently being edited (-1 if not editing) */
   editingTokenIndex?: number
+  /** Index of currently selected token (-1 if none) */
+  selectedTokenIndex?: number
+  /** Whether all tokens are selected */
+  allTokensSelected?: boolean
   /** Called when token edit is complete */
   onTokenEditComplete?: (newValue: ConditionValue) => void
   /** Called when token edit is cancelled */
@@ -67,6 +71,8 @@ export function TokenContainer({
   className,
   inputProps,
   editingTokenIndex = -1,
+  selectedTokenIndex = -1,
+  allTokensSelected = false,
   onTokenEditComplete,
   onTokenEditCancel,
 }: TokenContainerProps) {
@@ -90,6 +96,7 @@ export function TokenContainer({
           data={token}
           isEditable={token.type === 'value'}
           isEditing={index === editingTokenIndex}
+          isSelected={allTokensSelected || index === selectedTokenIndex}
           isDeletable={false}
           onEdit={() => onTokenClick?.(index)}
           onDelete={() => {}}
