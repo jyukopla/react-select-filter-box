@@ -598,3 +598,41 @@ export const CamundaProcessInstance: Story = {
     },
   },
 }
+
+// Clear Button Story
+function ClearButtonFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'active', serialized: 'active' },
+      },
+    },
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'John', display: 'John', serialized: 'John' },
+      },
+      connector: 'AND',
+    },
+  ])
+
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <p style={{ marginBottom: '0.5rem', color: '#666', fontSize: '14px' }}>
+        <strong>Click the × button</strong> to clear all filters at once.
+        The button only appears when there are filters and the component is not disabled.
+      </p>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} showClearButton />
+      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const ClearButton: Story = {
+  render: () => <ClearButtonFilterBox schema={basicSchema} />,
+}

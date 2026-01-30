@@ -503,4 +503,81 @@ describe('FilterBox', () => {
       expect(screen.queryByRole('textbox', { name: /edit operator/i })).not.toBeInTheDocument()
     })
   })
+
+  describe('Clear Button', () => {
+    it('should not show clear button by default', () => {
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
+
+      expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
+    })
+
+    it('should show clear button when showClearButton is true and has tokens', () => {
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} showClearButton />)
+
+      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
+    })
+
+    it('should not show clear button when showClearButton is true but no tokens', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} showClearButton />)
+
+      expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
+    })
+
+    it('should clear all expressions when clear button is clicked', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} showClearButton />)
+
+      const clearButton = screen.getByRole('button', { name: /clear/i })
+      await user.click(clearButton)
+
+      expect(onChange).toHaveBeenCalledWith([])
+    })
+
+    it('should not show clear button when disabled', () => {
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} showClearButton disabled />)
+
+      expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
+    })
+  })
 })

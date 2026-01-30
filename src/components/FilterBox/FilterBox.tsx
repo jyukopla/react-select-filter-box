@@ -36,6 +36,8 @@ export interface FilterBoxProps extends UseFilterStateProps {
   usePortal?: boolean
   /** Auto-focus the input on mount */
   autoFocus?: boolean
+  /** Show a clear button when there are filters (default: false) */
+  showClearButton?: boolean
 }
 
 export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function FilterBox(
@@ -49,6 +51,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     'aria-label': ariaLabel,
     usePortal = true,
     autoFocus = false,
+    showClearButton = false,
   },
   ref
 ) {
@@ -126,10 +129,11 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       data-disabled={disabled || undefined}
     >
       <LiveRegion>{announcement}</LiveRegion>
-      <TokenContainer
-        tokens={tokens}
-        inputRef={inputRef}
-        inputValue={inputValue}
+      <div className="filter-box__content">
+        <TokenContainer
+          tokens={tokens}
+          inputRef={inputRef}
+          inputValue={inputValue}
         placeholder={placeholder}
         onInputChange={handleInputChange}
         onInputFocus={handleFocus}
@@ -153,6 +157,17 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
               : undefined,
         }}
       />
+        {showClearButton && tokens.length > 0 && !disabled && (
+          <button
+            type="button"
+            className="filter-box__clear-button"
+            onClick={handleClear}
+            aria-label="Clear all filters"
+          >
+            ×
+          </button>
+        )}
+      </div>
       {usePortal ? (
         <DropdownPortal>
           {isDropdownOpen && !disabled && (

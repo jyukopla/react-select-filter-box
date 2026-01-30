@@ -32,3 +32,4 @@ devenv.local.nix
 .devcontainer.json
 .pre-commit-config.yaml
 TODO*
+coverage/
