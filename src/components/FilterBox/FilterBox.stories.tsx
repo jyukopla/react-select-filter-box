@@ -454,3 +454,147 @@ function KeyboardNavigationFilterBox(props: { schema: FilterSchema }) {
 export const KeyboardNavigation: Story = {
   render: () => <KeyboardNavigationFilterBox schema={basicSchema} />,
 }
+
+// Camunda Process Instance Filter - Real-world example
+const camundaProcessInstanceSchema: FilterSchema = {
+  fields: [
+    {
+      key: 'processInstanceId',
+      label: 'Process Instance ID',
+      type: 'id',
+      description: 'Unique process instance identifier',
+      operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+    },
+    {
+      key: 'processInstanceBusinessKey',
+      label: 'Business Key',
+      type: 'string',
+      description: 'Business correlation key',
+      operators: [
+        { key: 'eq', label: 'equals', symbol: '=' },
+        { key: 'like', label: 'like' },
+      ],
+    },
+    {
+      key: 'processDefinitionKey',
+      label: 'Process Definition',
+      type: 'enum',
+      group: 'Process',
+      description: 'The process definition key',
+      operators: [
+        { key: 'eq', label: 'is', symbol: '=' },
+        { key: 'in', label: 'in' },
+      ],
+    },
+    {
+      key: 'state',
+      label: 'State',
+      type: 'enum',
+      group: 'Status',
+      description: 'Current state of the process instance',
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+    },
+    {
+      key: 'startedBefore',
+      label: 'Started Before',
+      type: 'datetime',
+      group: 'Dates',
+      operators: [{ key: 'before', label: 'before', symbol: '<' }],
+    },
+    {
+      key: 'startedAfter',
+      label: 'Started After',
+      type: 'datetime',
+      group: 'Dates',
+      operators: [{ key: 'after', label: 'after', symbol: '>' }],
+    },
+    {
+      key: 'finishedBefore',
+      label: 'Finished Before',
+      type: 'datetime',
+      group: 'Dates',
+      operators: [{ key: 'before', label: 'before', symbol: '<' }],
+    },
+    {
+      key: 'finishedAfter',
+      label: 'Finished After',
+      type: 'datetime',
+      group: 'Dates',
+      operators: [{ key: 'after', label: 'after', symbol: '>' }],
+    },
+    {
+      key: 'startedBy',
+      label: 'Started By',
+      type: 'string',
+      group: 'Users',
+      description: 'User who started the process',
+      operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+    },
+    {
+      key: 'tenantId',
+      label: 'Tenant',
+      type: 'enum',
+      group: 'Multi-tenancy',
+      operators: [
+        { key: 'eq', label: 'is', symbol: '=' },
+        { key: 'in', label: 'in' },
+      ],
+    },
+    {
+      key: 'withIncidents',
+      label: 'Has Incidents',
+      type: 'boolean',
+      group: 'Incidents',
+      operators: [{ key: 'is', label: 'is', symbol: '=' }],
+    },
+    {
+      key: 'incidentType',
+      label: 'Incident Type',
+      type: 'enum',
+      group: 'Incidents',
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+    },
+  ],
+}
+
+function CamundaProcessInstanceFilterBox() {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'state', label: 'State', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'ACTIVE', display: 'Active', serialized: 'ACTIVE' },
+      },
+    },
+  ])
+
+  return (
+    <div style={{ maxWidth: '700px' }}>
+      <h3 style={{ marginBottom: '0.5rem' }}>Camunda 7 Process Instance Filter</h3>
+      <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>
+        A real-world example demonstrating how to filter process instances in Camunda 7.
+        Fields are grouped by category for easier navigation.
+      </p>
+      <FilterBox schema={camundaProcessInstanceSchema} value={value} onChange={setValue} />
+      <details style={{ marginTop: '1rem' }}>
+        <summary style={{ cursor: 'pointer', color: '#666', fontSize: '14px' }}>
+          Show filter expressions JSON
+        </summary>
+        <pre style={{ marginTop: '0.5rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+          {JSON.stringify(value, null, 2)}
+        </pre>
+      </details>
+    </div>
+  )
+}
+
+export const CamundaProcessInstance: Story = {
+  render: () => <CamundaProcessInstanceFilterBox />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'A comprehensive example showing how to configure the FilterBox for Camunda 7 process instance queries, with grouped fields and various data types.',
+      },
+    },
+  },
+}
