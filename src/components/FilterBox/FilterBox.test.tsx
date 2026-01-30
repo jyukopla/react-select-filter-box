@@ -83,15 +83,14 @@ describe('FilterBox', () => {
     })
 
     it('should close dropdown on blur', async () => {
-      const user = userEvent.setup()
       render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
 
       const input = screen.getByPlaceholderText('Add filter...')
-      await user.click(input)
+      fireEvent.focus(input)
 
       expect(screen.getByRole('listbox')).toBeInTheDocument()
 
-      await user.tab() // blur
+      fireEvent.blur(input)
 
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
     })
@@ -156,6 +155,23 @@ describe('FilterBox', () => {
       await user.keyboard('{Escape}')
 
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    })
+
+    it('should select highlighted item with Tab key', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Dropdown is open with field suggestions
+      expect(screen.getByRole('listbox')).toBeInTheDocument()
+
+      // Press Tab to select the highlighted item (first field)
+      await user.tab()
+
+      // Should transition to operator selection
+      expect(input).toHaveAttribute('placeholder', 'Select operator...')
     })
   })
 

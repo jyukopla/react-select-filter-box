@@ -45,6 +45,10 @@ export interface UseFilterStateReturn {
   announcement: string
   /** Index of token currently being edited (-1 if not editing) */
   editingTokenIndex: number
+  /** Index of currently selected token (-1 if none) */
+  selectedTokenIndex: number
+  /** Whether all tokens are selected (via Ctrl+A) */
+  allTokensSelected: boolean
   /** Handle focus event */
   handleFocus: () => void
   /** Handle blur event */
@@ -217,6 +221,8 @@ export function useFilterState({
   const [inputValue, setInputValue] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const [editingTokenIndex, setEditingTokenIndex] = useState(-1)
+  const [selectedTokenIndex, setSelectedTokenIndex] = useState(-1)
+  const [allTokensSelected, setAllTokensSelected] = useState(false)
   const [currentField, setCurrentField] = useState<FieldValue | undefined>()
   const [currentOperator, setCurrentOperator] = useState<OperatorValue | undefined>()
   const [announcement, setAnnouncement] = useState('')
@@ -274,6 +280,9 @@ export function useFilterState({
 
   const handleInputChange = useCallback((newValue: string) => {
     setInputValue(newValue)
+    // Clear token selection when typing
+    setSelectedTokenIndex(-1)
+    setAllTokensSelected(false)
   }, [])
 
   const handleHighlight = useCallback((index: number) => {
@@ -356,6 +365,33 @@ export function useFilterState({
           e.preventDefault()
           setHighlightedIndex((prev) => Math.max(prev - 1, 0))
           break
+        case 'ArrowLeft':
+          // Navigate to tokens when input is empty
+          if (inputValue === '' && tokens.length > 0) {
+            e.preventDefault()
+            if (selectedTokenIndex === -1) {
+              // Select last token
+              setSelectedTokenIndex(tokens.length - 1)
+            } else if (selectedTokenIndex > 0) {
+              // Navigate to previous token
+              setSelectedTokenIndex(selectedTokenIndex - 1)
+            }
+            setIsDropdownOpen(false)
+          }
+          break
+        case 'ArrowRight':
+          // Navigate through tokens
+          if (selectedTokenIndex >= 0) {
+            e.preventDefault()
+            if (selectedTokenIndex < tokens.length - 1) {
+              // Navigate to next token
+              setSelectedTokenIndex(selectedTokenIndex + 1)
+            } else {
+              // Was on last token, deselect and focus input
+              setSelectedTokenIndex(-1)
+            }
+          }
+          break
         case 'Enter':
           e.preventDefault()
           if (isDropdownOpen && suggestions[highlightedIndex]) {
@@ -367,12 +403,51 @@ export function useFilterState({
         case 'Escape':
           setIsDropdownOpen(false)
           break
+        case 'Tab':
+          // Tab selects the highlighted item and moves to next step
+          if (isDropdownOpen && suggestions[highlightedIndex]) {
+            e.preventDefault()
+            handleSelect(suggestions[highlightedIndex])
+          }
+          // If dropdown is not open, let Tab move focus naturally
+          break
         case 'Backspace':
-          if (inputValue === '' && state === 'entering-value') {
+          // Ctrl+Backspace deletes all expressions
+          if (e.ctrlKey && tokens.length > 0) {
+            e.preventDefault()
+            machine.clear()
+            setState('idle')
+            setInputValue('')
+            setCurrentField(undefined)
+            setCurrentOperator(undefined)
+            setSelectedTokenIndex(-1)
+            setAllTokensSelected(false)
+            onChange([])
+          } else if (inputValue === '' && state === 'entering-value') {
             machine.transition({ type: 'DELETE_LAST' })
             setState(machine.getState())
             setCurrentOperator(undefined)
             setIsDropdownOpen(true)
+          }
+          break
+        case 'Delete':
+          // Delete the selected token (entire expression)
+          if (selectedTokenIndex >= 0) {
+            e.preventDefault()
+            const token = tokens[selectedTokenIndex]
+            if (token) {
+              const expressionIndex = token.expressionIndex
+              const newExpressions = value.filter((_, i) => i !== expressionIndex)
+              onChange(newExpressions)
+              setSelectedTokenIndex(-1)
+            }
+          }
+          break
+        case 'a':
+          // Ctrl+A selects all tokens
+          if (e.ctrlKey && tokens.length > 0) {
+            e.preventDefault()
+            setAllTokensSelected(true)
           }
           break
       }
@@ -383,6 +458,10 @@ export function useFilterState({
       isDropdownOpen,
       state,
       inputValue,
+      tokens,
+      selectedTokenIndex,
+      value,
+      onChange,
       handleSelect,
       handleConfirmValue,
       machine,
@@ -451,6 +530,8 @@ export function useFilterState({
     placeholder,
     announcement,
     editingTokenIndex,
+    selectedTokenIndex,
+    allTokensSelected,
     handleFocus,
     handleBlur,
     handleInputChange,
