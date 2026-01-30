@@ -1,0 +1,26 @@
+/* TokenContainer Component Styles */
+
+.token-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--filter-token-gap, 4px);
+  padding: var(--filter-container-padding, 8px);
+  min-height: 42px;
+  background-color: var(--filter-container-bg, #ffffff);
+  border: 1px solid var(--filter-container-border, #e0e0e0);
+  border-radius: 6px;
+  cursor: text;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.token-container:focus-within {
+  border-color: var(--filter-container-border-focus, #2196f3);
+  box-shadow: var(--filter-container-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.token-container--disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}

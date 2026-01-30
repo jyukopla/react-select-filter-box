@@ -1,0 +1,24 @@
+/* TokenInput Component Styles */
+
+.token-input {
+  flex: 1 1 auto;
+  min-width: 50px;
+  max-width: 100%;
+  padding: var(--filter-token-padding, 4px 8px);
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--filter-font-family, system-ui, -apple-system, sans-serif);
+  font-size: var(--filter-font-size, 14px);
+  line-height: 1.4;
+  color: inherit;
+}
+
+.token-input::placeholder {
+  color: var(--filter-input-placeholder, #9e9e9e);
+}
+
+.token-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

@@ -1,0 +1,52 @@
+/* Token Component Styles */
+
+.token {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--filter-token-padding, 4px 8px);
+  border-radius: var(--filter-token-radius, 4px);
+  font-family: var(--filter-font-family, system-ui, -apple-system, sans-serif);
+  font-size: var(--filter-font-size, 14px);
+  font-weight: var(--filter-token-font-weight, 500);
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.token--editable {
+  cursor: pointer;
+}
+
+.token--editable:hover {
+  filter: brightness(0.95);
+}
+
+/* Field Token */
+.token--field {
+  background-color: var(--filter-token-field-bg, #e3f2fd);
+  border: 1px solid var(--filter-token-field-border, #2196f3);
+  color: var(--filter-token-field-text, #1565c0);
+}
+
+/* Operator Token */
+.token--operator {
+  background-color: var(--filter-token-operator-bg, #fce4ec);
+  border: 1px solid var(--filter-token-operator-border, #e91e63);
+  color: var(--filter-token-operator-text, #c2185b);
+}
+
+/* Value Token */
+.token--value {
+  background-color: var(--filter-token-value-bg, #e8f5e9);
+  border: 1px solid var(--filter-token-value-border, #4caf50);
+  color: var(--filter-token-value-text, #2e7d32);
+}
+
+/* Connector Token */
+.token--connector {
+  background-color: var(--filter-token-connector-bg, #fff3e0);
+  border: 1px solid var(--filter-token-connector-border, #ff9800);
+  color: var(--filter-token-connector-text, #e65100);
+}

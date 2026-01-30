@@ -1,0 +1,110 @@
+import { describe, expect, it, vi } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { AutocompleteDropdown, type AutocompleteDropdownProps } from './AutocompleteDropdown'
+import type { AutocompleteItem } from '@/types'
+
+describe('AutocompleteDropdown', () => {
+  const createItems = (): AutocompleteItem[] => [
+    { type: 'field', key: 'status', label: 'Status', description: 'Process status' },
+    { type: 'field', key: 'name', label: 'Name' },
+    { type: 'field', key: 'createdAt', label: 'Created At', disabled: true },
+  ]
+
+  const defaultProps: AutocompleteDropdownProps = {
+    isOpen: true,
+    items: createItems(),
+    highlightedIndex: 0,
+    onSelect: vi.fn(),
+    onHighlight: vi.fn(),
+  }
+
+  describe('Rendering', () => {
+    it('should render when isOpen is true', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      expect(screen.getByRole('listbox')).toBeInTheDocument()
+    })
+
+    it('should not render when isOpen is false', () => {
+      render(<AutocompleteDropdown {...defaultProps} isOpen={false} />)
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    })
+
+    it('should render all items', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      expect(screen.getByText('Status')).toBeInTheDocument()
+      expect(screen.getByText('Name')).toBeInTheDocument()
+      expect(screen.getByText('Created At')).toBeInTheDocument()
+    })
+
+    it('should render item descriptions when provided', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      expect(screen.getByText('Process status')).toBeInTheDocument()
+    })
+
+    it('should show empty message when no items', () => {
+      render(<AutocompleteDropdown {...defaultProps} items={[]} emptyMessage="No results" />)
+      expect(screen.getByText('No results')).toBeInTheDocument()
+    })
+
+    it('should show loading message when loading', () => {
+      render(<AutocompleteDropdown {...defaultProps} isLoading loadingMessage="Loading..." />)
+      expect(screen.getByText('Loading...')).toBeInTheDocument()
+    })
+  })
+
+  describe('Highlighting', () => {
+    it('should highlight the item at highlightedIndex', () => {
+      const { container } = render(<AutocompleteDropdown {...defaultProps} highlightedIndex={1} />)
+      const items = container.querySelectorAll('.autocomplete-item')
+      expect(items[1]).toHaveClass('autocomplete-item--highlighted')
+    })
+
+    it('should call onHighlight on mouse enter', () => {
+      const onHighlight = vi.fn()
+      render(<AutocompleteDropdown {...defaultProps} onHighlight={onHighlight} />)
+      fireEvent.mouseEnter(screen.getByText('Name'))
+      expect(onHighlight).toHaveBeenCalledWith(1)
+    })
+  })
+
+  describe('Selection', () => {
+    it('should call onSelect when item is clicked', () => {
+      const onSelect = vi.fn()
+      render(<AutocompleteDropdown {...defaultProps} onSelect={onSelect} />)
+      fireEvent.click(screen.getByText('Status'))
+      expect(onSelect).toHaveBeenCalledWith(defaultProps.items[0])
+    })
+
+    it('should not call onSelect when disabled item is clicked', () => {
+      const onSelect = vi.fn()
+      render(<AutocompleteDropdown {...defaultProps} onSelect={onSelect} />)
+      fireEvent.click(screen.getByText('Created At'))
+      expect(onSelect).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Accessibility', () => {
+    it('should have role="listbox"', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      expect(screen.getByRole('listbox')).toBeInTheDocument()
+    })
+
+    it('should have items with role="option"', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      const options = screen.getAllByRole('option')
+      expect(options).toHaveLength(3)
+    })
+
+    it('should mark disabled items with aria-disabled', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      const disabledItem = screen.getByText('Created At').closest('[role="option"]')
+      expect(disabledItem).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('should set aria-selected on highlighted item', () => {
+      render(<AutocompleteDropdown {...defaultProps} highlightedIndex={0} />)
+      const options = screen.getAllByRole('option')
+      expect(options[0]).toHaveAttribute('aria-selected', 'true')
+    })
+  })
+})
