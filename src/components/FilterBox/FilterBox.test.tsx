@@ -205,4 +205,53 @@ describe('FilterBox', () => {
       expect(screen.getByRole('listbox')).toBeInTheDocument()
     })
   })
+
+  describe('Portal Rendering', () => {
+    it('should render dropdown in portal by default', async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />
+      )
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      const dropdown = screen.getByRole('listbox')
+      // Dropdown should be in body, not in the FilterBox container
+      expect(container.contains(dropdown)).toBe(false)
+      expect(document.body.contains(dropdown)).toBe(true)
+    })
+
+    it('should render dropdown inline when usePortal is false', async () => {
+      const user = userEvent.setup()
+      const { container } = render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={[]}
+          onChange={vi.fn()}
+          usePortal={false}
+        />
+      )
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      const dropdown = screen.getByRole('listbox')
+      // Dropdown should be in the FilterBox container
+      expect(container.contains(dropdown)).toBe(true)
+    })
+
+    it('should have positioned dropdown in portal', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Portal wrapper should have positioning styles
+      const portal = document.querySelector('.filter-box-dropdown-portal')
+      expect(portal).toBeInTheDocument()
+      expect(portal).toHaveStyle({ position: 'fixed' })
+    })
+  })
 })

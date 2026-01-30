@@ -9,7 +9,8 @@ import { useRef, useId } from 'react'
 import clsx from 'clsx'
 import { TokenContainer } from '@/components/TokenContainer'
 import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
-import { useFilterState, type UseFilterStateProps } from '@/hooks'
+import { DropdownPortal } from '@/components/DropdownPortal'
+import { useFilterState, useDropdownPosition, type UseFilterStateProps } from '@/hooks'
 import './FilterBox.css'
 
 export interface FilterBoxProps extends UseFilterStateProps {
@@ -21,6 +22,8 @@ export interface FilterBoxProps extends UseFilterStateProps {
   disabled?: boolean
   /** Accessible label for the filter box */
   'aria-label'?: string
+  /** Whether to render dropdown in a portal (default: true) */
+  usePortal?: boolean
 }
 
 export function FilterBox({
@@ -31,7 +34,9 @@ export function FilterBox({
   id,
   disabled = false,
   'aria-label': ariaLabel,
+  usePortal = true,
 }: FilterBoxProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const generatedId = useId()
   const dropdownId = id ? `${id}-dropdown` : `${generatedId}-dropdown`
@@ -51,8 +56,31 @@ export function FilterBox({
     handleHighlight,
   } = useFilterState({ schema, value, onChange })
 
+  const { position, maxHeight } = useDropdownPosition({
+    anchorRef: containerRef,
+    isOpen: isDropdownOpen && !disabled,
+    dropdownHeight: 300,
+    offset: 4,
+  })
+
+  const dropdownContent = (
+    <AutocompleteDropdown
+      id={dropdownId}
+      items={suggestions}
+      isOpen={isDropdownOpen && !disabled}
+      highlightedIndex={highlightedIndex}
+      onSelect={handleSelect}
+      onHighlight={handleHighlight}
+      maxHeight={maxHeight}
+    />
+  )
+
   return (
-    <div className={clsx('filter-box', className)} data-disabled={disabled || undefined}>
+    <div
+      ref={containerRef}
+      className={clsx('filter-box', className)}
+      data-disabled={disabled || undefined}
+    >
       <TokenContainer
         tokens={tokens}
         inputRef={inputRef}
@@ -74,14 +102,26 @@ export function FilterBox({
               : undefined,
         }}
       />
-      <AutocompleteDropdown
-        id={dropdownId}
-        items={suggestions}
-        isOpen={isDropdownOpen && !disabled}
-        highlightedIndex={highlightedIndex}
-        onSelect={handleSelect}
-        onHighlight={handleHighlight}
-      />
+      {usePortal ? (
+        <DropdownPortal>
+          {isDropdownOpen && !disabled && (
+            <div
+              className="filter-box-dropdown-portal"
+              style={{
+                position: 'fixed',
+                top: position.top,
+                left: position.left,
+                width: position.width,
+                zIndex: 9999,
+              }}
+            >
+              {dropdownContent}
+            </div>
+          )}
+        </DropdownPortal>
+      ) : (
+        dropdownContent
+      )}
     </div>
   )
 }
