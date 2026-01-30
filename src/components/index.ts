@@ -22,3 +22,18 @@ export type { DropdownPortalProps } from './DropdownPortal'
 
 export { LiveRegion, useLiveAnnounce } from './LiveRegion'
 export type { LiveRegionProps, UseLiveAnnounceOptions, UseLiveAnnounceReturn } from './LiveRegion'
+
+// Custom Input Widgets
+export {
+  DatePickerWidget,
+  createDatePickerWidget,
+  NumberInputWidget,
+  createNumberInputWidget,
+  DateRangeWidget,
+  createDateRangeWidget,
+} from './CustomInputs'
+export type {
+  DatePickerWidgetOptions,
+  NumberInputWidgetOptions,
+  DateRangeWidgetOptions,
+} from './CustomInputs'
