@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { FilterBox } from './FilterBox'
 import type { FilterSchema, FilterExpression } from '@/types'
 import { getDefaultOperators } from '@/types'
+import { FilterBoxThemeProvider, themes, createTheme } from '@/theme'
 
 const meta = {
   title: 'Components/FilterBox',
@@ -760,6 +761,147 @@ export const AllTokenTypes: Story = {
     docs: {
       description: {
         story: 'Shows all four token types (field, operator, value, connector) with their distinct color coding.',
+      },
+    },
+  },
+}
+
+// Theme Stories
+function ThemedFilterBox({ 
+  themeName, 
+  schema 
+}: { 
+  themeName: 'light' | 'dark' | 'highContrast'
+  schema: FilterSchema 
+}) {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'Active', serialized: 'active' },
+      },
+      connector: 'AND',
+    },
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'John', display: 'John', serialized: 'John' },
+      },
+    },
+  ])
+
+  const theme = themes[themeName]
+  const bgColor = themeName === 'dark' ? '#1e1e1e' : themeName === 'highContrast' ? '#000000' : '#ffffff'
+
+  return (
+    <div style={{ padding: '1rem', backgroundColor: bgColor, borderRadius: '8px' }}>
+      <FilterBoxThemeProvider theme={theme}>
+        <FilterBox schema={schema} value={value} onChange={setValue} />
+      </FilterBoxThemeProvider>
+    </div>
+  )
+}
+
+export const LightTheme: Story = {
+  render: () => <ThemedFilterBox themeName="light" schema={basicSchema} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'FilterBox with the default light theme.',
+      },
+    },
+  },
+}
+
+export const DarkTheme: Story = {
+  render: () => <ThemedFilterBox themeName="dark" schema={basicSchema} />,
+  parameters: {
+    backgrounds: { default: 'dark' },
+    docs: {
+      description: {
+        story: 'FilterBox with the dark theme, suitable for dark mode interfaces.',
+      },
+    },
+  },
+}
+
+export const HighContrastTheme: Story = {
+  render: () => <ThemedFilterBox themeName="highContrast" schema={basicSchema} />,
+  parameters: {
+    backgrounds: { default: 'dark' },
+    docs: {
+      description: {
+        story: 'FilterBox with the high contrast theme for improved accessibility.',
+      },
+    },
+  },
+}
+
+// Custom Theme
+function CustomThemedFilterBox({ schema }: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'Active', serialized: 'active' },
+      },
+    },
+  ])
+
+  const customTheme = createTheme(themes.light, {
+    tokens: {
+      fieldBg: '#e8f4f8',
+      fieldBorder: '#0078d4',
+      fieldText: '#0078d4',
+      operatorBg: '#fef3e2',
+      operatorBorder: '#c87d00',
+      operatorText: '#c87d00',
+      valueBg: '#f0f0f0',
+      valueBorder: '#666666',
+      valueText: '#333333',
+      borderRadius: '16px',
+    },
+    container: {
+      borderFocus: '#0078d4',
+    },
+  })
+
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <h4 style={{ marginBottom: '0.5rem' }}>Custom Corporate Theme</h4>
+      <p style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        This example shows how to create a custom theme by extending the light theme
+        with brand-specific colors.
+      </p>
+      <FilterBoxThemeProvider theme={customTheme}>
+        <FilterBox schema={schema} value={value} onChange={setValue} />
+      </FilterBoxThemeProvider>
+      <pre style={{ marginTop: '1rem', fontSize: '11px', background: '#f5f5f5', padding: '1rem', overflow: 'auto' }}>
+{`const customTheme = createTheme(themes.light, {
+  tokens: {
+    fieldBg: '#e8f4f8',
+    fieldBorder: '#0078d4',
+    fieldText: '#0078d4',
+    borderRadius: '16px',
+  },
+  container: {
+    borderFocus: '#0078d4',
+  },
+})`}
+      </pre>
+    </div>
+  )
+}
+
+export const CustomTheme: Story = {
+  render: () => <CustomThemedFilterBox schema={basicSchema} />,
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows how to create and apply a custom theme using the createTheme utility.',
       },
     },
   },

@@ -98,3 +98,20 @@ export {
 
 // Core (for advanced use cases)
 export { FilterStateMachine, type FilterStep } from './core'
+
+// Theme System
+export {
+  FilterBoxThemeProvider,
+  useFilterBoxTheme,
+  useThemeCssVariables,
+  themes,
+  mergeThemes,
+  createTheme,
+  type FilterBoxTheme,
+  type FilterBoxThemeProviderProps,
+  type TokenStyles,
+  type ContainerStyles,
+  type DropdownStyles,
+  type InputStyles,
+  type TypographyStyles,
+} from './theme'
