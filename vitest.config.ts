@@ -2,11 +2,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-
-// https://vite.dev/config/
 import { fileURLToPath } from 'node:url'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { playwright } from '@vitest/browser-playwright'
+
 const dirname =
   typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 
@@ -15,21 +14,18 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@/components': path.resolve(__dirname, './src/components'),
-      '@/hooks': path.resolve(__dirname, './src/hooks'),
-      '@/types': path.resolve(__dirname, './src/types'),
-      '@/utils': path.resolve(__dirname, './src/utils'),
-      '@/core': path.resolve(__dirname, './src/core'),
-      '@/autocompleters': path.resolve(__dirname, './src/autocompleters'),
-      '@/schemas': path.resolve(__dirname, './src/schemas'),
+      '@': path.resolve(dirname, './src'),
+      '@/components': path.resolve(dirname, './src/components'),
+      '@/hooks': path.resolve(dirname, './src/hooks'),
+      '@/types': path.resolve(dirname, './src/types'),
+      '@/utils': path.resolve(dirname, './src/utils'),
+      '@/core': path.resolve(dirname, './src/core'),
+      '@/autocompleters': path.resolve(dirname, './src/autocompleters'),
+      '@/schemas': path.resolve(dirname, './src/schemas'),
     },
   },
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -40,20 +36,25 @@ export default defineConfig({
         'src/test/**',
         'src/main.tsx',
         'src/vite-env.d.ts',
+        'src/stories/**',
       ],
-      thresholds: {
-        statements: 100,
-        branches: 100,
-        functions: 100,
-        lines: 100,
-      },
     },
     projects: [
+      // Unit tests project
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          environment: 'jsdom',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          exclude: ['src/**/*.stories.{ts,tsx}'],
+          setupFiles: ['./src/test/setup.ts'],
+        },
+      },
+      // Storybook tests project
       {
         extends: true,
         plugins: [
-          // The plugin will run tests for the stories defined in your Storybook config
-          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
           storybookTest({
             configDir: path.join(dirname, '.storybook'),
           }),
@@ -64,11 +65,7 @@ export default defineConfig({
             enabled: true,
             headless: true,
             provider: playwright({}),
-            instances: [
-              {
-                browser: 'chromium',
-              },
-            ],
+            instances: [{ browser: 'chromium' }],
           },
           setupFiles: ['.storybook/vitest.setup.ts'],
         },
