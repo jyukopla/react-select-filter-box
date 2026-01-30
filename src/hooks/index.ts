@@ -11,3 +11,9 @@ export {
   type UseFocusManagementProps,
   type UseFocusManagementReturn,
 } from './useFocusManagement'
+export {
+  useVirtualList,
+  type UseVirtualListOptions,
+  type UseVirtualListResult,
+  type VirtualItem,
+} from './useVirtualList'

@@ -134,4 +134,109 @@ describe('AutocompleteDropdown', () => {
       expect(basicHeaders).toHaveLength(1)
     })
   })
+
+  describe('Virtual Scrolling', () => {
+    const createLargeList = (count: number): AutocompleteItem[] => {
+      return Array.from({ length: count }, (_, i) => ({
+        type: 'field' as const,
+        key: `item-${i}`,
+        label: `Item ${i}`,
+      }))
+    }
+
+    it('should enable virtual scrolling automatically for lists > 100 items', () => {
+      const { container } = render(
+        <AutocompleteDropdown {...defaultProps} items={createLargeList(150)} />
+      )
+      expect(container.querySelector('.autocomplete-dropdown--virtual')).toBeInTheDocument()
+    })
+
+    it('should not enable virtual scrolling for small lists', () => {
+      const { container } = render(
+        <AutocompleteDropdown {...defaultProps} items={createLargeList(50)} />
+      )
+      expect(container.querySelector('.autocomplete-dropdown--virtual')).not.toBeInTheDocument()
+    })
+
+    it('should enable virtual scrolling when explicitly set to true', () => {
+      const { container } = render(
+        <AutocompleteDropdown {...defaultProps} items={createLargeList(50)} virtualScrolling={true} />
+      )
+      expect(container.querySelector('.autocomplete-dropdown--virtual')).toBeInTheDocument()
+    })
+
+    it('should not use virtual scrolling for grouped items', () => {
+      const groupedItems: AutocompleteItem[] = Array.from({ length: 150 }, (_, i) => ({
+        type: 'field' as const,
+        key: `item-${i}`,
+        label: `Item ${i}`,
+        group: i % 2 === 0 ? 'Even' : 'Odd',
+      }))
+      const { container } = render(
+        <AutocompleteDropdown {...defaultProps} items={groupedItems} />
+      )
+      // Should fall back to standard mode due to groups
+      expect(container.querySelector('.autocomplete-dropdown--virtual')).not.toBeInTheDocument()
+    })
+
+    it('should render only visible items in virtual mode', () => {
+      const { container } = render(
+        <AutocompleteDropdown 
+          {...defaultProps} 
+          items={createLargeList(200)} 
+          virtualScrolling={true}
+          maxHeight={300}
+          itemHeight={40}
+        />
+      )
+      // With 300px height and 40px items, should show ~8 items + overscan
+      // Using container query because items are inside aria-hidden spacer for a11y
+      const options = container.querySelectorAll('.autocomplete-item')
+      expect(options.length).toBeLessThan(200)
+      expect(options.length).toBeGreaterThan(0)
+      expect(options.length).toBeLessThanOrEqual(15) // ~8 visible + 3 overscan each side
+    })
+
+    it('should highlight correct item in virtual mode', () => {
+      const { container } = render(
+        <AutocompleteDropdown 
+          {...defaultProps} 
+          items={createLargeList(150)} 
+          highlightedIndex={2}
+          virtualScrolling={true}
+        />
+      )
+      const highlightedItem = container.querySelector('.autocomplete-item--highlighted')
+      expect(highlightedItem).toBeInTheDocument()
+      expect(highlightedItem).toHaveTextContent('Item 2')
+    })
+
+    it('should call onSelect in virtual mode', () => {
+      const onSelect = vi.fn()
+      render(
+        <AutocompleteDropdown 
+          {...defaultProps} 
+          items={createLargeList(150)} 
+          onSelect={onSelect}
+          virtualScrolling={true}
+        />
+      )
+      fireEvent.click(screen.getByText('Item 0'))
+      expect(onSelect).toHaveBeenCalled()
+    })
+
+    it('should call onHighlight on mouse enter in virtual mode', () => {
+      const onHighlight = vi.fn()
+      render(
+        <AutocompleteDropdown 
+          {...defaultProps} 
+          items={createLargeList(150)} 
+          onHighlight={onHighlight}
+          virtualScrolling={true}
+        />
+      )
+      fireEvent.mouseEnter(screen.getByText('Item 1'))
+      expect(onHighlight).toHaveBeenCalledWith(1)
+    })
+  })
 })

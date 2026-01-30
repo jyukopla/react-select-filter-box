@@ -2,11 +2,13 @@
  * AutocompleteDropdown Component
  *
  * Dropdown list for autocomplete suggestions.
+ * Supports virtual scrolling for large lists (>100 items).
  */
 
-import type { ReactNode } from 'react'
+import { type ReactNode, useRef, useCallback } from 'react'
 import { clsx } from 'clsx'
 import type { AutocompleteItem } from '@/types'
+import { useVirtualList } from '@/hooks'
 import './AutocompleteDropdown.css'
 
 export interface AutocompleteDropdownProps {
@@ -36,6 +38,13 @@ export interface AutocompleteDropdownProps {
   isLoading?: boolean
   /** Additional CSS class */
   className?: string
+  /** 
+   * Enable virtual scrolling for large lists.
+   * When true (or 'auto' with >100 items), only visible items are rendered.
+   */
+  virtualScrolling?: boolean | 'auto'
+  /** Height of each item in pixels (for virtual scrolling) */
+  itemHeight?: number
 }
 
 /**
@@ -85,7 +94,34 @@ export function AutocompleteDropdown({
   loadingMessage = 'Loading...',
   isLoading = false,
   className,
+  virtualScrolling = 'auto',
+  itemHeight = 40,
 }: AutocompleteDropdownProps) {
+  const scrollContainerRef = useRef<HTMLUListElement>(null)
+  
+  // Determine if we should use virtual scrolling
+  const shouldVirtualize = virtualScrolling === true || 
+    (virtualScrolling === 'auto' && items.length > 100)
+  
+  // Check if any items have groups (virtual scrolling doesn't support groups)
+  const hasGroups = items.some(item => item.group !== undefined)
+  const useVirtual = shouldVirtualize && !hasGroups
+  
+  // Virtual list hook
+  const virtualList = useVirtualList({
+    itemCount: items.length,
+    itemHeight,
+    containerHeight: maxHeight,
+    overscan: 3,
+    highlightedIndex,
+  })
+  
+  const handleScroll = useCallback((e: React.UIEvent<HTMLUListElement>) => {
+    if (useVirtual) {
+      virtualList.onScroll(e.currentTarget.scrollTop)
+    }
+  }, [useVirtual, virtualList])
+
   if (!isOpen) {
     return null
   }
@@ -113,6 +149,104 @@ export function AutocompleteDropdown({
     e.preventDefault()
   }
 
+  // Render loading or empty state
+  if (isLoading) {
+    return (
+      <ul
+        id={id}
+        role="listbox"
+        aria-label="Suggestions"
+        className={clsx('autocomplete-dropdown', className)}
+        style={style}
+        onMouseDown={handleMouseDown}
+      >
+        <li className="autocomplete-dropdown__message">{loadingMessage}</li>
+      </ul>
+    )
+  }
+
+  if (items.length === 0) {
+    return (
+      <ul
+        id={id}
+        role="listbox"
+        aria-label="Suggestions"
+        className={clsx('autocomplete-dropdown', className)}
+        style={style}
+        onMouseDown={handleMouseDown}
+      >
+        <li className="autocomplete-dropdown__message">{emptyMessage}</li>
+      </ul>
+    )
+  }
+
+  // Virtual scrolling mode (flat list, no groups)
+  if (useVirtual) {
+    return (
+      <ul
+        id={id}
+        ref={(node) => {
+          virtualList.scrollContainerRef(node)
+          if (scrollContainerRef.current !== node) {
+            (scrollContainerRef as React.MutableRefObject<HTMLUListElement | null>).current = node
+          }
+        }}
+        role="listbox"
+        aria-label="Suggestions"
+        className={clsx('autocomplete-dropdown', 'autocomplete-dropdown--virtual', className)}
+        style={style}
+        onMouseDown={handleMouseDown}
+        onScroll={handleScroll}
+      >
+        <li
+          className="autocomplete-dropdown__virtual-spacer"
+          style={{ height: virtualList.totalHeight, position: 'relative' }}
+          aria-hidden="true"
+        >
+          <ul
+            className="autocomplete-dropdown__virtual-items"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              transform: `translateY(${virtualList.offsetTop}px)`,
+            }}
+          >
+            {virtualList.virtualItems.map(({ index }) => {
+              const item = items[index]
+              const isHighlighted = index === highlightedIndex
+              const isDisabled = item.disabled ?? false
+
+              return (
+                <li
+                  key={item.key}
+                  role="option"
+                  aria-selected={isHighlighted}
+                  aria-disabled={isDisabled}
+                  className={clsx('autocomplete-item', {
+                    'autocomplete-item--highlighted': isHighlighted,
+                    'autocomplete-item--disabled': isDisabled,
+                  })}
+                  style={{ height: itemHeight }}
+                  onClick={(e) => handleItemClick(item, e)}
+                  onMouseEnter={() => onHighlight(index)}
+                >
+                  {renderItem ? (
+                    renderItem(item, isHighlighted)
+                  ) : (
+                    <DefaultItem item={item} isHighlighted={isHighlighted} isDisabled={isDisabled} />
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        </li>
+      </ul>
+    )
+  }
+
+  // Standard mode with groups support
   // Group items by their group property
   const groupedItems = items.reduce<{ group: string | undefined; items: { item: AutocompleteItem; originalIndex: number }[] }[]>(
     (acc, item, originalIndex) => {
@@ -143,48 +277,42 @@ export function AutocompleteDropdown({
       style={style}
       onMouseDown={handleMouseDown}
     >
-      {isLoading ? (
-        <li className="autocomplete-dropdown__message">{loadingMessage}</li>
-      ) : items.length === 0 ? (
-        <li className="autocomplete-dropdown__message">{emptyMessage}</li>
-      ) : (
-        sortedGroups.map((groupData) => (
-          <li key={groupData.group ?? '__ungrouped'} className="autocomplete-group">
-            {groupData.group && (
-              <div className="autocomplete-group__header" role="presentation">
-                {groupData.group}
-              </div>
-            )}
-            <ul className="autocomplete-group__items" role="group">
-              {groupData.items.map(({ item, originalIndex }) => {
-                const isHighlighted = originalIndex === highlightedIndex
-                const isDisabled = item.disabled ?? false
+      {sortedGroups.map((groupData) => (
+        <li key={groupData.group ?? '__ungrouped'} className="autocomplete-group">
+          {groupData.group && (
+            <div className="autocomplete-group__header" role="presentation">
+              {groupData.group}
+            </div>
+          )}
+          <ul className="autocomplete-group__items" role="group">
+            {groupData.items.map(({ item, originalIndex }) => {
+              const isHighlighted = originalIndex === highlightedIndex
+              const isDisabled = item.disabled ?? false
 
-                return (
-                  <li
-                    key={item.key}
-                    role="option"
-                    aria-selected={isHighlighted}
-                    aria-disabled={isDisabled}
-                    className={clsx('autocomplete-item', {
-                      'autocomplete-item--highlighted': isHighlighted,
-                      'autocomplete-item--disabled': isDisabled,
-                    })}
-                    onClick={(e) => handleItemClick(item, e)}
-                    onMouseEnter={() => onHighlight(originalIndex)}
-                  >
-                    {renderItem ? (
-                      renderItem(item, isHighlighted)
-                    ) : (
-                      <DefaultItem item={item} isHighlighted={isHighlighted} isDisabled={isDisabled} />
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          </li>
-        ))
-      )}
+              return (
+                <li
+                  key={item.key}
+                  role="option"
+                  aria-selected={isHighlighted}
+                  aria-disabled={isDisabled}
+                  className={clsx('autocomplete-item', {
+                    'autocomplete-item--highlighted': isHighlighted,
+                    'autocomplete-item--disabled': isDisabled,
+                  })}
+                  onClick={(e) => handleItemClick(item, e)}
+                  onMouseEnter={() => onHighlight(originalIndex)}
+                >
+                  {renderItem ? (
+                    renderItem(item, isHighlighted)
+                  ) : (
+                    <DefaultItem item={item} isHighlighted={isHighlighted} isDisabled={isDisabled} />
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        </li>
+      ))}
     </ul>
   )
 }
