@@ -319,3 +319,55 @@ function AutoFocusFilterBox(props: { schema: FilterSchema }) {
 export const AutoFocus: Story = {
   render: () => <AutoFocusFilterBox schema={basicSchema} />,
 }
+
+// Horizontal scrolling demo with narrow container and many tokens
+function HorizontalScrollFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'Active', serialized: 'active' },
+      },
+      connector: 'AND',
+    },
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'John', display: 'John', serialized: 'John' },
+      },
+      connector: 'AND',
+    },
+    {
+      condition: {
+        field: { key: 'age', label: 'Age', type: 'number' },
+        operator: { key: 'gt', label: 'greater than', symbol: '>' },
+        value: { raw: 25, display: '25', serialized: '25' },
+      },
+      connector: 'OR',
+    },
+    {
+      condition: {
+        field: { key: 'createdAt', label: 'Created At', type: 'date' },
+        operator: { key: 'after', label: 'after', symbol: '>' },
+        value: { raw: '2024-01-01', display: '2024-01-01', serialized: '2024-01-01' },
+      },
+    },
+  ])
+  return (
+    <div style={{ maxWidth: '350px' }}>
+      <p style={{ marginBottom: '0.5rem', color: '#666', fontSize: '14px' }}>
+        Container width is limited to 350px. Scroll horizontally to see all tokens.
+      </p>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} />
+      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const HorizontalScroll: Story = {
+  render: () => <HorizontalScrollFilterBox schema={basicSchema} />,
+}

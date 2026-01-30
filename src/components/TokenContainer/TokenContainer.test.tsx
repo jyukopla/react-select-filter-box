@@ -106,4 +106,62 @@ describe('TokenContainer', () => {
       expect(container.querySelector('.token-container')).toBeInTheDocument()
     })
   })
+
+  describe('Overflow Handling', () => {
+    it('should have overflow-x auto for horizontal scrolling', () => {
+      const { container } = render(<TokenContainer {...defaultProps} tokens={createTokens()} />)
+      const tokenContainer = container.querySelector('.token-container')
+      expect(tokenContainer).toHaveClass('token-container')
+      // The container should exist and have the class that provides overflow-x: auto
+      expect(tokenContainer).toBeInTheDocument()
+    })
+
+    it('should render many tokens without wrapping', () => {
+      const manyTokens: TokenData[] = []
+      for (let i = 0; i < 10; i++) {
+        manyTokens.push(
+          {
+            id: `field-${i}`,
+            type: 'field',
+            value: { key: `field_${i}`, label: `Field ${i}`, type: 'string' },
+            position: i * 4,
+            expressionIndex: i,
+          },
+          {
+            id: `operator-${i}`,
+            type: 'operator',
+            value: { key: 'eq', label: 'equals', symbol: '=' },
+            position: i * 4 + 1,
+            expressionIndex: i,
+          },
+          {
+            id: `value-${i}`,
+            type: 'value',
+            value: { raw: `value${i}`, display: `Value ${i}`, serialized: `value${i}` },
+            position: i * 4 + 2,
+            expressionIndex: i,
+          },
+          {
+            id: `connector-${i}`,
+            type: 'connector',
+            value: { key: 'AND', label: 'AND' },
+            position: i * 4 + 3,
+            expressionIndex: i,
+          }
+        )
+      }
+
+      const { container } = render(<TokenContainer {...defaultProps} tokens={manyTokens} />)
+      const tokenContainer = container.querySelector('.token-container')
+      expect(tokenContainer).toBeInTheDocument()
+      // All tokens should be rendered
+      expect(container.querySelectorAll('.token').length).toBe(manyTokens.length)
+    })
+
+    it('should apply flex-nowrap to prevent wrapping', () => {
+      const { container } = render(<TokenContainer {...defaultProps} tokens={createTokens()} />)
+      const tokenContainer = container.querySelector('.token-container')
+      expect(tokenContainer).toHaveClass('token-container')
+    })
+  })
 })

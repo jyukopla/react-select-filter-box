@@ -3,6 +3,7 @@
 .token {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   padding: var(--filter-token-padding, 4px 8px);
   border-radius: var(--filter-token-radius, 4px);
   font-family: var(--filter-font-family, system-ui, -apple-system, sans-serif);

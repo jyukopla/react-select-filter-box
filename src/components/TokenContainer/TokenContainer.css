@@ -2,7 +2,7 @@
 
 .token-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--filter-token-gap, 4px);
   padding: var(--filter-container-padding, 8px);
@@ -12,6 +12,29 @@
   border-radius: 6px;
   cursor: text;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* Hide scrollbar for a cleaner look while still allowing scroll */
+  scrollbar-width: thin;
+  scrollbar-color: var(--filter-container-border, #e0e0e0) transparent;
+}
+
+/* WebKit scrollbar styling */
+.token-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.token-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.token-container::-webkit-scrollbar-thumb {
+  background-color: var(--filter-container-border, #e0e0e0);
+  border-radius: 2px;
+}
+
+.token-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--filter-container-border-focus, #2196f3);
 }
 
 .token-container:focus-within {
