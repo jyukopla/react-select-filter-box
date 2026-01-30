@@ -26,6 +26,10 @@ export interface TokenProps {
   isSelected: boolean
   /** Whether this token can be deleted */
   isDeletable: boolean
+  /** Whether this token has a validation error */
+  hasError?: boolean
+  /** Error message to display on hover */
+  errorMessage?: string
   /** Called when the token is clicked to edit */
   onEdit: () => void
   /** Called when delete is requested */
@@ -83,6 +87,8 @@ export const Token = memo(function Token({
   isEditing,
   isSelected,
   isDeletable: _isDeletable,
+  hasError = false,
+  errorMessage,
   onEdit,
   onDelete: _onDelete,
   onEditComplete,
@@ -163,12 +169,15 @@ export const Token = memo(function Token({
       role="option"
       aria-selected={isSelected}
       aria-label={ariaLabel}
+      aria-invalid={hasError ? 'true' : undefined}
+      title={hasError && errorMessage ? errorMessage : undefined}
       className={clsx(
         'token',
         `token--${data.type}`,
         {
           'token--editable': isEditable,
           'token--selected': isSelected,
+          'token--error': hasError,
         },
         className
       )}

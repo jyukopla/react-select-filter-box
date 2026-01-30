@@ -235,4 +235,47 @@ describe('Token', () => {
       expect(input.selectionEnd).toBe(input.value.length)
     })
   })
+
+  describe('Error State', () => {
+    it('should apply error class when hasError is true', () => {
+      const { container } = render(
+        <Token {...defaultProps} data={createValueToken()} hasError />
+      )
+      expect(container.querySelector('.token--error')).toBeInTheDocument()
+    })
+
+    it('should not apply error class when hasError is false', () => {
+      const { container } = render(
+        <Token {...defaultProps} data={createValueToken()} hasError={false} />
+      )
+      expect(container.querySelector('.token--error')).not.toBeInTheDocument()
+    })
+
+    it('should apply error class in addition to type class', () => {
+      const { container } = render(
+        <Token {...defaultProps} data={createValueToken()} hasError />
+      )
+      expect(container.querySelector('.token--value.token--error')).toBeInTheDocument()
+    })
+
+    it('should show error message in title attribute when provided', () => {
+      render(
+        <Token {...defaultProps} data={createValueToken()} hasError errorMessage="Invalid value" />
+      )
+      const token = screen.getByRole('option')
+      expect(token).toHaveAttribute('title', 'Invalid value')
+    })
+
+    it('should have aria-invalid="true" when hasError is true', () => {
+      render(<Token {...defaultProps} data={createValueToken()} hasError />)
+      const token = screen.getByRole('option')
+      expect(token).toHaveAttribute('aria-invalid', 'true')
+    })
+
+    it('should not have aria-invalid when hasError is false', () => {
+      render(<Token {...defaultProps} data={createValueToken()} hasError={false} />)
+      const token = screen.getByRole('option')
+      expect(token).not.toHaveAttribute('aria-invalid')
+    })
+  })
 })

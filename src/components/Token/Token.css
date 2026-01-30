@@ -135,3 +135,36 @@
     transform: none;
   }
 }
+
+/* Error State */
+.token--error {
+  background-color: var(--filter-token-error-bg, #fef2f2);
+  border-color: var(--filter-token-error-border, #ef4444);
+  color: var(--filter-token-error-text, #dc2626);
+  position: relative;
+}
+
+.token--error::after {
+  content: '⚠';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 10px;
+  line-height: 1;
+  background: var(--filter-token-error-indicator-bg, #ef4444);
+  color: var(--filter-token-error-indicator-text, #fff);
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.token--error:hover {
+  border-color: var(--filter-token-error-border-hover, #dc2626);
+}
+
+.token--error:focus-visible {
+  box-shadow: 0 0 0 2px var(--filter-token-error-ring, #f87171);
+}
