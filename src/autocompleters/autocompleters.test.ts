@@ -1,0 +1,395 @@
+/**
+ * Autocompleter Tests
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import {
+  createStaticAutocompleter,
+  createEnumAutocompleter,
+  createAsyncAutocompleter,
+  createNumberAutocompleter,
+  createDateAutocompleter,
+  combineAutocompleters,
+  mapAutocompleter,
+  withCache,
+} from './index'
+import type { AutocompleteContext, AutocompleteItem } from '@/types'
+
+// Mock context
+const createMockContext = (inputValue: string = ''): AutocompleteContext => ({
+  inputValue,
+  field: {
+    key: 'test',
+    label: 'Test',
+    type: 'string',
+    operators: [],
+  },
+  operator: {
+    key: 'eq',
+    label: 'equals',
+  },
+  existingExpressions: [],
+  schema: { fields: [] },
+})
+
+describe('createStaticAutocompleter', () => {
+  it('should return all items when input is empty', () => {
+    const autocompleter = createStaticAutocompleter(['Apple', 'Banana', 'Cherry'])
+    const context = createMockContext('')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(3)
+    expect(result.map((r) => r.label)).toEqual(['Apple', 'Banana', 'Cherry'])
+  })
+
+  it('should filter by substring match by default', () => {
+    const autocompleter = createStaticAutocompleter(['Apple', 'Banana', 'Cherry'])
+    const context = createMockContext('an')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].label).toBe('Banana')
+  })
+
+  it('should filter by prefix match when configured', () => {
+    const autocompleter = createStaticAutocompleter(['Apple', 'Apricot', 'Banana'], {
+      matchMode: 'prefix',
+    })
+    const context = createMockContext('Ap')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(2)
+    expect(result.map((r) => r.label)).toEqual(['Apple', 'Apricot'])
+  })
+
+  it('should support fuzzy matching', () => {
+    const autocompleter = createStaticAutocompleter(['Apple', 'Apricot', 'Banana'], {
+      matchMode: 'fuzzy',
+    })
+    const context = createMockContext('ae')
+
+    const result = autocompleter.getSuggestions(context)
+
+    // "ae" matches "Apple" (a...e)
+    expect(result.some((r) => r.label === 'Apple')).toBe(true)
+  })
+
+  it('should respect case sensitivity', () => {
+    const autocompleter = createStaticAutocompleter(['Apple', 'apple'], {
+      caseSensitive: true,
+    })
+    const context = createMockContext('Apple')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].label).toBe('Apple')
+  })
+
+  it('should limit results when maxResults is set', () => {
+    const autocompleter = createStaticAutocompleter(
+      ['A', 'B', 'C', 'D', 'E'],
+      { maxResults: 3 }
+    )
+    const context = createMockContext('')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(3)
+  })
+
+  it('should accept AutocompleteItem array', () => {
+    const items: AutocompleteItem[] = [
+      { type: 'value', key: 'active', label: 'Active', description: 'Active status' },
+      { type: 'value', key: 'inactive', label: 'Inactive' },
+    ]
+    const autocompleter = createStaticAutocompleter(items)
+    const context = createMockContext('')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(2)
+    expect(result[0].description).toBe('Active status')
+  })
+})
+
+describe('createEnumAutocompleter', () => {
+  const enumValues = [
+    { key: 'ACTIVE', label: 'Active', description: 'Currently active' },
+    { key: 'INACTIVE', label: 'Inactive', description: 'Not active' },
+    { key: 'PENDING', label: 'Pending' },
+  ]
+
+  it('should return all values when input is empty', () => {
+    const autocompleter = createEnumAutocompleter(enumValues)
+    const context = createMockContext('')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(3)
+  })
+
+  it('should filter by label', () => {
+    const autocompleter = createEnumAutocompleter(enumValues)
+    const context = createMockContext('act')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(2) // Active and Inactive
+  })
+
+  it('should filter by description', () => {
+    const autocompleter = createEnumAutocompleter(enumValues)
+    const context = createMockContext('currently')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].key).toBe('ACTIVE')
+  })
+
+  it('should not filter when searchable is false', () => {
+    const autocompleter = createEnumAutocompleter(enumValues, { searchable: false })
+    const context = createMockContext('xyz')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(3) // All values returned
+  })
+})
+
+describe('createAsyncAutocompleter', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('should call fetch function with query', async () => {
+    const fetchFn = vi.fn().mockResolvedValue([
+      { type: 'value', key: '1', label: 'Result 1' },
+    ])
+
+    const autocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0 })
+    const context = createMockContext('test')
+
+    const result = await autocompleter.getSuggestions(context)
+
+    expect(fetchFn).toHaveBeenCalledWith('test', context)
+    expect(result).toHaveLength(1)
+  })
+
+  it('should respect minChars', async () => {
+    const fetchFn = vi.fn().mockResolvedValue([])
+
+    const autocompleter = createAsyncAutocompleter(fetchFn, { minChars: 3 })
+    const context = createMockContext('ab')
+
+    const result = await autocompleter.getSuggestions(context)
+
+    expect(fetchFn).not.toHaveBeenCalled()
+    expect(result).toEqual([])
+  })
+
+  it('should cache results', async () => {
+    const fetchFn = vi.fn().mockResolvedValue([
+      { type: 'value', key: '1', label: 'Result 1' },
+    ])
+
+    const autocompleter = createAsyncAutocompleter(fetchFn, {
+      debounceMs: 0,
+      cacheResults: true,
+    })
+    const context = createMockContext('test')
+
+    // First call
+    await autocompleter.getSuggestions(context)
+    // Second call with same query
+    await autocompleter.getSuggestions(context)
+
+    expect(fetchFn).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('createNumberAutocompleter', () => {
+  it('should return default suggestions when input is empty', () => {
+    const autocompleter = createNumberAutocompleter({ min: 0, max: 100, step: 10 })
+    const context = createMockContext('')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(5) // 0, 10, 20, 30, 40
+    expect(result.map((r) => r.key)).toEqual(['0', '10', '20', '30', '40'])
+  })
+
+  it('should validate entered number', () => {
+    const autocompleter = createNumberAutocompleter({ min: 0, max: 100 })
+    const context = createMockContext('50')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].key).toBe('50')
+  })
+
+  it('should return empty for out of range number', () => {
+    const autocompleter = createNumberAutocompleter({ min: 0, max: 100 })
+    const context = createMockContext('150')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(0)
+  })
+
+  it('should return empty for invalid number', () => {
+    const autocompleter = createNumberAutocompleter()
+    const context = createMockContext('not a number')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(0)
+  })
+
+  it('should validate with min/max constraints', () => {
+    const autocompleter = createNumberAutocompleter({ min: 10, max: 20 })
+
+    expect(autocompleter.validate?.(15, createMockContext())).toBe(true)
+    expect(autocompleter.validate?.(5, createMockContext())).toBe(false)
+    expect(autocompleter.validate?.(25, createMockContext())).toBe(false)
+  })
+
+  it('should validate integers when configured', () => {
+    const autocompleter = createNumberAutocompleter({ integer: true })
+
+    expect(autocompleter.validate?.(5, createMockContext())).toBe(true)
+    expect(autocompleter.validate?.(5.5, createMockContext())).toBe(false)
+  })
+
+  it('should format numbers', () => {
+    const autocompleter = createNumberAutocompleter({
+      format: (n) => `$${n.toFixed(2)}`,
+    })
+
+    expect(autocompleter.format?.(100, createMockContext())).toBe('$100.00')
+  })
+
+  it('should parse strings', () => {
+    const autocompleter = createNumberAutocompleter()
+
+    expect(autocompleter.parse?.('42', createMockContext())).toBe(42)
+  })
+})
+
+describe('createDateAutocompleter', () => {
+  it('should return presets when input is empty', () => {
+    const autocompleter = createDateAutocompleter()
+    const context = createMockContext('')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result.length).toBeGreaterThan(0)
+    expect(result.some((r) => r.label === 'Today')).toBe(true)
+    expect(result.some((r) => r.label === 'Yesterday')).toBe(true)
+  })
+
+  it('should filter presets by label', () => {
+    const autocompleter = createDateAutocompleter()
+    const context = createMockContext('week')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result.every((r) => r.label.toLowerCase().includes('week'))).toBe(true)
+  })
+
+  it('should parse ISO date input', () => {
+    const autocompleter = createDateAutocompleter()
+    const context = createMockContext('2024-01-15')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].key).toBe('2024-01-15')
+  })
+
+  it('should validate dates', () => {
+    const autocompleter = createDateAutocompleter()
+
+    expect(autocompleter.validate?.(new Date(), createMockContext())).toBe(true)
+    expect(autocompleter.validate?.('2024-01-15', createMockContext())).toBe(true)
+    expect(autocompleter.validate?.('invalid', createMockContext())).toBe(false)
+  })
+
+  it('should format dates', () => {
+    const autocompleter = createDateAutocompleter()
+    const date = new Date('2024-01-15')
+
+    expect(autocompleter.format?.(date, createMockContext())).toBe('2024-01-15')
+  })
+
+  it('should support custom presets', () => {
+    const customPresets = [
+      { label: 'Custom Date', value: new Date('2024-06-01') },
+    ]
+    const autocompleter = createDateAutocompleter({ presets: customPresets })
+    const context = createMockContext('')
+
+    const result = autocompleter.getSuggestions(context)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].label).toBe('Custom Date')
+  })
+})
+
+describe('combineAutocompleters', () => {
+  it('should combine results from multiple autocompleters', async () => {
+    const auto1 = createStaticAutocompleter(['A', 'B'])
+    const auto2 = createStaticAutocompleter(['C', 'D'])
+
+    const combined = combineAutocompleters(auto1, auto2)
+    const context = createMockContext('')
+
+    const result = await combined.getSuggestions(context)
+
+    expect(result).toHaveLength(4)
+    expect(result.map((r) => r.label)).toEqual(['A', 'B', 'C', 'D'])
+  })
+})
+
+describe('mapAutocompleter', () => {
+  it('should transform results', async () => {
+    const autocompleter = createStaticAutocompleter(['apple', 'banana'])
+    const mapped = mapAutocompleter(autocompleter, (items) =>
+      items.map((item) => ({ ...item, label: item.label.toUpperCase() }))
+    )
+    const context = createMockContext('')
+
+    const result = await mapped.getSuggestions(context)
+
+    expect(result.map((r) => r.label)).toEqual(['APPLE', 'BANANA'])
+  })
+})
+
+describe('withCache', () => {
+  it('should cache results', async () => {
+    let callCount = 0
+    const autocompleter = {
+      getSuggestions: () => {
+        callCount++
+        return [{ type: 'value' as const, key: '1', label: 'Result' }]
+      },
+    }
+
+    const cached = withCache(autocompleter, 60000)
+    const context = createMockContext('test')
+
+    await cached.getSuggestions(context)
+    await cached.getSuggestions(context)
+
+    expect(callCount).toBe(1)
+  })
+})

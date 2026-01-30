@@ -63,7 +63,38 @@ export {
   toQueryString,
   fromQueryString,
   type SerializedExpression,
+  // Schema builder
+  createSchema,
+  defineSchema,
+  mergeSchemas,
+  pickFields,
+  omitFields,
+  extendSchema,
+  // Validation
+  validateExpression,
+  validateExpressions,
+  validateSchema,
 } from './utils'
+
+// Autocompleters
+export {
+  createStaticAutocompleter,
+  createEnumAutocompleter,
+  createAsyncAutocompleter,
+  createNumberAutocompleter,
+  createDateAutocompleter,
+  combineAutocompleters,
+  mapAutocompleter,
+  withCache,
+  withDebounce,
+  type StaticAutocompleterOptions,
+  type EnumAutocompleterOptions,
+  type AsyncAutocompleterOptions,
+  type NumberAutocompleterOptions,
+  type DateAutocompleterOptions,
+  type EnumValue,
+  type DatePreset,
+} from './autocompleters'
 
 // Core (for advanced use cases)
 export { FilterStateMachine, type FilterStep } from './core'
