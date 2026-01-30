@@ -43,6 +43,8 @@ export interface UseFilterStateReturn {
   placeholder: string
   /** Screen reader announcement */
   announcement: string
+  /** Index of token currently being edited (-1 if not editing) */
+  editingTokenIndex: number
   /** Handle focus event */
   handleFocus: () => void
   /** Handle blur event */
@@ -59,6 +61,12 @@ export interface UseFilterStateReturn {
   handleConfirmValue: () => void
   /** Clear all expressions */
   handleClear: () => void
+  /** Start editing a token */
+  handleTokenEdit: (tokenIndex: number) => void
+  /** Complete editing a token */
+  handleTokenEditComplete: (newValue: ConditionValue) => void
+  /** Cancel editing a token */
+  handleTokenEditCancel: () => void
 }
 
 /**
@@ -208,6 +216,7 @@ export function useFilterState({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(0)
+  const [editingTokenIndex, setEditingTokenIndex] = useState(-1)
   const [currentField, setCurrentField] = useState<FieldValue | undefined>()
   const [currentOperator, setCurrentOperator] = useState<OperatorValue | undefined>()
   const [announcement, setAnnouncement] = useState('')
@@ -386,8 +395,51 @@ export function useFilterState({
     setInputValue('')
     setCurrentField(undefined)
     setCurrentOperator(undefined)
+    setEditingTokenIndex(-1)
     onChange([])
   }, [machine, onChange])
+
+  // Token editing handlers
+  const handleTokenEdit = useCallback((tokenIndex: number) => {
+    // Only value tokens are editable
+    const token = tokens[tokenIndex]
+    if (token?.type === 'value') {
+      setEditingTokenIndex(tokenIndex)
+      setIsDropdownOpen(false)
+    }
+  }, [tokens])
+
+  const handleTokenEditComplete = useCallback((newValue: ConditionValue) => {
+    if (editingTokenIndex < 0) return
+
+    // Find which expression this token belongs to
+    const token = tokens[editingTokenIndex]
+    if (!token || token.type !== 'value') return
+
+    const expressionIndex = token.expressionIndex
+    if (expressionIndex < 0 || expressionIndex >= value.length) return
+
+    // Create updated expressions
+    const newExpressions = value.map((expr, idx) => {
+      if (idx === expressionIndex) {
+        return {
+          ...expr,
+          condition: {
+            ...expr.condition,
+            value: newValue,
+          },
+        }
+      }
+      return expr
+    })
+
+    setEditingTokenIndex(-1)
+    onChange(newExpressions)
+  }, [editingTokenIndex, tokens, value, onChange])
+
+  const handleTokenEditCancel = useCallback(() => {
+    setEditingTokenIndex(-1)
+  }, [])
 
   return {
     state,
@@ -398,6 +450,7 @@ export function useFilterState({
     inputValue,
     placeholder,
     announcement,
+    editingTokenIndex,
     handleFocus,
     handleBlur,
     handleInputChange,
@@ -406,5 +459,8 @@ export function useFilterState({
     handleHighlight,
     handleConfirmValue,
     handleClear,
+    handleTokenEdit,
+    handleTokenEditComplete,
+    handleTokenEditCancel,
   }
 }

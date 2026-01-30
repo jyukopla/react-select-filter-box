@@ -322,4 +322,154 @@ describe('useFilterState', () => {
       expect(result.current.placeholder).toBe('Enter value...')
     })
   })
+
+  describe('Token Editing', () => {
+    it('should set editingTokenIndex when handleTokenEdit is called on value token', () => {
+      const initialValue = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
+      )
+
+      // Token index 2 is the value token (field=0, operator=1, value=2)
+      act(() => {
+        result.current.handleTokenEdit(2)
+      })
+
+      expect(result.current.editingTokenIndex).toBe(2)
+    })
+
+    it('should not set editingTokenIndex for field token', () => {
+      const initialValue = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
+      )
+
+      // Token index 0 is the field token
+      act(() => {
+        result.current.handleTokenEdit(0)
+      })
+
+      expect(result.current.editingTokenIndex).toBe(-1)
+    })
+
+    it('should call onChange with updated value when handleTokenEditComplete is called', () => {
+      const onChange = vi.fn()
+      const initialValue = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange })
+      )
+
+      // Start editing value token (index 2)
+      act(() => {
+        result.current.handleTokenEdit(2)
+      })
+
+      // Complete edit with new value
+      const newValue: ConditionValue = {
+        raw: 'inactive',
+        display: 'inactive',
+        serialized: 'inactive',
+      }
+
+      act(() => {
+        result.current.handleTokenEditComplete(newValue)
+      })
+
+      expect(onChange).toHaveBeenCalledWith([
+        expect.objectContaining({
+          condition: expect.objectContaining({
+            value: expect.objectContaining({ raw: 'inactive' }),
+          }),
+        }),
+      ])
+      expect(result.current.editingTokenIndex).toBe(-1)
+    })
+
+    it('should reset editingTokenIndex when handleTokenEditCancel is called', () => {
+      const initialValue = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
+      )
+
+      // Start editing
+      act(() => {
+        result.current.handleTokenEdit(2)
+      })
+
+      expect(result.current.editingTokenIndex).toBe(2)
+
+      // Cancel editing
+      act(() => {
+        result.current.handleTokenEditCancel()
+      })
+
+      expect(result.current.editingTokenIndex).toBe(-1)
+    })
+
+    it('should close dropdown when entering edit mode', () => {
+      const initialValue = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
+      )
+
+      // Focus to open dropdown
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      expect(result.current.isDropdownOpen).toBe(true)
+
+      // Start editing
+      act(() => {
+        result.current.handleTokenEdit(2)
+      })
+
+      expect(result.current.isDropdownOpen).toBe(false)
+    })
+  })
 })

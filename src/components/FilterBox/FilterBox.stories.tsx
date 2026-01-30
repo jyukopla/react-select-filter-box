@@ -371,3 +371,40 @@ function HorizontalScrollFilterBox(props: { schema: FilterSchema }) {
 export const HorizontalScroll: Story = {
   render: () => <HorizontalScrollFilterBox schema={basicSchema} />,
 }
+
+// Token Editing Story
+function TokenEditingFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'Click me to edit', display: 'Click me to edit', serialized: 'Click me to edit' },
+      },
+    },
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'active', serialized: 'active' },
+      },
+      connector: 'AND',
+    },
+  ])
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <p style={{ marginBottom: '0.5rem', color: '#666', fontSize: '14px' }}>
+        <strong>Click on any value token</strong> (green chips) to edit it inline. 
+        Press <kbd>Enter</kbd> to confirm or <kbd>Escape</kbd> to cancel.
+      </p>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} />
+      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const TokenEditing: Story = {
+  render: () => <TokenEditingFilterBox schema={basicSchema} />,
+}

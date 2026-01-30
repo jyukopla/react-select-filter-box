@@ -145,4 +145,69 @@ describe('Token', () => {
       expect(container.querySelector('.token--connector')).toBeInTheDocument()
     })
   })
+
+  describe('Editing Mode', () => {
+    it('should show inline input when isEditing is true', () => {
+      render(<Token {...defaultProps} data={createValueToken()} isEditable isEditing />)
+      const input = screen.getByRole('textbox')
+      expect(input).toBeInTheDocument()
+      expect(input).toHaveValue('Active')
+    })
+
+    it('should not show display text when editing', () => {
+      render(<Token {...defaultProps} data={createValueToken()} isEditable isEditing />)
+      // When editing, the display text is replaced by input
+      expect(screen.queryByText('Active')).not.toBeInTheDocument()
+    })
+
+    it('should call onEditComplete with new value on Enter', () => {
+      const onEditComplete = vi.fn()
+      render(
+        <Token
+          {...defaultProps}
+          data={createValueToken()}
+          isEditable
+          isEditing
+          onEditComplete={onEditComplete}
+        />
+      )
+      const input = screen.getByRole('textbox')
+      fireEvent.change(input, { target: { value: 'new value' } })
+      fireEvent.keyDown(input, { key: 'Enter' })
+      expect(onEditComplete).toHaveBeenCalledWith({
+        raw: 'new value',
+        display: 'new value',
+        serialized: 'new value',
+      })
+    })
+
+    it('should call onEditCancel on Escape', () => {
+      const onEditCancel = vi.fn()
+      render(
+        <Token
+          {...defaultProps}
+          data={createValueToken()}
+          isEditable
+          isEditing
+          onEditCancel={onEditCancel}
+        />
+      )
+      const input = screen.getByRole('textbox')
+      fireEvent.keyDown(input, { key: 'Escape' })
+      expect(onEditCancel).toHaveBeenCalledTimes(1)
+    })
+
+    it('should auto-focus input when entering edit mode', () => {
+      render(<Token {...defaultProps} data={createValueToken()} isEditable isEditing />)
+      const input = screen.getByRole('textbox')
+      expect(document.activeElement).toBe(input)
+    })
+
+    it('should select all text when entering edit mode', () => {
+      render(<Token {...defaultProps} data={createValueToken()} isEditable isEditing />)
+      const input = screen.getByRole('textbox') as HTMLInputElement
+      expect(input.selectionStart).toBe(0)
+      expect(input.selectionEnd).toBe(input.value.length)
+    })
+  })
 })

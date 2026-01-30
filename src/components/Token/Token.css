@@ -51,3 +51,21 @@
   border: 1px solid var(--filter-token-connector-border, #ff9800);
   color: var(--filter-token-connector-text, #e65100);
 }
+
+/* Editing Mode */
+.token--editing {
+  padding: 0;
+}
+
+.token__edit-input {
+  font-family: var(--filter-font-family, system-ui, -apple-system, sans-serif);
+  font-size: var(--filter-font-size, 14px);
+  font-weight: var(--filter-token-font-weight, 500);
+  padding: var(--filter-token-padding, 4px 8px);
+  border: none;
+  background: transparent;
+  color: inherit;
+  outline: none;
+  width: auto;
+  min-width: 50px;
+}

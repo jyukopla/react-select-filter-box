@@ -4,7 +4,7 @@
  * Renders a single token (field, operator, value, or connector) in the filter box.
  */
 
-import { memo } from 'react'
+import { memo, useState, useEffect, useRef, type KeyboardEvent } from 'react'
 import { clsx } from 'clsx'
 import type {
   TokenData,
@@ -78,21 +78,81 @@ function getTokenAriaLabel(data: TokenData): string {
 export const Token = memo(function Token({
   data,
   isEditable,
-  isEditing: _isEditing,
+  isEditing,
   isDeletable: _isDeletable,
   onEdit,
   onDelete: _onDelete,
-  onEditComplete: _onEditComplete,
-  onEditCancel: _onEditCancel,
+  onEditComplete,
+  onEditCancel,
   className,
 }: TokenProps) {
   const display = getTokenDisplay(data)
   const ariaLabel = getTokenAriaLabel(data)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [editValue, setEditValue] = useState(display)
+
+  // Auto-focus and select all when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [isEditing])
+
+  // Reset edit value when starting to edit
+  useEffect(() => {
+    if (isEditing) {
+      setEditValue(display)
+    }
+  }, [isEditing, display])
 
   const handleClick = () => {
-    if (isEditable) {
+    if (isEditable && !isEditing) {
       onEdit()
     }
+  }
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const newValue: ConditionValue = {
+        raw: editValue,
+        display: editValue,
+        serialized: editValue,
+      }
+      onEditComplete(newValue)
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      onEditCancel()
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value)
+  }
+
+  // Render inline input when editing
+  if (isEditing) {
+    return (
+      <span
+        className={clsx(
+          'token',
+          `token--${data.type}`,
+          'token--editing',
+          className
+        )}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          className="token__edit-input"
+          value={editValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          aria-label={`Edit ${data.type}`}
+        />
+      </span>
+    )
   }
 
   return (

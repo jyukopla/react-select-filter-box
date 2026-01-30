@@ -8,7 +8,7 @@ import type { KeyboardEvent, RefObject, InputHTMLAttributes } from 'react'
 import { clsx } from 'clsx'
 import { Token } from '../Token'
 import { TokenInput } from '../TokenInput'
-import type { TokenData } from '@/types'
+import type { TokenData, ConditionValue } from '@/types'
 import './TokenContainer.css'
 
 export interface TokenContainerProps {
@@ -40,6 +40,12 @@ export interface TokenContainerProps {
   className?: string
   /** Additional props for the input element */
   inputProps?: Partial<InputHTMLAttributes<HTMLInputElement>>
+  /** Index of token currently being edited (-1 if not editing) */
+  editingTokenIndex?: number
+  /** Called when token edit is complete */
+  onTokenEditComplete?: (newValue: ConditionValue) => void
+  /** Called when token edit is cancelled */
+  onTokenEditCancel?: () => void
 }
 
 /**
@@ -60,6 +66,9 @@ export function TokenContainer({
   disabled,
   className,
   inputProps,
+  editingTokenIndex = -1,
+  onTokenEditComplete,
+  onTokenEditCancel,
 }: TokenContainerProps) {
   // Support both onInputFocus/onInputBlur and legacy onFocus/onBlur
   const handleFocus = onInputFocus ?? onFocus
@@ -75,17 +84,17 @@ export function TokenContainer({
       className={clsx('token-container', { 'token-container--disabled': disabled }, className)}
       onClick={handleContainerClick}
     >
-      {tokens.map((token) => (
+      {tokens.map((token, index) => (
         <Token
           key={token.id}
           data={token}
           isEditable={token.type === 'value'}
-          isEditing={false}
+          isEditing={index === editingTokenIndex}
           isDeletable={false}
-          onEdit={() => onTokenClick?.(token.position)}
+          onEdit={() => onTokenClick?.(index)}
           onDelete={() => {}}
-          onEditComplete={() => {}}
-          onEditCancel={() => {}}
+          onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}
+          onEditCancel={() => onTokenEditCancel?.()}
         />
       ))}
       <TokenInput

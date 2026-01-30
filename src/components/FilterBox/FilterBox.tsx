@@ -65,6 +65,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     inputValue,
     placeholder,
     announcement,
+    editingTokenIndex,
     handleFocus,
     handleBlur,
     handleInputChange,
@@ -72,6 +73,9 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     handleSelect,
     handleHighlight,
     handleClear,
+    handleTokenEdit,
+    handleTokenEditComplete,
+    handleTokenEditCancel,
   } = useFilterState({ schema, value, onChange })
 
   // Expose imperative handle
@@ -129,6 +133,10 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
         onInputFocus={handleFocus}
         onInputBlur={handleBlur}
         onInputKeyDown={handleKeyDown}
+        onTokenClick={handleTokenEdit}
+        editingTokenIndex={editingTokenIndex}
+        onTokenEditComplete={handleTokenEditComplete}
+        onTokenEditCancel={handleTokenEditCancel}
         disabled={disabled}
         inputProps={{
           'aria-autocomplete': 'list',

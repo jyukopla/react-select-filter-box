@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createRef } from 'react'
 import { FilterBox, type FilterBoxHandle } from './FilterBox'
@@ -352,6 +352,139 @@ describe('FilterBox', () => {
       })
 
       expect(onChange).toHaveBeenCalledWith([])
+    })
+  })
+
+  describe('Token Editing', () => {
+    it('should allow editing value tokens on click', async () => {
+      const user = userEvent.setup()
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
+
+      const valueToken = screen.getByText('test')
+      await user.click(valueToken)
+
+      // Value token should be in edit mode with an input
+      const input = screen.getByRole('textbox', { name: /edit value/i })
+      expect(input).toBeInTheDocument()
+      expect(input).toHaveValue('test')
+    })
+
+    it('should update value when editing is confirmed with Enter', async () => {
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
+
+      const valueToken = screen.getByText('test')
+      fireEvent.click(valueToken)
+
+      const input = screen.getByRole('textbox', { name: /edit value/i })
+      fireEvent.change(input, { target: { value: 'new value' } })
+      fireEvent.keyDown(input, { key: 'Enter' })
+
+      expect(onChange).toHaveBeenCalledWith([
+        expect.objectContaining({
+          condition: expect.objectContaining({
+            value: expect.objectContaining({ raw: 'new value' }),
+          }),
+        }),
+      ])
+    })
+
+    it('should cancel editing on Escape', async () => {
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
+
+      const valueToken = screen.getByText('test')
+      fireEvent.click(valueToken)
+
+      // Get the edit input that appears in the token
+      const editInput = screen.getByRole('textbox', { name: /edit value/i })
+      expect(editInput).toHaveValue('test')
+      
+      // Change the value
+      fireEvent.change(editInput, { target: { value: 'changed' } })
+      expect(editInput).toHaveValue('changed')
+      
+      // Press Escape
+      fireEvent.keyDown(editInput, { key: 'Escape' })
+
+      // Should not call onChange since edit was cancelled
+      expect(onChange).not.toHaveBeenCalled()
+      // Should exit edit mode and show original value
+      expect(screen.getByText('test')).toBeInTheDocument()
+      // Edit input should no longer be present
+      expect(screen.queryByRole('textbox', { name: /edit value/i })).not.toBeInTheDocument()
+    })
+
+    it('should not allow editing field tokens', async () => {
+      const user = userEvent.setup()
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
+
+      const fieldToken = screen.getByText('Name')
+      await user.click(fieldToken)
+
+      // No edit input should appear for field tokens
+      expect(screen.queryByRole('textbox', { name: /edit field/i })).not.toBeInTheDocument()
+    })
+
+    it('should not allow editing operator tokens', async () => {
+      const user = userEvent.setup()
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
+
+      const operatorToken = screen.getByText('contains')
+      await user.click(operatorToken)
+
+      // No edit input should appear for operator tokens
+      expect(screen.queryByRole('textbox', { name: /edit operator/i })).not.toBeInTheDocument()
     })
   })
 })
