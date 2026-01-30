@@ -37,3 +37,18 @@ export type {
   NumberInputWidgetOptions,
   DateRangeWidgetOptions,
 } from './CustomInputs'
+
+// Error Display Components
+export {
+  ErrorTooltip,
+  ErrorSummary,
+  ErrorIndicator,
+  useValidationErrors,
+} from './ErrorDisplay'
+export type {
+  ErrorTooltipProps,
+  ErrorSummaryProps,
+  ErrorIndicatorProps,
+  UseValidationErrorsOptions,
+  UseValidationErrorsReturn,
+} from './ErrorDisplay'
