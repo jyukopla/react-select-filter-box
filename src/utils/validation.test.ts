@@ -448,6 +448,162 @@ describe('validation', () => {
     })
   })
 
+  describe('multi-value validation', () => {
+    const schemaWithMultiValue: FilterSchema = {
+      fields: [
+        {
+          key: 'price',
+          label: 'Price',
+          type: 'number',
+          operators: [
+            { key: 'eq', label: 'equals', symbol: '=' },
+            {
+              key: 'between',
+              label: 'between',
+              multiValue: { count: 2, separator: 'and', labels: ['from', 'to'] },
+            },
+          ],
+        },
+        {
+          key: 'tags',
+          label: 'Tags',
+          type: 'enum',
+          operators: [
+            { key: 'eq', label: 'equals' },
+            {
+              key: 'in',
+              label: 'in',
+              multiValue: { count: -1, separator: ',', labels: [] }, // Unlimited values
+            },
+          ],
+        },
+      ],
+    }
+
+    it('should validate correct number of values for between operator', () => {
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'price', label: 'Price', type: 'number' },
+          operator: { key: 'between', label: 'between' },
+          value: {
+            raw: [100, 500], // Correct: 2 values
+            display: '100 and 500',
+            serialized: '100,500',
+          },
+        },
+      }
+
+      const result = validateExpression(expression, schemaWithMultiValue)
+      expect(result.valid).toBe(true)
+    })
+
+    it('should error when between has too few values', () => {
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'price', label: 'Price', type: 'number' },
+          operator: { key: 'between', label: 'between' },
+          value: {
+            raw: [100], // Wrong: only 1 value
+            display: '100',
+            serialized: '100',
+          },
+        },
+      }
+
+      const result = validateExpression(expression, schemaWithMultiValue)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some(e => e.message.includes('requires exactly 2 values'))).toBe(true)
+    })
+
+    it('should error when between has too many values', () => {
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'price', label: 'Price', type: 'number' },
+          operator: { key: 'between', label: 'between' },
+          value: {
+            raw: [100, 200, 300], // Wrong: 3 values
+            display: '100, 200, 300',
+            serialized: '100,200,300',
+          },
+        },
+      }
+
+      const result = validateExpression(expression, schemaWithMultiValue)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some(e => e.message.includes('requires exactly 2 values'))).toBe(true)
+    })
+
+    it('should accept any number of values when count is -1 (unlimited)', () => {
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'tags', label: 'Tags', type: 'enum' },
+          operator: { key: 'in', label: 'in' },
+          value: {
+            raw: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+            display: 'tag1, tag2, tag3, tag4, tag5',
+            serialized: 'tag1,tag2,tag3,tag4,tag5',
+          },
+        },
+      }
+
+      const result = validateExpression(expression, schemaWithMultiValue)
+      expect(result.valid).toBe(true)
+    })
+
+    it('should require at least one value when count is -1 (unlimited)', () => {
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'tags', label: 'Tags', type: 'enum' },
+          operator: { key: 'in', label: 'in' },
+          value: {
+            raw: [], // Empty array
+            display: '',
+            serialized: '',
+          },
+        },
+      }
+
+      const result = validateExpression(expression, schemaWithMultiValue)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some(e => e.message.includes('requires at least one value'))).toBe(true)
+    })
+
+    it('should validate non-array values for multi-value operators', () => {
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'price', label: 'Price', type: 'number' },
+          operator: { key: 'between', label: 'between' },
+          value: {
+            raw: 100, // Wrong: should be an array
+            display: '100',
+            serialized: '100',
+          },
+        },
+      }
+
+      const result = validateExpression(expression, schemaWithMultiValue)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some(e => e.message.includes('must be an array'))).toBe(true)
+    })
+
+    it('should not apply multi-value validation to regular operators', () => {
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'price', label: 'Price', type: 'number' },
+          operator: { key: 'eq', label: 'equals', symbol: '=' },
+          value: {
+            raw: 100, // Single value is fine
+            display: '100',
+            serialized: '100',
+          },
+        },
+      }
+
+      const result = validateExpression(expression, schemaWithMultiValue)
+      expect(result.valid).toBe(true)
+    })
+  })
+
   describe('schema-level validation', () => {
     it('should run schema-level validation function', () => {
       const schemaWithValidation: FilterSchema = {

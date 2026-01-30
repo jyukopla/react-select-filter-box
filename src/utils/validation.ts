@@ -66,9 +66,22 @@ export function validateExpression(
     })
   }
 
+  // Validate multi-value if operator has multiValue config
+  if (operatorConfig?.multiValue) {
+    const multiValueResult = validateMultiValue(
+      value.raw,
+      operatorConfig.multiValue.count,
+      field.key,
+      operator.key,
+      expressionIndex
+    )
+    errors.push(...multiValueResult.errors)
+  }
+
   // Validate value is not empty (unless valueRequired is false)
+  // Note: multi-value validation handles empty arrays separately
   const valueRequired = fieldConfig.valueRequired !== false
-  if (valueRequired && isEmpty(value.raw)) {
+  if (valueRequired && isEmpty(value.raw) && !operatorConfig?.multiValue) {
     errors.push({
       type: 'value',
       message: `Value is required for field "${field.key}"`,
@@ -196,4 +209,61 @@ function isEmpty(value: unknown): boolean {
   if (typeof value === 'string') return value.trim() === ''
   if (Array.isArray(value)) return value.length === 0
   return false
+}
+
+/**
+ * Validate multi-value for operators like 'between' or 'in'
+ * @param value - The raw value (should be an array for multi-value operators)
+ * @param expectedCount - Expected number of values (-1 for unlimited)
+ * @param fieldKey - Field key for error messages
+ * @param operatorKey - Operator key for error messages
+ * @param expressionIndex - Expression index for error context
+ */
+function validateMultiValue(
+  value: unknown,
+  expectedCount: number,
+  fieldKey: string,
+  operatorKey: string,
+  expressionIndex?: number
+): ValidationResult {
+  const errors: ValidationError[] = []
+
+  // Multi-value must be an array
+  if (!Array.isArray(value)) {
+    errors.push({
+      type: 'value',
+      message: `Value for "${operatorKey}" operator on field "${fieldKey}" must be an array`,
+      expressionIndex,
+      field: fieldKey,
+    })
+    return { valid: false, errors }
+  }
+
+  // Check count constraints
+  if (expectedCount === -1) {
+    // Unlimited, but must have at least one value
+    if (value.length === 0) {
+      errors.push({
+        type: 'value',
+        message: `Operator "${operatorKey}" on field "${fieldKey}" requires at least one value`,
+        expressionIndex,
+        field: fieldKey,
+      })
+    }
+  } else {
+    // Fixed count
+    if (value.length !== expectedCount) {
+      errors.push({
+        type: 'value',
+        message: `Operator "${operatorKey}" on field "${fieldKey}" requires exactly ${expectedCount} values, but got ${value.length}`,
+        expressionIndex,
+        field: fieldKey,
+      })
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  }
 }
