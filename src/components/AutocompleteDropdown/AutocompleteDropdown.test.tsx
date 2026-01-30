@@ -107,4 +107,31 @@ describe('AutocompleteDropdown', () => {
       expect(options[0]).toHaveAttribute('aria-selected', 'true')
     })
   })
+
+  describe('Grouped Items', () => {
+    const createGroupedItems = (): AutocompleteItem[] => [
+      { type: 'field', key: 'status', label: 'Status', group: 'Basic' },
+      { type: 'field', key: 'name', label: 'Name', group: 'Basic' },
+      { type: 'field', key: 'createdAt', label: 'Created At', group: 'Dates' },
+      { type: 'field', key: 'updatedAt', label: 'Updated At', group: 'Dates' },
+      { type: 'field', key: 'unGrouped', label: 'Ungrouped Field' },
+    ]
+
+    it('should render group headers', () => {
+      render(<AutocompleteDropdown {...defaultProps} items={createGroupedItems()} />)
+      expect(screen.getByText('Basic')).toBeInTheDocument()
+      expect(screen.getByText('Dates')).toBeInTheDocument()
+    })
+
+    it('should render ungrouped items at the end', () => {
+      render(<AutocompleteDropdown {...defaultProps} items={createGroupedItems()} />)
+      expect(screen.getByText('Ungrouped Field')).toBeInTheDocument()
+    })
+
+    it('should not render duplicate group headers', () => {
+      render(<AutocompleteDropdown {...defaultProps} items={createGroupedItems()} />)
+      const basicHeaders = screen.getAllByText('Basic')
+      expect(basicHeaders).toHaveLength(1)
+    })
+  })
 })
