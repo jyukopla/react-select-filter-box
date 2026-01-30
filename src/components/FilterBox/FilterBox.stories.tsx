@@ -268,3 +268,54 @@ const largeSchema: FilterSchema = {
 export const LargeSchema: Story = {
   render: () => <FilterBoxWithState schema={largeSchema} />,
 }
+
+// Import dark theme styles
+import '@/styles/themes/dark.css'
+
+function DarkThemeFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([])
+  return (
+    <div data-theme="dark" style={{ 
+      maxWidth: '600px', 
+      padding: '2rem', 
+      background: '#1e1e1e',
+      borderRadius: '8px',
+      color: '#e0e0e0',
+    }}>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} />
+      <pre style={{ 
+        marginTop: '1rem', 
+        fontSize: '12px', 
+        background: '#2d2d2d', 
+        padding: '1rem',
+        borderRadius: '4px',
+        color: '#90caf9',
+      }}>
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const DarkTheme: Story = {
+  render: () => <DarkThemeFilterBox schema={basicSchema} />,
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+}
+
+function AutoFocusFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([])
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <p style={{ marginBottom: '0.5rem', color: '#666' }}>
+        The filter box is focused automatically on mount.
+      </p>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} autoFocus />
+    </div>
+  )
+}
+
+export const AutoFocus: Story = {
+  render: () => <AutoFocusFilterBox schema={basicSchema} />,
+}
