@@ -145,21 +145,62 @@ export function deserialize(
 }
 
 /**
+ * Options for customizing display string generation
+ */
+export interface DisplayFormatOptions {
+  /** Custom field label formatter */
+  formatField?: (field: FieldValue) => string
+  /** Custom operator label formatter */
+  formatOperator?: (operator: OperatorValue) => string
+  /** Custom value formatter */
+  formatValue?: (value: ConditionValue, field: FieldValue, operator: OperatorValue) => string
+  /** Custom connector formatter */
+  formatConnector?: (connector: 'AND' | 'OR') => string
+  /** Custom full expression formatter (overrides individual formatters) */
+  formatExpression?: (expression: FilterExpression, index: number) => string
+}
+
+/**
  * Generate a human-readable display string from expressions
  */
-export function toDisplayString(expressions: FilterExpression[]): string {
+export function toDisplayString(
+  expressions: FilterExpression[],
+  options: DisplayFormatOptions = {}
+): string {
   if (expressions.length === 0) return ''
+
+  const {
+    formatField = (f) => f.label,
+    formatOperator = (o) => o.label,
+    formatValue = (v) => v.display,
+    formatConnector = (c) => c,
+    formatExpression,
+  } = options
 
   return expressions
     .map((expr, index) => {
-      const field = expr.condition.field.label
-      const operator = expr.condition.operator.label
-      const value = expr.condition.value.display
+      // Use custom expression formatter if provided
+      if (formatExpression) {
+        const formatted = formatExpression(expr, index)
+        if (expr.connector && index < expressions.length - 1) {
+          return `${formatted} ${formatConnector(expr.connector)}`
+        }
+        return formatted
+      }
+
+      // Otherwise use individual formatters
+      const field = formatField(expr.condition.field)
+      const operator = formatOperator(expr.condition.operator)
+      const value = formatValue(
+        expr.condition.value,
+        expr.condition.field,
+        expr.condition.operator
+      )
 
       let part = `${field} ${operator} ${value}`
 
       if (expr.connector && index < expressions.length - 1) {
-        part += ` ${expr.connector}`
+        part += ` ${formatConnector(expr.connector)}`
       }
 
       return part

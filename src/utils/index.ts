@@ -7,6 +7,7 @@ export {
   type SerializedExpression,
   type SerializeOptions,
   type DeserializeOptions,
+  type DisplayFormatOptions,
 } from './serialization'
 
 export {

@@ -174,6 +174,144 @@ describe('Serialization', () => {
     it('should return empty string for empty expressions', () => {
       expect(toDisplayString([])).toBe('')
     })
+
+    it('should use custom field formatter', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'startDate', label: 'Start Date', type: 'date' },
+            operator: { key: 'before', label: 'before' },
+            value: { raw: '2024-01-15', display: '2024-01-15', serialized: '2024-01-15' },
+          },
+        },
+      ]
+
+      const result = toDisplayString(expressions, {
+        formatField: (field) => field.label.toUpperCase(),
+      })
+
+      expect(result).toBe('START DATE before 2024-01-15')
+    })
+
+    it('should use custom operator formatter', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const result = toDisplayString(expressions, {
+        formatOperator: (operator) => operator.symbol || operator.label,
+      })
+
+      expect(result).toBe('Status = Active')
+    })
+
+    it('should use custom value formatter', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'startDate', label: 'Started', type: 'date' },
+            operator: { key: 'before', label: 'before' },
+            value: { raw: '2024-01-15T00:00:00.000Z', display: '2024-01-15', serialized: '2024-01-15T00:00:00.000Z' },
+          },
+        },
+      ]
+
+      const result = toDisplayString(expressions, {
+        formatValue: (value, field) => {
+          if (field.type === 'date') {
+            return new Date(String(value.raw)).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })
+          }
+          return value.display
+        },
+      })
+
+      expect(result).toBe('Started before Jan 15, 2024')
+    })
+
+    it('should use custom connector formatter', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+          connector: 'AND',
+        },
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'John', display: 'John', serialized: 'John' },
+          },
+        },
+      ]
+
+      const result = toDisplayString(expressions, {
+        formatConnector: (connector) => connector.toLowerCase(),
+      })
+
+      expect(result).toBe('Status is Active and Name contains John')
+    })
+
+    it('should combine multiple custom formatters', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+          connector: 'AND',
+        },
+        {
+          condition: {
+            field: { key: 'count', label: 'Count', type: 'number' },
+            operator: { key: 'gt', label: 'greater than', symbol: '>' },
+            value: { raw: 10, display: '10', serialized: '10' },
+          },
+        },
+      ]
+
+      const result = toDisplayString(expressions, {
+        formatField: (field) => `[${field.label}]`,
+        formatOperator: (operator) => operator.symbol || operator.label,
+        formatValue: (value) => `"${value.display}"`,
+        formatConnector: (connector) => `&&`,
+      })
+
+      expect(result).toBe('[Status] = "Active" && [Count] > "10"')
+    })
+
+    it('should use custom expression formatter to override entire expression', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const result = toDisplayString(expressions, {
+        formatExpression: (expr) => {
+          return `${expr.condition.field.key}=${expr.condition.value.raw}`
+        },
+      })
+
+      expect(result).toBe('status=active')
+    })
   })
 
   describe('toQueryString', () => {
