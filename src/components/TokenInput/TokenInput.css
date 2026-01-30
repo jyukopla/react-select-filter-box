@@ -1,5 +1,22 @@
 /* TokenInput Component Styles */
 
+.token-input-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex: 1 1 auto;
+  min-width: 50px;
+}
+
+.token-input-sizer {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  font-family: var(--filter-font-family, system-ui, -apple-system, sans-serif);
+  font-size: var(--filter-font-size, 14px);
+  line-height: 1.4;
+  padding: var(--filter-token-padding, 4px 8px);
+}
+
 .token-input {
   flex: 1 1 auto;
   min-width: 50px;

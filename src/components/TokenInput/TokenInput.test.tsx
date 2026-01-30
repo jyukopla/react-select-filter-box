@@ -81,10 +81,35 @@ describe('TokenInput', () => {
   })
 
   describe('Auto-sizing', () => {
-    it('should have min-width style', () => {
+    it('should render a sizer span for measuring', () => {
       const { container } = render(<TokenInput {...defaultProps} />)
+      const sizer = container.querySelector('.token-input-sizer')
+      expect(sizer).toBeInTheDocument()
+      expect(sizer).toHaveAttribute('aria-hidden', 'true')
+    })
+
+    it('should have the wrapper element', () => {
+      const { container } = render(<TokenInput {...defaultProps} />)
+      const wrapper = container.querySelector('.token-input-wrapper')
+      expect(wrapper).toBeInTheDocument()
+    })
+
+    it('should show value text in sizer when value is set', () => {
+      const { container } = render(<TokenInput {...defaultProps} value="test text" />)
+      const sizer = container.querySelector('.token-input-sizer')
+      expect(sizer).toHaveTextContent('test text')
+    })
+
+    it('should show placeholder in sizer when value is empty', () => {
+      const { container } = render(<TokenInput {...defaultProps} placeholder="Select..." />)
+      const sizer = container.querySelector('.token-input-sizer')
+      expect(sizer).toHaveTextContent('Select...')
+    })
+
+    it('should accept custom minWidth', () => {
+      const { container } = render(<TokenInput {...defaultProps} minWidth={100} />)
       const input = container.querySelector('input')
-      expect(input).toHaveStyle({ minWidth: '50px' })
+      expect(input).toHaveStyle({ width: '100px' })
     })
   })
 })

@@ -4,7 +4,7 @@
  * Auto-sizing input for entering new token values.
  */
 
-import type { KeyboardEvent, RefObject, InputHTMLAttributes } from 'react'
+import { type KeyboardEvent, type RefObject, type InputHTMLAttributes, useState, useRef, useLayoutEffect } from 'react'
 import { clsx } from 'clsx'
 import './TokenInput.css'
 
@@ -29,6 +29,8 @@ export interface TokenInputProps extends Omit<InputHTMLAttributes<HTMLInputEleme
   className?: string
   /** Whether input is disabled */
   disabled?: boolean
+  /** Minimum width of the input */
+  minWidth?: number
 }
 
 /**
@@ -45,26 +47,51 @@ export function TokenInput({
   inputRef,
   className,
   disabled,
+  minWidth = 50,
   ...restProps
 }: TokenInputProps) {
+  const sizerRef = useRef<HTMLSpanElement>(null)
+  const [width, setWidth] = useState(minWidth)
+
+  // Measure and update width when value or placeholder changes
+  useLayoutEffect(() => {
+    if (sizerRef.current) {
+      const measuredWidth = sizerRef.current.scrollWidth
+      setWidth(Math.max(measuredWidth + 2, minWidth))
+    }
+  }, [value, placeholder, minWidth])
+
+  // Display text for sizing (value or placeholder)
+  const sizerText = value || placeholder || ''
+
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      role="combobox"
-      aria-autocomplete="list"
-      aria-expanded={false}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      onKeyDown={onKeyDown}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      placeholder={placeholder}
-      autoFocus={autoFocus}
-      disabled={disabled}
-      className={clsx('token-input', className)}
-      style={{ minWidth: '50px' }}
-      {...restProps}
-    />
+    <span className="token-input-wrapper">
+      {/* Hidden sizer span */}
+      <span
+        ref={sizerRef}
+        className="token-input-sizer"
+        aria-hidden="true"
+      >
+        {sizerText}
+      </span>
+      <input
+        ref={inputRef}
+        type="text"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={false}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+        disabled={disabled}
+        className={clsx('token-input', className)}
+        style={{ width: `${width}px` }}
+        {...restProps}
+      />
+    </span>
   )
 }

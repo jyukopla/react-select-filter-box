@@ -58,9 +58,10 @@ describe('TokenContainer', () => {
       const { container } = render(<TokenContainer {...defaultProps} tokens={createTokens()} />)
       const children = container.querySelector('.token-container')?.children
       expect(children).toBeDefined()
-      // Last child should be the input
+      // Last child should be the input wrapper (SPAN wrapping the input for auto-sizing)
       const lastChild = children?.[children.length - 1]
-      expect(lastChild?.tagName).toBe('INPUT')
+      expect(lastChild?.tagName).toBe('SPAN')
+      expect(lastChild?.querySelector('input')).toBeInTheDocument()
     })
 
     it('should display placeholder in input', () => {
