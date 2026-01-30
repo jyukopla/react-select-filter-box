@@ -254,4 +254,34 @@ describe('FilterBox', () => {
       expect(portal).toHaveStyle({ position: 'fixed' })
     })
   })
+
+  describe('Screen Reader Announcements', () => {
+    it('should announce suggestion count when dropdown opens', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Should have a live region with announcement
+      const liveRegion = screen.getByRole('status')
+      expect(liveRegion).toHaveTextContent(/2 fields available/)
+    })
+
+    it('should announce when a field is selected', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+      
+      // First clear the initial announcement by waiting
+      const liveRegion = screen.getByRole('status')
+      
+      await user.click(screen.getByText('Status'))
+
+      // After field selection, it announces operators are available
+      expect(liveRegion).toHaveTextContent(/2 operators available/)
+    })
+  })
 })

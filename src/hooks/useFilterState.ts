@@ -41,6 +41,8 @@ export interface UseFilterStateReturn {
   inputValue: string
   /** Placeholder text */
   placeholder: string
+  /** Screen reader announcement */
+  announcement: string
   /** Handle focus event */
   handleFocus: () => void
   /** Handle blur event */
@@ -208,6 +210,7 @@ export function useFilterState({
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const [currentField, setCurrentField] = useState<FieldValue | undefined>()
   const [currentOperator, setCurrentOperator] = useState<OperatorValue | undefined>()
+  const [announcement, setAnnouncement] = useState('')
 
   // Sync machine with external value on mount
   useEffect(() => {
@@ -229,11 +232,26 @@ export function useFilterState({
     setHighlightedIndex(0)
   }, [state])
 
+  // Generate announcements when dropdown opens or suggestions change
+  useEffect(() => {
+    if (isDropdownOpen && suggestions.length > 0) {
+      const count = suggestions.length
+      const itemType = suggestions[0]?.type === 'field' ? 'field' :
+                       suggestions[0]?.type === 'operator' ? 'operator' :
+                       suggestions[0]?.type === 'connector' ? 'connector' : 'suggestion'
+      setAnnouncement(`${count} ${itemType}${count !== 1 ? 's' : ''} available. Use arrow keys to navigate.`)
+    } else if (isDropdownOpen && suggestions.length === 0) {
+      setAnnouncement('No suggestions available.')
+    }
+  }, [isDropdownOpen, suggestions])
+
   // Handlers
   const handleFocus = useCallback(() => {
     machine.transition({ type: 'FOCUS' })
-    setState(machine.getState())
+    const newState = machine.getState()
+    setState(newState)
     setIsDropdownOpen(true)
+    // Announcement will be set after suggestions are calculated
   }, [machine])
 
   const handleBlur = useCallback(() => {
@@ -269,6 +287,7 @@ export function useFilterState({
           machine.transition({ type: 'SELECT_FIELD', payload: fieldValue })
           setState(machine.getState())
           setInputValue('')
+          setAnnouncement(`Selected ${fieldValue.label}. Now select an operator.`)
         }
       } else if (currentState === 'selecting-operator') {
         const fieldConfig = schema.fields.find((f) => f.key === currentField?.key)
@@ -285,6 +304,7 @@ export function useFilterState({
           setInputValue('')
           // Close dropdown for value entry (free text)
           setIsDropdownOpen(false)
+          setAnnouncement(`Selected ${operatorValue.label}. Now enter a value.`)
         }
       } else if (currentState === 'selecting-connector') {
         machine.transition({ type: 'SELECT_CONNECTOR', payload: item.key as 'AND' | 'OR' })
@@ -292,6 +312,7 @@ export function useFilterState({
         onChange([...newExpressions])
         setState(machine.getState())
         setInputValue('')
+        setAnnouncement(`Added ${item.key} connector. Now select a field.`)
       }
     },
     [machine, schema, currentField, onChange]
@@ -376,6 +397,7 @@ export function useFilterState({
     highlightedIndex,
     inputValue,
     placeholder,
+    announcement,
     handleFocus,
     handleBlur,
     handleInputChange,

@@ -10,6 +10,7 @@ import clsx from 'clsx'
 import { TokenContainer } from '@/components/TokenContainer'
 import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
 import { DropdownPortal } from '@/components/DropdownPortal'
+import { LiveRegion } from '@/components/LiveRegion'
 import { useFilterState, useDropdownPosition, type UseFilterStateProps } from '@/hooks'
 import './FilterBox.css'
 
@@ -48,6 +49,7 @@ export function FilterBox({
     highlightedIndex,
     inputValue,
     placeholder,
+    announcement,
     handleFocus,
     handleBlur,
     handleInputChange,
@@ -81,6 +83,7 @@ export function FilterBox({
       className={clsx('filter-box', className)}
       data-disabled={disabled || undefined}
     >
+      <LiveRegion>{announcement}</LiveRegion>
       <TokenContainer
         tokens={tokens}
         inputRef={inputRef}
