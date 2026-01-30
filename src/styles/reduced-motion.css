@@ -1,0 +1,21 @@
+/**
+ * Reduced Motion Preference
+ *
+ * Respects the user's preference for reduced motion.
+ * When prefers-reduced-motion is set to reduce, animations and transitions are disabled.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all transitions */
+  .filter-box,
+  .filter-box *,
+  .token,
+  .token-container,
+  .token-input,
+  .autocomplete-dropdown,
+  .autocomplete-item,
+  .autocomplete-item__content {
+    transition: none !important;
+    animation: none !important;
+  }
+}

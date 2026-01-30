@@ -1,1 +1,1 @@
-export { FilterBox, type FilterBoxProps } from './FilterBox'
+export { FilterBox, type FilterBoxProps, type FilterBoxHandle } from './FilterBox'

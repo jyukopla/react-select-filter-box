@@ -5,7 +5,7 @@
  * to provide a complete filter expression builder.
  */
 
-import { useRef, useId } from 'react'
+import { useRef, useId, useEffect, useImperativeHandle, forwardRef } from 'react'
 import clsx from 'clsx'
 import { TokenContainer } from '@/components/TokenContainer'
 import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
@@ -13,6 +13,15 @@ import { DropdownPortal } from '@/components/DropdownPortal'
 import { LiveRegion } from '@/components/LiveRegion'
 import { useFilterState, useDropdownPosition, type UseFilterStateProps } from '@/hooks'
 import './FilterBox.css'
+
+export interface FilterBoxHandle {
+  /** Focus the input */
+  focus: () => void
+  /** Blur the input */
+  blur: () => void
+  /** Clear all filters */
+  clear: () => void
+}
 
 export interface FilterBoxProps extends UseFilterStateProps {
   /** Additional CSS class names */
@@ -25,18 +34,24 @@ export interface FilterBoxProps extends UseFilterStateProps {
   'aria-label'?: string
   /** Whether to render dropdown in a portal (default: true) */
   usePortal?: boolean
+  /** Auto-focus the input on mount */
+  autoFocus?: boolean
 }
 
-export function FilterBox({
-  schema,
-  value,
-  onChange,
-  className,
-  id,
-  disabled = false,
-  'aria-label': ariaLabel,
-  usePortal = true,
-}: FilterBoxProps) {
+export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function FilterBox(
+  {
+    schema,
+    value,
+    onChange,
+    className,
+    id,
+    disabled = false,
+    'aria-label': ariaLabel,
+    usePortal = true,
+    autoFocus = false,
+  },
+  ref
+) {
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const generatedId = useId()
@@ -56,7 +71,28 @@ export function FilterBox({
     handleKeyDown,
     handleSelect,
     handleHighlight,
+    handleClear,
   } = useFilterState({ schema, value, onChange })
+
+  // Expose imperative handle
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus()
+    },
+    blur: () => {
+      inputRef.current?.blur()
+    },
+    clear: () => {
+      handleClear()
+    },
+  }), [handleClear])
+
+  // Auto-focus on mount
+  useEffect(() => {
+    if (autoFocus && !disabled) {
+      inputRef.current?.focus()
+    }
+  }, [autoFocus, disabled])
 
   const { position, maxHeight } = useDropdownPosition({
     anchorRef: containerRef,
@@ -127,4 +163,4 @@ export function FilterBox({
       )}
     </div>
   )
-}
+})

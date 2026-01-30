@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { FilterBox } from './FilterBox'
+import { createRef } from 'react'
+import { FilterBox, type FilterBoxHandle } from './FilterBox'
 import type { FilterSchema } from '@/types'
 
 const createTestSchema = (): FilterSchema => ({
@@ -282,6 +283,75 @@ describe('FilterBox', () => {
 
       // After field selection, it announces operators are available
       expect(liveRegion).toHaveTextContent(/2 operators available/)
+    })
+  })
+
+  describe('Focus Management', () => {
+    it('should auto-focus when autoFocus prop is true', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} autoFocus />)
+
+      // Auto-focus triggers the focus handler which changes placeholder to 'Select field...'
+      const input = screen.getByPlaceholderText('Select field...')
+      expect(document.activeElement).toBe(input)
+    })
+
+    it('should not auto-focus when disabled', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} autoFocus disabled />)
+
+      // Disabled input still shows 'Add filter...' since it never got focus
+      const input = screen.getByPlaceholderText('Add filter...')
+      expect(document.activeElement).not.toBe(input)
+    })
+
+    it('should expose focus method via ref', () => {
+      const ref = createRef<FilterBoxHandle>()
+      render(<FilterBox ref={ref} schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      act(() => {
+        ref.current?.focus()
+      })
+
+      // After focus, placeholder changes to 'Select field...'
+      const input = screen.getByPlaceholderText('Select field...')
+      expect(document.activeElement).toBe(input)
+    })
+
+    it('should expose blur method via ref', async () => {
+      const user = userEvent.setup()
+      const ref = createRef<FilterBoxHandle>()
+      render(<FilterBox ref={ref} schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+      expect(document.activeElement).toBe(input)
+
+      act(() => {
+        ref.current?.blur()
+      })
+
+      expect(document.activeElement).not.toBe(input)
+    })
+
+    it('should expose clear method via ref', async () => {
+      const onChange = vi.fn()
+      const ref = createRef<FilterBoxHandle>()
+      const existingValue = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      render(<FilterBox ref={ref} schema={createTestSchema()} value={existingValue} onChange={onChange} />)
+
+      act(() => {
+        ref.current?.clear()
+      })
+
+      expect(onChange).toHaveBeenCalledWith([])
     })
   })
 })
