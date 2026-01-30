@@ -1,0 +1,180 @@
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
+import { FilterBox } from './FilterBox'
+import type { FilterSchema, FilterExpression } from '@/types'
+import { getDefaultOperators } from '@/types'
+
+const meta = {
+  title: 'Components/FilterBox',
+  component: FilterBox,
+  parameters: {
+    layout: 'padded',
+  },
+  tags: ['autodocs'],
+} satisfies Meta<typeof FilterBox>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+const basicSchema: FilterSchema = {
+  fields: [
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'enum',
+      operators: [
+        { key: 'eq', label: 'is', symbol: '=' },
+        { key: 'neq', label: 'is not', symbol: '!=' },
+      ],
+    },
+    {
+      key: 'name',
+      label: 'Name',
+      type: 'string',
+      operators: getDefaultOperators('string'),
+    },
+    {
+      key: 'age',
+      label: 'Age',
+      type: 'number',
+      operators: getDefaultOperators('number'),
+    },
+    {
+      key: 'createdAt',
+      label: 'Created At',
+      type: 'date',
+      operators: getDefaultOperators('date'),
+    },
+    {
+      key: 'isActive',
+      label: 'Is Active',
+      type: 'boolean',
+      operators: getDefaultOperators('boolean'),
+    },
+  ],
+}
+
+function FilterBoxWithState(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([])
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} />
+      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const Default: Story = {
+  render: () => <FilterBoxWithState schema={basicSchema} />,
+}
+
+export const WithExistingValue: Story = {
+  args: {
+    schema: basicSchema,
+    value: [
+      {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'eq', label: 'is', symbol: '=' },
+          value: { raw: 'active', display: 'active', serialized: 'active' },
+        },
+      },
+      {
+        condition: {
+          field: { key: 'name', label: 'Name', type: 'string' },
+          operator: { key: 'contains', label: 'contains' },
+          value: { raw: 'John', display: 'John', serialized: 'John' },
+        },
+        connector: 'AND',
+      },
+    ],
+    onChange: () => {},
+  },
+}
+
+export const Disabled: Story = {
+  args: {
+    schema: basicSchema,
+    value: [
+      {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'eq', label: 'is', symbol: '=' },
+          value: { raw: 'active', display: 'active', serialized: 'active' },
+        },
+      },
+    ],
+    onChange: () => {},
+    disabled: true,
+  },
+}
+
+export const Empty: Story = {
+  args: {
+    schema: basicSchema,
+    value: [],
+    onChange: () => {},
+  },
+}
+
+const processEngineSchema: FilterSchema = {
+  fields: [
+    {
+      key: 'processDefinitionKey',
+      label: 'Process Definition',
+      type: 'string',
+      description: 'The process definition key',
+      operators: [
+        { key: 'eq', label: 'equals', symbol: '=' },
+        { key: 'like', label: 'like' },
+      ],
+    },
+    {
+      key: 'state',
+      label: 'State',
+      type: 'enum',
+      description: 'Instance state',
+      operators: [
+        { key: 'eq', label: 'is', symbol: '=' },
+        { key: 'in', label: 'is one of' },
+      ],
+    },
+    {
+      key: 'startDate',
+      label: 'Start Date',
+      type: 'date',
+      description: 'When the process started',
+      operators: [
+        { key: 'after', label: 'after', symbol: '>' },
+        { key: 'before', label: 'before', symbol: '<' },
+        { key: 'between', label: 'between' },
+      ],
+    },
+    {
+      key: 'businessKey',
+      label: 'Business Key',
+      type: 'string',
+      description: 'Business correlation key',
+      operators: [
+        { key: 'eq', label: 'equals', symbol: '=' },
+        { key: 'like', label: 'like' },
+      ],
+    },
+    {
+      key: 'tenantId',
+      label: 'Tenant ID',
+      type: 'id',
+      description: 'Multi-tenant identifier',
+      operators: [
+        { key: 'eq', label: 'is', symbol: '=' },
+        { key: 'in', label: 'is one of' },
+      ],
+    },
+  ],
+}
+
+export const ProcessEngine: Story = {
+  render: () => <FilterBoxWithState schema={processEngineSchema} />,
+}
