@@ -1,0 +1,79 @@
+/**
+ * Design Tokens
+ *
+ * CSS custom properties for theming the FilterBox component.
+ * Override these in your application to customize the appearance.
+ */
+
+:root {
+  /* Token type colors */
+  --filter-token-field-bg: #e3f2fd;
+  --filter-token-field-border: #2196f3;
+  --filter-token-field-text: #1565c0;
+
+  --filter-token-operator-bg: #fce4ec;
+  --filter-token-operator-border: #e91e63;
+  --filter-token-operator-text: #c2185b;
+
+  --filter-token-value-bg: #e8f5e9;
+  --filter-token-value-border: #4caf50;
+  --filter-token-value-text: #2e7d32;
+
+  --filter-token-connector-bg: #fff3e0;
+  --filter-token-connector-border: #ff9800;
+  --filter-token-connector-text: #e65100;
+
+  /* Field type colors (for value tokens) */
+  --filter-type-string-bg: #e8f5e9;
+  --filter-type-number-bg: #e3f2fd;
+  --filter-type-date-bg: #fce4ec;
+  --filter-type-boolean-bg: #f3e5f5;
+  --filter-type-enum-bg: #fff8e1;
+  --filter-type-id-bg: #e0f2f1;
+
+  /* Container */
+  --filter-container-bg: #ffffff;
+  --filter-container-border: #e0e0e0;
+  --filter-container-border-focus: #2196f3;
+  --filter-container-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --filter-container-radius: 6px;
+  --filter-container-padding: 8px;
+
+  /* Dropdown */
+  --filter-dropdown-bg: #ffffff;
+  --filter-dropdown-border: #e0e0e0;
+  --filter-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --filter-dropdown-item-hover: #f5f5f5;
+  --filter-dropdown-item-selected: #e3f2fd;
+  --filter-dropdown-radius: 6px;
+  --filter-dropdown-max-height: 300px;
+
+  /* Input */
+  --filter-input-bg: transparent;
+  --filter-input-text: #212121;
+  --filter-input-placeholder: #9e9e9e;
+
+  /* Spacing */
+  --filter-token-gap: 4px;
+  --filter-token-padding-x: 8px;
+  --filter-token-padding-y: 4px;
+  --filter-token-radius: 4px;
+
+  /* Typography */
+  --filter-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --filter-font-size: 14px;
+  --filter-font-size-small: 12px;
+  --filter-token-font-weight: 500;
+  --filter-line-height: 1.5;
+
+  /* Transitions */
+  --filter-transition-fast: 150ms ease;
+  --filter-transition-normal: 200ms ease;
+
+  /* Focus ring */
+  --filter-focus-ring-color: rgba(33, 150, 243, 0.4);
+  --filter-focus-ring-width: 3px;
+
+  /* Disabled */
+  --filter-disabled-opacity: 0.6;
+}

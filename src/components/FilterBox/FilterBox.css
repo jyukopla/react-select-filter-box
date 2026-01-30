@@ -2,9 +2,12 @@
   position: relative;
   display: inline-block;
   width: 100%;
+  font-family: var(--filter-font-family, system-ui, -apple-system, sans-serif);
+  font-size: var(--filter-font-size, 14px);
+  line-height: var(--filter-line-height, 1.5);
 }
 
 .filter-box[data-disabled] {
-  opacity: 0.5;
+  opacity: var(--filter-disabled-opacity, 0.6);
   pointer-events: none;
 }

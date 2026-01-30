@@ -1,0 +1,55 @@
+/**
+ * Dark Theme
+ *
+ * Override tokens for dark mode.
+ * Apply by adding [data-theme="dark"] to a parent element.
+ */
+
+[data-theme='dark'],
+.dark {
+  /* Token type colors - adjusted for dark backgrounds */
+  --filter-token-field-bg: #1e3a5f;
+  --filter-token-field-border: #42a5f5;
+  --filter-token-field-text: #90caf9;
+
+  --filter-token-operator-bg: #4a1a2e;
+  --filter-token-operator-border: #f48fb1;
+  --filter-token-operator-text: #f8bbd9;
+
+  --filter-token-value-bg: #1b3d2e;
+  --filter-token-value-border: #81c784;
+  --filter-token-value-text: #a5d6a7;
+
+  --filter-token-connector-bg: #4a3419;
+  --filter-token-connector-border: #ffb74d;
+  --filter-token-connector-text: #ffcc80;
+
+  /* Field type colors (for value tokens) */
+  --filter-type-string-bg: #1b3d2e;
+  --filter-type-number-bg: #1e3a5f;
+  --filter-type-date-bg: #4a1a2e;
+  --filter-type-boolean-bg: #3d1a4a;
+  --filter-type-enum-bg: #4a3d19;
+  --filter-type-id-bg: #19403d;
+
+  /* Container */
+  --filter-container-bg: #1e1e1e;
+  --filter-container-border: #424242;
+  --filter-container-border-focus: #42a5f5;
+  --filter-container-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  /* Dropdown */
+  --filter-dropdown-bg: #2d2d2d;
+  --filter-dropdown-border: #424242;
+  --filter-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --filter-dropdown-item-hover: #3d3d3d;
+  --filter-dropdown-item-selected: #1e3a5f;
+
+  /* Input */
+  --filter-input-bg: transparent;
+  --filter-input-text: #e0e0e0;
+  --filter-input-placeholder: #757575;
+
+  /* Focus ring */
+  --filter-focus-ring-color: rgba(66, 165, 245, 0.4);
+}
