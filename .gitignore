@@ -25,3 +25,10 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+.direnv
+.devenv*
+devenv.local.nix
+.devcontainer.json
+.pre-commit-config.yaml
+TODO*

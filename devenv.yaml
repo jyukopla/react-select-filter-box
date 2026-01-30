@@ -1,0 +1,9 @@
+inputs:
+  nixpkgs:
+    url: github:nixos/nixpkgs/master
+  devenv-module-devcontainer:
+    url: git+https://github.com/datakurre/devenv-module-devcontainer
+    flake: false
+allowUnfree: true
+imports:
+  - devenv-module-devcontainer
