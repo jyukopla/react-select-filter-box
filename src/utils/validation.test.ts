@@ -604,6 +604,148 @@ describe('validation', () => {
     })
   })
 
+  describe('field-level validators', () => {
+    it('should run field-level validator when provided', () => {
+      const schemaWithFieldValidator: FilterSchema = {
+        fields: [
+          {
+            key: 'email',
+            label: 'Email',
+            type: 'string',
+            operators: [{ key: 'eq', label: 'equals' }],
+            validate: (value) => {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+              if (!emailRegex.test(String(value.raw))) {
+                return {
+                  valid: false,
+                  errors: [{ type: 'value', message: 'Invalid email format' }],
+                }
+              }
+              return { valid: true, errors: [] }
+            },
+          },
+        ],
+      }
+
+      const invalidExpression: FilterExpression = {
+        condition: {
+          field: { key: 'email', label: 'Email', type: 'string' },
+          operator: { key: 'eq', label: 'equals' },
+          value: { raw: 'not-an-email', display: 'not-an-email', serialized: 'not-an-email' },
+        },
+      }
+
+      const result = validateExpression(invalidExpression, schemaWithFieldValidator)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some(e => e.message.includes('Invalid email format'))).toBe(true)
+    })
+
+    it('should pass field-level validation for valid value', () => {
+      const schemaWithFieldValidator: FilterSchema = {
+        fields: [
+          {
+            key: 'email',
+            label: 'Email',
+            type: 'string',
+            operators: [{ key: 'eq', label: 'equals' }],
+            validate: (value) => {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+              if (!emailRegex.test(String(value.raw))) {
+                return {
+                  valid: false,
+                  errors: [{ type: 'value', message: 'Invalid email format' }],
+                }
+              }
+              return { valid: true, errors: [] }
+            },
+          },
+        ],
+      }
+
+      const validExpression: FilterExpression = {
+        condition: {
+          field: { key: 'email', label: 'Email', type: 'string' },
+          operator: { key: 'eq', label: 'equals' },
+          value: { raw: 'test@example.com', display: 'test@example.com', serialized: 'test@example.com' },
+        },
+      }
+
+      const result = validateExpression(validExpression, schemaWithFieldValidator)
+      expect(result.valid).toBe(true)
+    })
+
+    it('should provide validation context to field validator', () => {
+      let capturedContext: unknown = null
+      
+      const schemaWithContext: FilterSchema = {
+        fields: [
+          {
+            key: 'status',
+            label: 'Status',
+            type: 'enum',
+            operators: [{ key: 'eq', label: 'equals' }],
+            validate: (value, context) => {
+              capturedContext = context
+              return { valid: true, errors: [] }
+            },
+          },
+        ],
+      }
+
+      const expression: FilterExpression = {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'eq', label: 'equals' },
+          value: { raw: 'active', display: 'active', serialized: 'active' },
+        },
+      }
+
+      validateExpression(expression, schemaWithContext)
+      
+      expect(capturedContext).not.toBeNull()
+      expect((capturedContext as { field: { key: string } }).field.key).toBe('status')
+      expect((capturedContext as { operator: { key: string } }).operator.key).toBe('eq')
+      expect((capturedContext as { schema: FilterSchema }).schema).toBeDefined()
+    })
+
+    it('should combine field-level errors with other validation errors', () => {
+      const schemaWithFieldValidator: FilterSchema = {
+        fields: [
+          {
+            key: 'age',
+            label: 'Age',
+            type: 'number',
+            operators: [{ key: 'eq', label: 'equals' }, { key: 'gt', label: 'greater than' }],
+            validate: (value) => {
+              const num = Number(value.raw)
+              if (num < 0 || num > 150) {
+                return {
+                  valid: false,
+                  errors: [{ type: 'value', message: 'Age must be between 0 and 150' }],
+                }
+              }
+              return { valid: true, errors: [] }
+            },
+          },
+        ],
+      }
+
+      const invalidExpression: FilterExpression = {
+        condition: {
+          field: { key: 'age', label: 'Age', type: 'number' },
+          operator: { key: 'invalid', label: 'invalid' }, // Invalid operator
+          value: { raw: 200, display: '200', serialized: '200' }, // Also invalid value
+        },
+      }
+
+      const result = validateExpression(invalidExpression, schemaWithFieldValidator)
+      expect(result.valid).toBe(false)
+      expect(result.errors.length).toBeGreaterThanOrEqual(2)
+      expect(result.errors.some(e => e.type === 'operator')).toBe(true)
+      expect(result.errors.some(e => e.message.includes('Age must be between'))).toBe(true)
+    })
+  })
+
   describe('schema-level validation', () => {
     it('should run schema-level validation function', () => {
       const schemaWithValidation: FilterSchema = {

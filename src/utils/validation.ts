@@ -78,6 +78,26 @@ export function validateExpression(
     errors.push(...multiValueResult.errors)
   }
 
+  // Run field-level validator if provided
+  if (fieldConfig.validate) {
+    const validationContext = {
+      field: fieldConfig,
+      operator: operatorConfig ?? { key: operator.key, label: operator.label },
+      expressions: [], // Single expression context
+      schema,
+    }
+    const fieldValidationResult = fieldConfig.validate(value, validationContext)
+    if (!fieldValidationResult.valid) {
+      // Add expression index to field-level errors
+      const fieldErrors = fieldValidationResult.errors.map((error) => ({
+        ...error,
+        expressionIndex,
+        field: field.key,
+      }))
+      errors.push(...fieldErrors)
+    }
+  }
+
   // Validate value is not empty (unless valueRequired is false)
   // Note: multi-value validation handles empty arrays separately
   const valueRequired = fieldConfig.valueRequired !== false
