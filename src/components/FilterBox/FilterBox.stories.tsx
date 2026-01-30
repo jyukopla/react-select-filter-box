@@ -178,3 +178,93 @@ const processEngineSchema: FilterSchema = {
 export const ProcessEngine: Story = {
   render: () => <FilterBoxWithState schema={processEngineSchema} />,
 }
+
+// Grouped fields example
+const groupedFieldsSchema: FilterSchema = {
+  fields: [
+    // Basic fields group
+    {
+      key: 'name',
+      label: 'Name',
+      type: 'string',
+      group: 'Basic',
+      operators: getDefaultOperators('string'),
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      type: 'string',
+      group: 'Basic',
+      operators: getDefaultOperators('string'),
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'enum',
+      group: 'Basic',
+      operators: [
+        { key: 'eq', label: 'is', symbol: '=' },
+        { key: 'neq', label: 'is not', symbol: '!=' },
+      ],
+    },
+    // Date fields group
+    {
+      key: 'createdAt',
+      label: 'Created At',
+      type: 'date',
+      group: 'Dates',
+      operators: getDefaultOperators('date'),
+    },
+    {
+      key: 'updatedAt',
+      label: 'Updated At',
+      type: 'date',
+      group: 'Dates',
+      operators: getDefaultOperators('date'),
+    },
+    {
+      key: 'deletedAt',
+      label: 'Deleted At',
+      type: 'date',
+      group: 'Dates',
+      operators: getDefaultOperators('date'),
+    },
+    // Numeric fields group
+    {
+      key: 'age',
+      label: 'Age',
+      type: 'number',
+      group: 'Numbers',
+      operators: getDefaultOperators('number'),
+    },
+    {
+      key: 'salary',
+      label: 'Salary',
+      type: 'number',
+      group: 'Numbers',
+      operators: getDefaultOperators('number'),
+    },
+  ],
+}
+
+export const GroupedFields: Story = {
+  render: () => <FilterBoxWithState schema={groupedFieldsSchema} />,
+}
+
+// Large schema example (many fields)
+const largeSchema: FilterSchema = {
+  fields: Array.from({ length: 30 }, (_, i) => ({
+    key: `field${i + 1}`,
+    label: `Field ${i + 1}`,
+    type: 'string' as const,
+    group: `Group ${Math.floor(i / 10) + 1}`,
+    operators: [
+      { key: 'eq', label: 'equals', symbol: '=' },
+      { key: 'contains', label: 'contains' },
+    ],
+  })),
+}
+
+export const LargeSchema: Story = {
+  render: () => <FilterBoxWithState schema={largeSchema} />,
+}
