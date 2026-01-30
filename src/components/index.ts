@@ -15,7 +15,7 @@ export { AutocompleteDropdown } from './AutocompleteDropdown'
 export type { AutocompleteDropdownProps } from './AutocompleteDropdown'
 
 export { FilterBox } from './FilterBox'
-export type { FilterBoxProps } from './FilterBox'
+export type { FilterBoxProps, FilterBoxHandle } from './FilterBox'
 
 export { DropdownPortal } from './DropdownPortal'
 export type { DropdownPortalProps } from './DropdownPortal'

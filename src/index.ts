@@ -6,7 +6,7 @@
  */
 
 // Main Component
-export { FilterBox, type FilterBoxProps } from './components'
+export { FilterBox, type FilterBoxProps, type FilterBoxHandle } from './components'
 
 // Individual Components
 export {
@@ -22,6 +22,13 @@ export {
 
 // Hooks
 export { useFilterState, type UseFilterStateProps, type UseFilterStateReturn } from './hooks'
+export {
+  useDropdownPosition,
+  type UseDropdownPositionOptions,
+  type UseDropdownPositionResult,
+  type DropdownPosition,
+  type DropdownPlacement,
+} from './hooks'
 
 // Types
 export {
