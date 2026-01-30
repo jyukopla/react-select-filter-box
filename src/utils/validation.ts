@@ -92,9 +92,51 @@ export function validateExpressions(
 ): ValidationResult {
   const errors: ValidationError[] = []
 
+  // Validate max expressions limit
+  if (schema.maxExpressions !== undefined && expressions.length > schema.maxExpressions) {
+    errors.push({
+      type: 'schema',
+      message: `Maximum of ${schema.maxExpressions} expressions allowed, but ${expressions.length} provided`,
+    })
+  }
+
+  // Track field usage for uniqueness validation
+  const fieldUsage = new Map<string, number[]>()
+
   for (let i = 0; i < expressions.length; i++) {
-    const result = validateExpression(expressions[i], schema, i)
+    const expr = expressions[i]
+    const result = validateExpression(expr, schema, i)
     errors.push(...result.errors)
+
+    // Track which expressions use each field
+    const fieldKey = expr.condition.field.key
+    if (!fieldUsage.has(fieldKey)) {
+      fieldUsage.set(fieldKey, [])
+    }
+    fieldUsage.get(fieldKey)!.push(i)
+  }
+
+  // Validate field uniqueness (if allowMultiple is false)
+  for (const field of schema.fields) {
+    if (field.allowMultiple === false) {
+      const usage = fieldUsage.get(field.key)
+      if (usage && usage.length > 1) {
+        errors.push({
+          type: 'field',
+          message: `Field "${field.label}" can only be used once, but appears ${usage.length} times`,
+          field: field.key,
+          expressionIndex: usage[1], // Mark the second occurrence
+        })
+      }
+    }
+  }
+
+  // Apply schema-level validation if provided
+  if (schema.validate) {
+    const schemaResult = schema.validate(expressions)
+    if (!schemaResult.valid) {
+      errors.push(...schemaResult.errors)
+    }
   }
 
   return {
