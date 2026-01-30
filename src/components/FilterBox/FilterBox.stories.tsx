@@ -408,3 +408,49 @@ function TokenEditingFilterBox(props: { schema: FilterSchema }) {
 export const TokenEditing: Story = {
   render: () => <TokenEditingFilterBox schema={basicSchema} />,
 }
+
+// Keyboard Navigation Story
+function KeyboardNavigationFilterBox(props: { schema: FilterSchema }) {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'active', serialized: 'active' },
+      },
+    },
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'John', display: 'John', serialized: 'John' },
+      },
+      connector: 'AND',
+    },
+  ])
+  return (
+    <div style={{ maxWidth: '600px' }}>
+      <h4 style={{ marginBottom: '1rem' }}>Keyboard Shortcuts</h4>
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        <ul style={{ margin: 0, paddingLeft: '1.2rem', lineHeight: 1.8 }}>
+          <li><kbd>↑</kbd> / <kbd>↓</kbd> - Navigate dropdown items</li>
+          <li><kbd>Enter</kbd> - Select highlighted item or confirm value</li>
+          <li><kbd>Tab</kbd> - Select highlighted item (when dropdown open)</li>
+          <li><kbd>Escape</kbd> - Close dropdown</li>
+          <li><kbd>←</kbd> / <kbd>→</kbd> - Navigate between tokens (when input is empty)</li>
+          <li><kbd>Delete</kbd> - Delete selected token</li>
+          <li><kbd>Ctrl+A</kbd> - Select all tokens</li>
+          <li><kbd>Ctrl+Backspace</kbd> - Delete all expressions</li>
+        </ul>
+      </div>
+      <FilterBox schema={props.schema} value={value} onChange={setValue} autoFocus />
+      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const KeyboardNavigation: Story = {
+  render: () => <KeyboardNavigationFilterBox schema={basicSchema} />,
+}
