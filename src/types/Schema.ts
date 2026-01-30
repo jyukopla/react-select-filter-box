@@ -155,6 +155,10 @@ export interface FieldConfig {
   valueAutocompleter?: Autocompleter
   /** Custom value validation */
   validate?: (value: ConditionValue, context: ValidationContext) => ValidationResult
+  /** Custom serialization for field values */
+  serialize?: (value: ConditionValue) => unknown
+  /** Custom deserialization for field values */
+  deserialize?: (serialized: unknown) => ConditionValue
 }
 
 /**

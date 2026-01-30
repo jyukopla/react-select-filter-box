@@ -5,6 +5,8 @@ export {
   toQueryString,
   fromQueryString,
   type SerializedExpression,
+  type SerializeOptions,
+  type DeserializeOptions,
 } from './serialization'
 
 export {

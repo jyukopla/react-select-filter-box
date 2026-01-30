@@ -271,4 +271,267 @@ describe('Serialization', () => {
       expect(result[0]?.condition.field.key).toBe('status')
     })
   })
+
+  describe('custom field serialization', () => {
+    const schemaWithCustomSerializers: FilterSchema = {
+      fields: [
+        {
+          key: 'date',
+          label: 'Date',
+          type: 'date',
+          operators: [
+            { key: 'eq', label: 'on', symbol: '=' },
+            { key: 'before', label: 'before', symbol: '<' },
+          ],
+          // Custom serializer: convert Date to ISO string
+          serialize: (value) => {
+            if (value.raw instanceof Date) {
+              return value.raw.toISOString()
+            }
+            return value.serialized
+          },
+          // Custom deserializer: convert ISO string back to proper ConditionValue
+          deserialize: (serialized) => {
+            const date = new Date(serialized as string)
+            const display = date.toLocaleDateString()
+            return {
+              raw: date,
+              display,
+              serialized: date.toISOString(),
+            }
+          },
+        },
+        {
+          key: 'price',
+          label: 'Price',
+          type: 'number',
+          operators: [
+            { key: 'eq', label: 'is', symbol: '=' },
+            { key: 'gt', label: 'above', symbol: '>' },
+          ],
+          // Custom serializer: convert to cents for API
+          serialize: (value) => {
+            const dollars = typeof value.raw === 'number' ? value.raw : parseFloat(String(value.raw))
+            return Math.round(dollars * 100) // cents
+          },
+          // Custom deserializer: convert cents back to dollars
+          deserialize: (serialized) => {
+            const cents = serialized as number
+            const dollars = cents / 100
+            return {
+              raw: dollars,
+              display: `$${dollars.toFixed(2)}`,
+              serialized: dollars.toString(),
+            }
+          },
+        },
+        {
+          key: 'status',
+          label: 'Status',
+          type: 'enum',
+          operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+          // No custom serializer - uses default
+        },
+      ],
+    }
+
+    it('should use custom field serializer when serializing', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'date', label: 'Date', type: 'date' },
+            operator: { key: 'eq', label: 'on', symbol: '=' },
+            value: {
+              raw: new Date('2024-06-15T00:00:00.000Z'),
+              display: '2024-06-15',
+              serialized: '2024-06-15',
+            },
+          },
+        },
+      ]
+
+      const result = serialize(expressions, schemaWithCustomSerializers)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.value).toBe('2024-06-15T00:00:00.000Z')
+    })
+
+    it('should use custom field serializer for price (dollars to cents)', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'price', label: 'Price', type: 'number' },
+            operator: { key: 'gt', label: 'above', symbol: '>' },
+            value: {
+              raw: 19.99,
+              display: '$19.99',
+              serialized: '19.99',
+            },
+          },
+        },
+      ]
+
+      const result = serialize(expressions, schemaWithCustomSerializers)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.value).toBe(1999) // cents
+    })
+
+    it('should use default serialization when no custom serializer', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const result = serialize(expressions, schemaWithCustomSerializers)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.value).toBe('active')
+    })
+
+    it('should use custom field deserializer when deserializing', () => {
+      const serialized = [
+        { field: 'date', operator: 'eq', value: '2024-06-15T00:00:00.000Z' },
+      ]
+
+      const result = deserialize(serialized, schemaWithCustomSerializers)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.condition.value.raw).toBeInstanceOf(Date)
+      expect((result[0]?.condition.value.raw as Date).getFullYear()).toBe(2024)
+    })
+
+    it('should use custom field deserializer for price (cents to dollars)', () => {
+      const serialized = [
+        { field: 'price', operator: 'gt', value: 1999 },
+      ]
+
+      const result = deserialize(serialized, schemaWithCustomSerializers)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.condition.value.raw).toBe(19.99)
+      expect(result[0]?.condition.value.display).toBe('$19.99')
+    })
+
+    it('should allow disabling custom serializers via options', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'price', label: 'Price', type: 'number' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: {
+              raw: 10.00,
+              display: '$10.00',
+              serialized: '10.00',
+            },
+          },
+        },
+      ]
+
+      const result = serialize(expressions, schemaWithCustomSerializers, { useFieldSerializers: false })
+
+      expect(result[0]?.value).toBe('10.00') // Not converted to cents
+    })
+
+    it('should allow disabling custom deserializers via options', () => {
+      const serialized = [
+        { field: 'price', operator: 'gt', value: 500 },
+      ]
+
+      const result = deserialize(serialized, schemaWithCustomSerializers, { useFieldDeserializers: false })
+
+      expect(result[0]?.condition.value.raw).toBe(500) // Not converted from cents
+      expect(result[0]?.condition.value.display).toBe('500')
+    })
+  })
+
+  describe('schema-level serialization', () => {
+    const schemaWithSchemaSerializer: FilterSchema = {
+      fields: [
+        {
+          key: 'status',
+          label: 'Status',
+          type: 'enum',
+          operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+        },
+        {
+          key: 'name',
+          label: 'Name',
+          type: 'string',
+          operators: [{ key: 'contains', label: 'contains' }],
+        },
+      ],
+      // Schema-level serializer: custom format
+      serialize: (expressions) => {
+        return expressions.map((expr) => ({
+          f: expr.condition.field.key,
+          o: expr.condition.operator.key,
+          v: expr.condition.value.serialized,
+          c: expr.connector,
+        }))
+      },
+      // Schema-level deserializer: custom format
+      deserialize: (data) => {
+        const items = data as Array<{ f: string; o: string; v: string; c?: 'AND' | 'OR' }>
+        return items.map((item) => ({
+          condition: {
+            field: { key: item.f, label: item.f, type: 'string' as const },
+            operator: { key: item.o, label: item.o },
+            value: { raw: item.v, display: item.v, serialized: item.v },
+          },
+          connector: item.c,
+        }))
+      },
+    }
+
+    it('should use schema-level serializer when available', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const result = serialize(expressions, schemaWithSchemaSerializer)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]).toEqual({ f: 'status', o: 'eq', v: 'active', c: undefined })
+    })
+
+    it('should use schema-level deserializer when available', () => {
+      const data = [{ f: 'status', o: 'eq', v: 'active' }]
+
+      const result = deserialize(data as any, schemaWithSchemaSerializer)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.condition.field.key).toBe('status')
+      expect(result[0]?.condition.value.raw).toBe('active')
+    })
+
+    it('should allow disabling schema-level serializer via options', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      // Without schema serializer, should return standard format
+      const result = serialize(expressions, schemaWithSchemaSerializer, { useSchemaSerializer: false })
+
+      expect(result).toHaveLength(1)
+      expect(result[0]).toEqual({ field: 'status', operator: 'eq', value: 'active' })
+    })
+  })
 })

@@ -2,7 +2,7 @@
  * Serialization utilities for filter expressions
  */
 
-import type { FilterExpression, FilterSchema, FieldConfig, FieldType } from '@/types'
+import type { FilterExpression, FilterSchema, FieldConfig, FieldType, ConditionValue } from '@/types'
 
 /**
  * Serialized expression format (for JSON/API)
@@ -15,14 +15,61 @@ export interface SerializedExpression {
 }
 
 /**
- * Serialize filter expressions to a simple JSON format
+ * Options for serialization
  */
-export function serialize(expressions: FilterExpression[]): SerializedExpression[] {
+export interface SerializeOptions {
+  /** Use custom field serializers if available */
+  useFieldSerializers?: boolean
+  /** Use schema-level serializer if available */
+  useSchemaSerializer?: boolean
+}
+
+/**
+ * Options for deserialization
+ */
+export interface DeserializeOptions {
+  /** Use custom field deserializers if available */
+  useFieldDeserializers?: boolean
+  /** Use schema-level deserializer if available */
+  useSchemaDeserializer?: boolean
+}
+
+/**
+ * Serialize filter expressions to a simple JSON format
+ * Supports custom field-level serializers
+ */
+export function serialize(
+  expressions: FilterExpression[],
+  schema?: FilterSchema,
+  options: SerializeOptions = {}
+): SerializedExpression[] {
+  const { useFieldSerializers = true, useSchemaSerializer = true } = options
+
+  // Check for schema-level serializer
+  if (useSchemaSerializer && schema?.serialize) {
+    const result = schema.serialize(expressions)
+    // If schema serializer returns SerializedExpression[], use it directly
+    if (Array.isArray(result)) {
+      return result as SerializedExpression[]
+    }
+    // Otherwise, fall back to default serialization
+  }
+
   return expressions.map((expr) => {
+    let serializedValue: unknown = expr.condition.value.serialized
+
+    // Apply field-level serializer if available
+    if (useFieldSerializers && schema) {
+      const fieldConfig = schema.fields.find((f) => f.key === expr.condition.field.key)
+      if (fieldConfig?.serialize) {
+        serializedValue = fieldConfig.serialize(expr.condition.value)
+      }
+    }
+
     const result: SerializedExpression = {
       field: expr.condition.field.key,
       operator: expr.condition.operator.key,
-      value: expr.condition.value.serialized,
+      value: serializedValue,
     }
     if (expr.connector) {
       result.connector = expr.connector
@@ -33,11 +80,20 @@ export function serialize(expressions: FilterExpression[]): SerializedExpression
 
 /**
  * Deserialize from simple JSON format back to filter expressions
+ * Supports custom field-level deserializers
  */
 export function deserialize(
   serialized: SerializedExpression[],
-  schema: FilterSchema
+  schema: FilterSchema,
+  options: DeserializeOptions = {}
 ): FilterExpression[] {
+  const { useFieldDeserializers = true, useSchemaDeserializer = true } = options
+
+  // Check for schema-level deserializer
+  if (useSchemaDeserializer && schema.deserialize) {
+    return schema.deserialize(serialized)
+  }
+
   return serialized.map((item) => {
     // Find field config
     const fieldConfig = schema.fields.find((f) => f.key === item.field)
@@ -51,7 +107,18 @@ export function deserialize(
       throw new Error(`Unknown operator: ${item.operator} for field ${item.field}`)
     }
 
-    const valueStr = String(item.value)
+    // Apply field-level deserializer if available
+    let value: ConditionValue
+    if (useFieldDeserializers && fieldConfig.deserialize) {
+      value = fieldConfig.deserialize(item.value)
+    } else {
+      const valueStr = String(item.value)
+      value = {
+        raw: item.value,
+        display: valueStr,
+        serialized: valueStr,
+      }
+    }
 
     const expression: FilterExpression = {
       condition: {
@@ -65,11 +132,7 @@ export function deserialize(
           label: operatorConfig.label,
           symbol: operatorConfig.symbol,
         },
-        value: {
-          raw: item.value,
-          display: valueStr,
-          serialized: valueStr,
-        },
+        value,
       },
     }
 
