@@ -19,3 +19,6 @@ export type { FilterBoxProps } from './FilterBox'
 
 export { DropdownPortal } from './DropdownPortal'
 export type { DropdownPortalProps } from './DropdownPortal'
+
+export { LiveRegion, useLiveAnnounce } from './LiveRegion'
+export type { LiveRegionProps, UseLiveAnnounceOptions, UseLiveAnnounceReturn } from './LiveRegion'
