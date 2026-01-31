@@ -5,7 +5,7 @@
  * to provide a complete filter expression builder.
  */
 
-import { useRef, useId, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { useRef, useId, useEffect, useImperativeHandle, forwardRef, useState, useMemo } from 'react'
 import clsx from 'clsx'
 import { TokenContainer } from '@/components/TokenContainer'
 import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
@@ -63,16 +63,34 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
   const inputRef = useRef<HTMLInputElement>(null)
   const generatedId = useId()
   const dropdownId = id ? `${id}-dropdown` : `${generatedId}-dropdown`
+  const [validationErrorAnnouncement, setValidationErrorAnnouncement] = useState('')
 
-  // Validate expressions and call onError when errors change
+  // Validate expressions and announce errors to screen readers
+  const validationResult = useMemo(() => {
+    if (value.length === 0) return { valid: true, errors: [] }
+    return validateExpressions(value, schema)
+  }, [value, schema])
+
+  // Call onError when validation errors change
   useEffect(() => {
-    if (onError && value.length > 0) {
-      const result = validateExpressions(value, schema)
-      if (!result.valid && result.errors.length > 0) {
-        onError(result.errors)
-      }
+    if (onError && !validationResult.valid && validationResult.errors.length > 0) {
+      onError(validationResult.errors)
     }
-  }, [value, schema, onError])
+  }, [validationResult, onError])
+
+  // Announce validation errors to screen readers
+  useEffect(() => {
+    if (!validationResult.valid && validationResult.errors.length > 0) {
+      const errorCount = validationResult.errors.length
+      const errorMessages = validationResult.errors.map(e => e.message).slice(0, 3).join('. ')
+      const announcement = errorCount === 1
+        ? `Validation error: ${errorMessages}`
+        : `${errorCount} validation errors. ${errorMessages}${errorCount > 3 ? '...' : ''}`
+      setValidationErrorAnnouncement(announcement)
+    } else {
+      setValidationErrorAnnouncement('')
+    }
+  }, [validationResult])
 
   const {
     tokens,
@@ -155,6 +173,8 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       aria-describedby={tokens.length > 0 ? `${generatedId}-status` : undefined}
     >
       <LiveRegion>{announcement}</LiveRegion>
+      {/* Separate live region for validation errors with assertive politeness */}
+      <LiveRegion politeness="assertive">{validationErrorAnnouncement}</LiveRegion>
       {/* Hidden status for screen readers */}
       {tokens.length > 0 && (
         <div id={`${generatedId}-status`} className="sr-only">

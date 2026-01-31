@@ -988,5 +988,31 @@ describe('FilterBox', () => {
         ])
       )
     })
+
+    it('should announce validation errors to screen readers', () => {
+      // Create expression with invalid field (not in schema)
+      const invalidValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'invalid_field', label: 'Invalid', type: 'string' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={invalidValue}
+          onChange={vi.fn()}
+        />
+      )
+
+      // Live region with role="alert" should announce validation errors (assertive)
+      const alertRegion = document.querySelector('[role="alert"]')
+      expect(alertRegion).toBeInTheDocument()
+      expect(alertRegion?.textContent).toContain('error')
+    })
   })
 })
