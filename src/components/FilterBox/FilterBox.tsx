@@ -12,6 +12,7 @@ import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
 import { DropdownPortal } from '@/components/DropdownPortal'
 import { LiveRegion } from '@/components/LiveRegion'
 import { useFilterState, useDropdownPosition, useFocusManagement, type UseFilterStateProps } from '@/hooks'
+import { validateExpressions, type ValidationError } from '@/utils'
 import './FilterBox.css'
 
 export interface FilterBoxHandle {
@@ -38,6 +39,8 @@ export interface FilterBoxProps extends UseFilterStateProps {
   autoFocus?: boolean
   /** Show a clear button when there are filters (default: false) */
   showClearButton?: boolean
+  /** Callback when validation errors occur */
+  onError?: (errors: ValidationError[]) => void
 }
 
 export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function FilterBox(
@@ -52,6 +55,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     usePortal = true,
     autoFocus = false,
     showClearButton = false,
+    onError,
   },
   ref
 ) {
@@ -59,6 +63,16 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
   const inputRef = useRef<HTMLInputElement>(null)
   const generatedId = useId()
   const dropdownId = id ? `${id}-dropdown` : `${generatedId}-dropdown`
+
+  // Validate expressions and call onError when errors change
+  useEffect(() => {
+    if (onError && value.length > 0) {
+      const result = validateExpressions(value, schema)
+      if (!result.valid && result.errors.length > 0) {
+        onError(result.errors)
+      }
+    }
+  }, [value, schema, onError])
 
   const {
     tokens,

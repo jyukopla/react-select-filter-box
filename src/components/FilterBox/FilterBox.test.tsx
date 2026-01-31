@@ -3,7 +3,7 @@ import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createRef } from 'react'
 import { FilterBox, type FilterBoxHandle } from './FilterBox'
-import type { FilterSchema } from '@/types'
+import type { FilterSchema, FilterExpression } from '@/types'
 
 const createTestSchema = (): FilterSchema => ({
   fields: [
@@ -880,6 +880,113 @@ describe('FilterBox', () => {
       expect(input).toHaveAttribute('aria-activedescendant')
       const activedescendant = input.getAttribute('aria-activedescendant')
       expect(activedescendant).toMatch(/dropdown-item-\d+/)
+    })
+  })
+
+  describe('onError Callback', () => {
+    it('should call onError when value has validation errors', () => {
+      const onError = vi.fn()
+      // Create expression with invalid field (not in schema)
+      const invalidValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'invalid_field', label: 'Invalid', type: 'string' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={invalidValue}
+          onChange={vi.fn()}
+          onError={onError}
+        />
+      )
+
+      expect(onError).toHaveBeenCalled()
+      expect(onError).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'field',
+            message: expect.stringContaining('invalid_field'),
+          }),
+        ])
+      )
+    })
+
+    it('should not call onError when value is valid', () => {
+      const onError = vi.fn()
+      const validValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={validValue}
+          onChange={vi.fn()}
+          onError={onError}
+        />
+      )
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('should not call onError when value is empty', () => {
+      const onError = vi.fn()
+
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={[]}
+          onChange={vi.fn()}
+          onError={onError}
+        />
+      )
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('should call onError with operator validation errors', () => {
+      const onError = vi.fn()
+      // Create expression with invalid operator (not in field's operators)
+      const invalidValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'invalid_op', label: 'invalid', symbol: '?' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={invalidValue}
+          onChange={vi.fn()}
+          onError={onError}
+        />
+      )
+
+      expect(onError).toHaveBeenCalled()
+      expect(onError).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: 'operator',
+            message: expect.stringContaining('invalid_op'),
+          }),
+        ])
+      )
     })
   })
 })
