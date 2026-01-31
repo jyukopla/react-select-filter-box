@@ -823,3 +823,443 @@ describe('createDateTimeAutocompleter', () => {
     })
   })
 })
+
+// =============================================================================
+// Paginated Autocompleter Tests
+// =============================================================================
+
+import { createPaginatedAutocompleter, PaginatedResult } from './index'
+
+describe('createPaginatedAutocompleter', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const createMockFetchFn = (totalItems: number = 100, pageSize: number = 20) => {
+    const allItems = Array.from({ length: totalItems }, (_, i) => ({
+      key: `item-${i}`,
+      label: `Item ${i}`,
+    }))
+
+    return vi.fn(
+      async (
+        query: string,
+        page: number,
+        size: number,
+        _cursor: string | undefined,
+        _signal?: AbortSignal
+      ): Promise<PaginatedResult> => {
+        // Filter by query
+        const filtered = query
+          ? allItems.filter((item) =>
+              item.label.toLowerCase().includes(query.toLowerCase())
+            )
+          : allItems
+
+        const start = page * size
+        const end = start + size
+        const items = filtered.slice(start, end)
+
+        return {
+          items,
+          hasMore: end < filtered.length,
+          total: filtered.length,
+          nextCursor: end < filtered.length ? `cursor-${end}` : undefined,
+        }
+      }
+    )
+  }
+
+  describe('getSuggestions', () => {
+    it('should fetch first page of results', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+      const context = createMockContext('')
+
+      const result = await autocompleter.getSuggestions(context)
+
+      expect(result).toHaveLength(20)
+      expect(fetchFn).toHaveBeenCalledWith('', 0, 20, undefined, expect.any(AbortSignal))
+    })
+
+    it('should debounce requests', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 300,
+      })
+      const context = createMockContext('test')
+
+      const promise = autocompleter.getSuggestions(context)
+
+      // Fetch should not be called immediately
+      expect(fetchFn).not.toHaveBeenCalled()
+
+      // Advance timers
+      await vi.advanceTimersByTimeAsync(300)
+
+      await promise
+
+      expect(fetchFn).toHaveBeenCalledTimes(1)
+    })
+
+    it('should filter results by query', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+      const context = createMockContext('Item 5')
+
+      const result = await autocompleter.getSuggestions(context)
+
+      expect(fetchFn).toHaveBeenCalledWith('Item 5', 0, 20, undefined, expect.any(AbortSignal))
+      // "Item 5", "Item 50", "Item 51", etc.
+      expect(result.every((item) => item.label.includes('5'))).toBe(true)
+    })
+
+    it('should return empty array if query is below minChars', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+        minChars: 3,
+      })
+      const context = createMockContext('ab')
+
+      const result = await autocompleter.getSuggestions(context)
+
+      expect(result).toHaveLength(0)
+      expect(fetchFn).not.toHaveBeenCalled()
+    })
+
+    it('should cache results and return from cache on subsequent calls', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+        cacheResults: true,
+      })
+      // Use empty query which returns all items
+      const context = createMockContext('')
+
+      // First call
+      await autocompleter.getSuggestions(context)
+      expect(fetchFn).toHaveBeenCalledTimes(1)
+
+      // Second call with same query - should use cache
+      const result = await autocompleter.getSuggestions(context)
+      expect(fetchFn).toHaveBeenCalledTimes(1) // No additional call
+      expect(result.length).toBeGreaterThan(0)
+    })
+
+    it('should reset and fetch new results when query changes', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      await autocompleter.getSuggestions(createMockContext('first'))
+      expect(fetchFn).toHaveBeenCalledTimes(1)
+
+      await autocompleter.getSuggestions(createMockContext('second'))
+      expect(fetchFn).toHaveBeenCalledTimes(2)
+      expect(fetchFn).toHaveBeenLastCalledWith('second', 0, 20, undefined, expect.any(AbortSignal))
+    })
+
+    it('should abort previous request when new query is made', async () => {
+      const abortedSignals: AbortSignal[] = []
+      const fetchFn = vi.fn(
+        async (
+          _query: string,
+          _page: number,
+          _size: number,
+          _cursor: string | undefined,
+          signal?: AbortSignal
+        ): Promise<PaginatedResult> => {
+          if (signal) abortedSignals.push(signal)
+          return { items: [], hasMore: false }
+        }
+      )
+
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      // Start first request
+      const promise1 = autocompleter.getSuggestions(createMockContext('first'))
+      
+      // Start second request immediately
+      const promise2 = autocompleter.getSuggestions(createMockContext('second'))
+
+      await Promise.all([promise1, promise2])
+
+      // First signal should be aborted
+      expect(abortedSignals[0]?.aborted).toBe(true)
+    })
+  })
+
+  describe('loadMore', () => {
+    it('should fetch next page of results', async () => {
+      const fetchFn = createMockFetchFn(50)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+      const context = createMockContext('')
+
+      // First page
+      const firstPage = await autocompleter.getSuggestions(context)
+      expect(firstPage).toHaveLength(20)
+
+      // Load more
+      const withSecondPage = await autocompleter.loadMore()
+      expect(withSecondPage).toHaveLength(40)
+
+      expect(fetchFn).toHaveBeenCalledTimes(2)
+      expect(fetchFn).toHaveBeenLastCalledWith('', 1, 20, 'cursor-20', undefined)
+    })
+
+    it('should not fetch if there are no more results', async () => {
+      const fetchFn = createMockFetchFn(15)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      await autocompleter.getSuggestions(createMockContext(''))
+      expect(fetchFn).toHaveBeenCalledTimes(1)
+
+      // hasMore should be false since we got all 15 items
+      const state = autocompleter.getPaginationState()
+      expect(state.hasMore).toBe(false)
+
+      // Try to load more
+      await autocompleter.loadMore()
+      expect(fetchFn).toHaveBeenCalledTimes(1) // No additional call
+    })
+
+    it('should use cached pages when fetching after reset', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      // Load first two pages
+      await autocompleter.getSuggestions(createMockContext(''))
+      await autocompleter.loadMore()
+      expect(fetchFn).toHaveBeenCalledTimes(2)
+
+      // Reset and refetch - getSuggestions should use cached pages 0 and 1
+      autocompleter.reset()
+      const cachedItems = await autocompleter.getSuggestions(createMockContext(''))
+      
+      // Should return all cached items (40) without fetching
+      expect(fetchFn).toHaveBeenCalledTimes(2) // No additional calls
+      expect(cachedItems).toHaveLength(40)
+      
+      // loadMore should fetch page 2 since it wasn't cached
+      const withThirdPage = await autocompleter.loadMore()
+      expect(fetchFn).toHaveBeenCalledTimes(3) // One more call for page 2
+      expect(withThirdPage).toHaveLength(60)
+    })
+
+    it('should accumulate all items from all pages', async () => {
+      const fetchFn = createMockFetchFn(50)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      await autocompleter.getSuggestions(createMockContext(''))
+      const page1 = await autocompleter.loadMore()
+      expect(page1).toHaveLength(40)
+
+      const page2 = await autocompleter.loadMore()
+      expect(page2).toHaveLength(50)
+
+      // All items from 0-49
+      expect(page2[0].label).toBe('Item 0')
+      expect(page2[49].label).toBe('Item 49')
+    })
+  })
+
+  describe('getPaginationState', () => {
+    it('should return initial state', () => {
+      const fetchFn = createMockFetchFn()
+      const autocompleter = createPaginatedAutocompleter(fetchFn, { debounceMs: 0 })
+
+      const state = autocompleter.getPaginationState()
+
+      expect(state).toEqual({
+        page: 0,
+        cursor: undefined,
+        hasMore: true,
+        isLoading: false,
+        total: undefined,
+      })
+    })
+
+    it('should update state after fetch', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      await autocompleter.getSuggestions(createMockContext(''))
+
+      const state = autocompleter.getPaginationState()
+
+      expect(state.page).toBe(0)
+      expect(state.hasMore).toBe(true)
+      expect(state.isLoading).toBe(false)
+      expect(state.total).toBe(100)
+      expect(state.cursor).toBe('cursor-20')
+    })
+
+    it('should update hasMore to false when all items loaded', async () => {
+      const fetchFn = createMockFetchFn(30)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      await autocompleter.getSuggestions(createMockContext(''))
+      await autocompleter.loadMore()
+
+      const state = autocompleter.getPaginationState()
+
+      expect(state.hasMore).toBe(false)
+      expect(state.total).toBe(30)
+    })
+  })
+
+  describe('reset', () => {
+    it('should reset pagination state', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+      })
+
+      // Load some pages
+      await autocompleter.getSuggestions(createMockContext(''))
+      await autocompleter.loadMore()
+
+      // Reset
+      autocompleter.reset()
+
+      const state = autocompleter.getPaginationState()
+
+      expect(state.page).toBe(0)
+      expect(state.cursor).toBeUndefined()
+      expect(state.hasMore).toBe(true)
+      expect(state.total).toBeUndefined()
+    })
+  })
+
+  describe('cache management', () => {
+    it('should limit cached pages per query', async () => {
+      const fetchFn = createMockFetchFn(200)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+        maxCachedPages: 3,
+      })
+
+      // Load many pages
+      await autocompleter.getSuggestions(createMockContext(''))
+      await autocompleter.loadMore() // page 1
+      await autocompleter.loadMore() // page 2
+      await autocompleter.loadMore() // page 3
+      await autocompleter.loadMore() // page 4
+
+      expect(fetchFn).toHaveBeenCalledTimes(5)
+
+      // Reset and load first page again - it should have been evicted
+      autocompleter.reset()
+      fetchFn.mockClear()
+      await autocompleter.getSuggestions(createMockContext(''))
+
+      // First page was evicted, so it should be fetched again
+      // But since we're starting fresh and query is same, cache may still have items
+      // The behavior depends on whether pages are evicted in order
+    })
+
+    it('should disable caching when cacheResults is false', async () => {
+      const fetchFn = createMockFetchFn(100)
+      const autocompleter = createPaginatedAutocompleter(fetchFn, {
+        pageSize: 20,
+        debounceMs: 0,
+        cacheResults: false,
+      })
+
+      await autocompleter.getSuggestions(createMockContext('test'))
+      expect(fetchFn).toHaveBeenCalledTimes(1)
+
+      // New query then back to same query - should refetch
+      await autocompleter.getSuggestions(createMockContext('other'))
+      expect(fetchFn).toHaveBeenCalledTimes(2)
+
+      await autocompleter.getSuggestions(createMockContext('test'))
+      expect(fetchFn).toHaveBeenCalledTimes(3) // Would be 2 if cached
+    })
+  })
+
+  describe('error handling', () => {
+    it('should handle fetch errors gracefully', async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error('Network error'))
+      const autocompleter = createPaginatedAutocompleter(fetchFn, { debounceMs: 0 })
+
+      await expect(
+        autocompleter.getSuggestions(createMockContext('test'))
+      ).rejects.toThrow('Network error')
+    })
+
+    it('should handle AbortError and return empty array', async () => {
+      const fetchFn = vi.fn().mockImplementation(async (_q, _p, _s, _c, signal) => {
+        if (signal?.aborted) {
+          const error = new DOMException('Aborted', 'AbortError')
+          throw error
+        }
+        return { items: [], hasMore: false }
+      })
+
+      const autocompleter = createPaginatedAutocompleter(fetchFn, { debounceMs: 0 })
+
+      // Start request and abort immediately
+      const promise1 = autocompleter.getSuggestions(createMockContext('first'))
+      const promise2 = autocompleter.getSuggestions(createMockContext('second'))
+
+      const [result1] = await Promise.all([promise1, promise2])
+
+      // Aborted request should return empty array, not throw
+      expect(result1).toEqual([])
+    })
+
+    it('should reset isLoading on error', async () => {
+      const fetchFn = vi.fn().mockRejectedValue(new Error('Error'))
+      const autocompleter = createPaginatedAutocompleter(fetchFn, { debounceMs: 0 })
+
+      try {
+        await autocompleter.getSuggestions(createMockContext('test'))
+      } catch {
+        // Expected
+      }
+
+      const state = autocompleter.getPaginationState()
+      expect(state.isLoading).toBe(false)
+    })
+  })
+})

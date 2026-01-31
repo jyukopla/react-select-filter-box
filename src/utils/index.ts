@@ -29,3 +29,12 @@ export {
   SchemaBuilder,
   FieldBuilder,
 } from './schemaBuilder'
+
+export {
+  createLazyAutocompleter,
+  preloadAutocompleter,
+  createLazyComponent,
+  preloadComponent,
+  createDynamicAutocompleter,
+  type LazyAutocompleterOptions,
+} from './codeSplitting'

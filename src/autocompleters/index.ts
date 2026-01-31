@@ -709,6 +709,297 @@ export function withDebounce(
   }
 }
 
+// =============================================================================
+// Lazy Load / Paginated Autocompleter
+// =============================================================================
+
+/**
+ * Page info returned by paginated fetch function
+ */
+export interface PaginatedResult {
+  /** Items for this page */
+  items: AutocompleteItem[]
+  /** Whether there are more items to load */
+  hasMore: boolean
+  /** Total count of items (optional) */
+  total?: number
+  /** Cursor or token for next page (optional) */
+  nextCursor?: string
+}
+
+/**
+ * Pagination state managed by the autocompleter
+ */
+export interface PaginationState {
+  /** Current page number (0-indexed) */
+  page: number
+  /** Cursor for next page fetch */
+  cursor?: string
+  /** Whether more items are available */
+  hasMore: boolean
+  /** Whether currently loading more items */
+  isLoading: boolean
+  /** Total items (if known) */
+  total?: number
+}
+
+export interface PaginatedAutocompleterOptions {
+  /** Number of items per page */
+  pageSize?: number
+  /** Debounce time in milliseconds for initial fetch */
+  debounceMs?: number
+  /** Minimum characters before fetching */
+  minChars?: number
+  /** Whether to cache results per query */
+  cacheResults?: boolean
+  /** Maximum pages to cache per query */
+  maxCachedPages?: number
+}
+
+/**
+ * Create an autocompleter that loads suggestions lazily with pagination support.
+ * 
+ * This is useful for large datasets where you don't want to load all items at once.
+ * The autocompleter supports:
+ * - Cursor-based or page-based pagination
+ * - Lazy loading triggered by scroll/load more
+ * - Per-query caching with page limits
+ * - Request cancellation for new queries
+ * 
+ * @example
+ * ```ts
+ * const autocompleter = createPaginatedAutocompleter(
+ *   async (query, page, pageSize, cursor, signal) => {
+ *     const response = await fetch(`/api/search?q=${query}&page=${page}`, { signal })
+ *     const data = await response.json()
+ *     return {
+ *       items: data.results.map(r => ({ key: r.id, label: r.name })),
+ *       hasMore: data.hasNextPage,
+ *       nextCursor: data.nextCursor,
+ *       total: data.totalCount
+ *     }
+ *   },
+ *   { pageSize: 20 }
+ * )
+ * ```
+ */
+export function createPaginatedAutocompleter(
+  fetchFn: (
+    query: string,
+    page: number,
+    pageSize: number,
+    cursor: string | undefined,
+    signal?: AbortSignal
+  ) => Promise<PaginatedResult>,
+  options: PaginatedAutocompleterOptions = {}
+): Autocompleter & {
+  /** Load next page of results */
+  loadMore: () => Promise<AutocompleteItem[]>
+  /** Get current pagination state */
+  getPaginationState: () => PaginationState
+  /** Reset pagination (call when query changes) */
+  reset: () => void
+} {
+  const {
+    pageSize = 20,
+    debounceMs = 300,
+    minChars = 0,
+    cacheResults = true,
+    maxCachedPages = 5,
+  } = options
+
+  // Cache structure: query -> { pages: Map<number, items[]>, hasMore, total, cursor }
+  const cache = new Map<string, {
+    pages: Map<number, AutocompleteItem[]>
+    hasMore: boolean
+    total?: number
+    cursor?: string
+  }>()
+
+  let currentQuery = ''
+  let currentPage = 0
+  let currentCursor: string | undefined
+  let hasMore = true
+  let isLoading = false
+  let total: number | undefined
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
+  let currentAbortController: AbortController | null = null
+
+  const reset = () => {
+    currentPage = 0
+    currentCursor = undefined
+    hasMore = true
+    isLoading = false
+    total = undefined
+  }
+
+  const getAllCachedItems = (query: string): AutocompleteItem[] => {
+    const cached = cache.get(query)
+    if (!cached) return []
+    
+    const items: AutocompleteItem[] = []
+    const sortedPages = Array.from(cached.pages.entries()).sort((a, b) => a[0] - b[0])
+    for (const [, pageItems] of sortedPages) {
+      items.push(...pageItems)
+    }
+    return items
+  }
+
+  const fetchPage = async (
+    query: string,
+    page: number,
+    cursor: string | undefined,
+    signal?: AbortSignal
+  ): Promise<AutocompleteItem[]> => {
+    isLoading = true
+    
+    try {
+      const result = await fetchFn(query, page, pageSize, cursor, signal)
+      
+      // Update state
+      hasMore = result.hasMore
+      total = result.total
+      currentCursor = result.nextCursor
+      
+      // Cache results
+      if (cacheResults) {
+        let queryCache = cache.get(query)
+        if (!queryCache) {
+          queryCache = { pages: new Map(), hasMore: true }
+          cache.set(query, queryCache)
+        }
+        
+        // Add new page to cache
+        queryCache.pages.set(page, result.items)
+        queryCache.hasMore = result.hasMore
+        queryCache.total = result.total
+        queryCache.cursor = result.nextCursor
+        
+        // Limit cached pages
+        if (queryCache.pages.size > maxCachedPages) {
+          const oldestPage = Math.min(...queryCache.pages.keys())
+          queryCache.pages.delete(oldestPage)
+        }
+      }
+      
+      isLoading = false
+      return result.items
+    } catch (error) {
+      isLoading = false
+      throw error
+    }
+  }
+
+  const getSuggestions = async (
+    context: AutocompleteContext
+  ): Promise<AutocompleteItem[]> => {
+    const { inputValue } = context
+
+    // Clear pending debounce
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
+
+    // Cancel any in-flight request
+    if (currentAbortController) {
+      currentAbortController.abort()
+      currentAbortController = null
+    }
+
+    // Reset if query changed
+    if (inputValue !== currentQuery) {
+      reset()
+      currentQuery = inputValue
+    }
+
+    // Check minimum characters
+    if (inputValue.length < minChars) {
+      return []
+    }
+
+    // Check cache for this query (including empty results)
+    if (cacheResults && cache.has(inputValue)) {
+      const queryCache = cache.get(inputValue)!
+      hasMore = queryCache.hasMore
+      total = queryCache.total
+      currentCursor = queryCache.cursor
+      if (queryCache.pages.size > 0) {
+        currentPage = Math.max(...queryCache.pages.keys())
+      }
+      return getAllCachedItems(inputValue)
+    }
+
+    // Create new abort controller for this request
+    const abortController = new AbortController()
+    currentAbortController = abortController
+
+    // Debounce initial fetch
+    if (debounceMs > 0) {
+      return new Promise((resolve, reject) => {
+        debounceTimer = setTimeout(async () => {
+          try {
+            const items = await fetchPage(inputValue, 0, undefined, abortController.signal)
+            resolve(items)
+          } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+              resolve([])
+            } else {
+              reject(error)
+            }
+          }
+        }, debounceMs)
+      })
+    }
+
+    // Fetch immediately
+    try {
+      return await fetchPage(inputValue, 0, undefined, abortController.signal)
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return []
+      }
+      throw error
+    }
+  }
+
+  const loadMore = async (): Promise<AutocompleteItem[]> => {
+    if (!hasMore || isLoading) {
+      return getAllCachedItems(currentQuery)
+    }
+
+    const nextPage = currentPage + 1
+    
+    // Check if next page is cached
+    const queryCache = cache.get(currentQuery)
+    if (queryCache?.pages.has(nextPage)) {
+      currentPage = nextPage
+      return getAllCachedItems(currentQuery)
+    }
+
+    // Fetch next page
+    currentPage = nextPage
+    await fetchPage(currentQuery, nextPage, currentCursor)
+    
+    return getAllCachedItems(currentQuery)
+  }
+
+  const getPaginationState = (): PaginationState => ({
+    page: currentPage,
+    cursor: currentCursor,
+    hasMore,
+    isLoading,
+    total,
+  })
+
+  return {
+    getSuggestions,
+    loadMore,
+    getPaginationState,
+    reset,
+  }
+}
+
 /**
  * Options for stale-while-revalidate wrapper
  */
