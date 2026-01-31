@@ -144,12 +144,14 @@ export interface AsyncAutocompleterOptions {
 }
 
 /**
- * Create an autocompleter that fetches from an async source
+ * Create an autocompleter that fetches from an async source.
+ * Supports AbortSignal for canceling in-flight requests when new input arrives.
  */
 export function createAsyncAutocompleter(
   fetchFn: (
     query: string,
-    context: AutocompleteContext
+    context: AutocompleteContext,
+    signal?: AbortSignal
   ) => Promise<AutocompleteItem[]>,
   options: AsyncAutocompleterOptions = {}
 ): Autocompleter {
@@ -161,6 +163,7 @@ export function createAsyncAutocompleter(
 
   const cache = new Map<string, AutocompleteItem[]>()
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
+  let currentAbortController: AbortController | null = null
   let lastQuery = ''
 
   return {
@@ -175,6 +178,12 @@ export function createAsyncAutocompleter(
         debounceTimer = null
       }
 
+      // Cancel any in-flight request
+      if (currentAbortController) {
+        currentAbortController.abort()
+        currentAbortController = null
+      }
+
       // Check minimum characters
       if (inputValue.length < minChars) {
         return []
@@ -185,27 +194,48 @@ export function createAsyncAutocompleter(
         return cache.get(inputValue)!
       }
 
+      // Create new abort controller for this request
+      const abortController = new AbortController()
+      currentAbortController = abortController
+
       // Debounce
       if (debounceMs > 0 && inputValue !== lastQuery) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           debounceTimer = setTimeout(async () => {
             lastQuery = inputValue
-            const results = await fetchFn(inputValue, context)
-            if (cacheResults) {
-              cache.set(inputValue, results)
+            try {
+              const results = await fetchFn(inputValue, context, abortController.signal)
+              if (cacheResults) {
+                cache.set(inputValue, results)
+              }
+              resolve(results)
+            } catch (error) {
+              // If aborted, resolve with empty array
+              if (error instanceof DOMException && error.name === 'AbortError') {
+                resolve([])
+              } else {
+                reject(error)
+              }
             }
-            resolve(results)
           }, debounceMs)
         })
       }
 
       // Fetch immediately
       lastQuery = inputValue
-      const results = await fetchFn(inputValue, context)
-      if (cacheResults) {
-        cache.set(inputValue, results)
+      try {
+        const results = await fetchFn(inputValue, context, abortController.signal)
+        if (cacheResults) {
+          cache.set(inputValue, results)
+        }
+        return results
+      } catch (error) {
+        // If aborted, return empty array
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return []
+        }
+        throw error
       }
-      return results
     },
   }
 }

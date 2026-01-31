@@ -181,7 +181,7 @@ describe('createAsyncAutocompleter', () => {
 
     const result = await autocompleter.getSuggestions(context)
 
-    expect(fetchFn).toHaveBeenCalledWith('test', context)
+    expect(fetchFn).toHaveBeenCalledWith('test', context, expect.any(AbortSignal))
     expect(result).toHaveLength(1)
   })
 
@@ -214,6 +214,63 @@ describe('createAsyncAutocompleter', () => {
     await autocompleter.getSuggestions(context)
 
     expect(fetchFn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should cancel in-flight requests when a new request is made', async () => {
+    const signals: AbortSignal[] = []
+    const fetchFn = vi.fn().mockImplementation((query: string, context: AutocompleteContext, signal?: AbortSignal) => {
+      if (signal) {
+        signals.push(signal)
+      }
+      return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          resolve([{ type: 'value', key: query, label: query }])
+        }, 100)
+        
+        if (signal) {
+          signal.addEventListener('abort', () => {
+            clearTimeout(timeoutId)
+            reject(new DOMException('Aborted', 'AbortError'))
+          })
+        }
+      })
+    })
+
+    const autocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0 })
+    
+    // Start first request
+    const promise1 = autocompleter.getSuggestions(createMockContext('first'))
+    
+    // Immediately start second request (should cancel first)
+    const promise2 = autocompleter.getSuggestions(createMockContext('second'))
+    
+    vi.advanceTimersByTime(150)
+    
+    // First signal should be aborted
+    expect(signals[0]?.aborted).toBe(true)
+    // Second signal should not be aborted
+    expect(signals[1]?.aborted).toBe(false)
+    
+    // Second request should succeed
+    const result2 = await promise2
+    expect(result2).toHaveLength(1)
+    expect(result2[0].key).toBe('second')
+  })
+
+  it('should pass abort signal to fetch function', async () => {
+    const fetchFn = vi.fn().mockImplementation((query, context, signal) => {
+      expect(signal).toBeInstanceOf(AbortSignal)
+      return Promise.resolve([])
+    })
+
+    const autocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0 })
+    await autocompleter.getSuggestions(createMockContext('test'))
+
+    expect(fetchFn).toHaveBeenCalledWith(
+      'test',
+      expect.any(Object),
+      expect.any(AbortSignal)
+    )
   })
 })
 
