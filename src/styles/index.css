@@ -6,4 +6,5 @@
 
 @import './tokens.css';
 @import './reduced-motion.css';
+@import './touch-accessibility.css';
 @import './themes/high-contrast.css';

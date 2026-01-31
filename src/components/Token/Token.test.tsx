@@ -294,4 +294,20 @@ describe('Token', () => {
       expect(token).not.toHaveAttribute('aria-invalid')
     })
   })
+
+  describe('Touch Accessibility', () => {
+    it('should have token class for CSS min-height styling', () => {
+      render(<Token {...defaultProps} data={createFieldToken()} />)
+      const token = screen.getByRole('option')
+      expect(token).toHaveClass('token')
+      // The CSS will apply min-height: 44px via the touch-accessibility.css
+    })
+
+    it('should support keyboard selection via isSelected prop', () => {
+      render(<Token {...defaultProps} data={createFieldToken()} isSelected={true} />)
+      const token = screen.getByRole('option')
+      expect(token).toHaveClass('token--selected')
+      expect(token).toHaveAttribute('aria-selected', 'true')
+    })
+  })
 })

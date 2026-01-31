@@ -1,0 +1,149 @@
+/**
+ * Touch Accessibility Styles
+ *
+ * Ensures all interactive elements meet the WCAG 2.1 Level AAA
+ * minimum touch target size of 44x44 CSS pixels.
+ *
+ * These styles apply at all viewport sizes but can be customized
+ * using media queries if needed.
+ */
+
+/**
+ * Touch target variables
+ * Override these to customize touch target sizes
+ */
+:root {
+  --filter-touch-target-size: 44px;
+  --filter-touch-target-spacing: 8px;
+}
+
+/**
+ * Token touch targets
+ * Tokens get expanded touch areas via padding and min-height
+ */
+.token {
+  min-height: var(--filter-touch-target-size);
+  box-sizing: border-box;
+}
+
+/**
+ * Autocomplete dropdown items
+ * Each item must be at least 44px tall for easy touch targeting
+ */
+.autocomplete-item__content {
+  min-height: var(--filter-touch-target-size);
+  box-sizing: border-box;
+}
+
+/**
+ * Clear button touch target
+ * The clear button is expanded to 44x44px for touch accessibility
+ * Visual appearance remains compact, but touch area is larger
+ */
+.filter-box__clear-button {
+  position: relative;
+  min-width: var(--filter-touch-target-size);
+  min-height: var(--filter-touch-target-size);
+  /* The visual button appears smaller within the touch target */
+}
+
+/**
+ * Token container
+ * Minimum height ensures comfortable touch area for input
+ */
+.token-container {
+  min-height: var(--filter-touch-target-size);
+}
+
+/**
+ * Token input touch area
+ * The input field itself should have sufficient height
+ */
+.token-input {
+  min-height: calc(var(--filter-touch-target-size) - 8px);
+}
+
+.token-input__field {
+  min-height: calc(var(--filter-touch-target-size) - 12px);
+}
+
+/**
+ * Custom input widgets in dropdown
+ * These inputs (date picker, number input) need larger touch targets
+ */
+.custom-widget input[type="date"],
+.custom-widget input[type="datetime-local"],
+.custom-widget input[type="number"],
+.custom-widget input[type="text"] {
+  min-height: var(--filter-touch-target-size);
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+.custom-widget button {
+  min-width: var(--filter-touch-target-size);
+  min-height: var(--filter-touch-target-size);
+}
+
+/**
+ * Error display touch targets
+ */
+.error-indicator {
+  min-width: var(--filter-touch-target-size);
+  min-height: var(--filter-touch-target-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/**
+ * Group headers in dropdown
+ * While not interactive, they should not reduce the touch area
+ * of adjacent items
+ */
+.autocomplete-group__header {
+  min-height: 32px;
+}
+
+/**
+ * Touch-specific adjustments
+ * These apply only on devices with coarse pointers (touch screens)
+ */
+@media (pointer: coarse) {
+  /* Increase spacing between tokens for easier targeting */
+  .token-container__tokens {
+    gap: var(--filter-touch-target-spacing);
+  }
+
+  /* Increase autocomplete item padding */
+  .autocomplete-item__content {
+    padding: 12px 16px;
+  }
+
+  /* Ensure dropdown items have comfortable spacing */
+  .autocomplete-dropdown {
+    padding: 8px 0;
+  }
+
+  /* Slightly larger clear button on touch devices */
+  .filter-box__clear-button {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+}
+
+/**
+ * Focus indicators for touch devices
+ * Touch devices may not show focus rings as prominently,
+ * so we ensure they're visible when using assistive tech
+ */
+@media (pointer: coarse) {
+  .token:focus-visible,
+  .autocomplete-item:focus-visible,
+  .filter-box__clear-button:focus-visible,
+  .token-input__field:focus-visible {
+    outline: 3px solid var(--filter-focus-ring-color, #1976d2);
+    outline-offset: 2px;
+  }
+}

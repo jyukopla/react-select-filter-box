@@ -239,4 +239,22 @@ describe('AutocompleteDropdown', () => {
       expect(onHighlight).toHaveBeenCalledWith(1)
     })
   })
+
+  describe('Touch Accessibility', () => {
+    it('should have autocomplete-item__content class for CSS min-height styling', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      const items = document.querySelectorAll('.autocomplete-item__content')
+      expect(items.length).toBeGreaterThan(0)
+      // The CSS will apply min-height: 44px via touch-accessibility.css
+    })
+
+    it('should have proper structure for touch targets', () => {
+      render(<AutocompleteDropdown {...defaultProps} />)
+      // Each item should have the content wrapper for proper touch sizing
+      const options = screen.getAllByRole('option')
+      options.forEach(option => {
+        expect(option).toHaveClass('autocomplete-item')
+      })
+    })
+  })
 })
