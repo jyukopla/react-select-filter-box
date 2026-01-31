@@ -8,7 +8,7 @@ const meta = {
   title: 'Components/FilterBox',
   component: FilterBox,
   parameters: {
-    layout: 'padded',
+    // Using default fullscreen layout from preview.tsx with decorator for padding
   },
   tags: ['autodocs'],
 } satisfies Meta<typeof FilterBox>
