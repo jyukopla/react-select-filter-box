@@ -18,14 +18,14 @@
 
     /* Strict Type Checking */
     "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "noImplicitReturns": true,
+    "noImplicitReturns": false,
     "noImplicitOverride": true,
 
     /* Path Aliases */

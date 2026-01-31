@@ -46,7 +46,7 @@ export interface OperatorValue {
   /** Display label (e.g., 'equals', 'before') */
   label: string
   /** Optional symbol for compact display (e.g., '=', '≠') */
-  symbol?: string
+  symbol?: string | undefined
 }
 
 /**
@@ -94,7 +94,7 @@ export interface FilterExpression {
   /** The condition for this expression */
   condition: FilterCondition
   /** Connector to the NEXT expression (undefined for last expression) */
-  connector?: 'AND' | 'OR'
+  connector?: 'AND' | 'OR' | undefined
 }
 
 // =============================================================================

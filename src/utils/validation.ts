@@ -17,8 +17,8 @@ export type ValidationErrorType = 'field' | 'operator' | 'value' | 'expression' 
 export interface ValidationError {
   type: ValidationErrorType
   message: string
-  expressionIndex?: number
-  field?: string
+  expressionIndex?: number | undefined
+  field?: string | undefined
 }
 
 /**
@@ -87,7 +87,7 @@ export function validateExpression(
       schema,
     }
     const fieldValidationResult = fieldConfig.validate(value, validationContext)
-    if (!fieldValidationResult.valid) {
+    if (!fieldValidationResult.valid && fieldValidationResult.errors) {
       // Add expression index to field-level errors
       const fieldErrors = fieldValidationResult.errors.map((error) => ({
         ...error,
@@ -138,6 +138,7 @@ export function validateExpressions(
 
   for (let i = 0; i < expressions.length; i++) {
     const expr = expressions[i]
+    if (!expr) continue
     const result = validateExpression(expr, schema, i)
     errors.push(...result.errors)
 
@@ -146,7 +147,7 @@ export function validateExpressions(
     if (!fieldUsage.has(fieldKey)) {
       fieldUsage.set(fieldKey, [])
     }
-    fieldUsage.get(fieldKey)!.push(i)
+    fieldUsage.get(fieldKey)?.push(i)
   }
 
   // Validate field uniqueness (if allowMultiple is false)
@@ -167,7 +168,7 @@ export function validateExpressions(
   // Apply schema-level validation if provided
   if (schema.validate) {
     const schemaResult = schema.validate(expressions)
-    if (!schemaResult.valid) {
+    if (!schemaResult.valid && schemaResult.errors) {
       errors.push(...schemaResult.errors)
     }
   }

@@ -204,15 +204,15 @@ export interface FilterSchema {
   /** Available fields */
   fields: FieldConfig[]
   /** Available connectors (default: AND, OR) */
-  connectors?: ConnectorConfig[]
+  connectors?: ConnectorConfig[] | undefined
   /** Schema-level validation */
-  validate?: (expressions: FilterExpression[]) => ValidationResult
+  validate?: ((expressions: FilterExpression[]) => ValidationResult) | undefined
   /** Maximum number of expressions allowed */
-  maxExpressions?: number
+  maxExpressions?: number | undefined
   /** Custom serialization */
-  serialize?: (expressions: FilterExpression[]) => unknown
+  serialize?: ((expressions: FilterExpression[]) => unknown) | undefined
   /** Custom deserialization */
-  deserialize?: (data: unknown) => FilterExpression[]
+  deserialize?: ((data: unknown) => FilterExpression[]) | undefined
 }
 
 // =============================================================================

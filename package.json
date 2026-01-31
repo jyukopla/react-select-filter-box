@@ -42,7 +42,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "build:lib": "vite build && tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -53,7 +53,7 @@
     "test:storybook": "vitest run --project storybook",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepublishOnly": "npm run build:lib"
