@@ -221,6 +221,77 @@ describe('FilterBox', () => {
       expect(input).toHaveAttribute('aria-controls')
       expect(screen.getByRole('listbox')).toBeInTheDocument()
     })
+
+    it('should have combobox role on container', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+      expect(screen.getByRole('combobox')).toBeInTheDocument()
+    })
+
+    it('should have group role on wrapper', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+      expect(screen.getByRole('group')).toBeInTheDocument()
+    })
+
+    it('should have aria-label for filter builder', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+      const group = screen.getByRole('group')
+      expect(group).toHaveAttribute('aria-label', 'Filter expression builder')
+    })
+
+    it('should have aria-expanded on combobox', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+      
+      const combobox = screen.getByRole('combobox')
+      expect(combobox).toHaveAttribute('aria-expanded', 'false')
+      
+      await user.click(combobox)
+      expect(combobox).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('should have listbox role on dropdown', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      expect(screen.getByRole('listbox')).toBeInTheDocument()
+    })
+
+    it('should have option role on dropdown items', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      const options = screen.getAllByRole('option')
+      expect(options.length).toBeGreaterThan(0)
+    })
+
+    it('should have aria-describedby linking to status description when tokens exist', () => {
+      const value = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
+      
+      const group = screen.getByRole('group')
+      expect(group).toHaveAttribute('aria-describedby')
+    })
+
+    it('should have live region for announcements', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+      
+      const liveRegion = document.querySelector('[role="status"][aria-live="polite"]')
+      expect(liveRegion).toBeInTheDocument()
+    })
   })
 
   describe('Portal Rendering', () => {
