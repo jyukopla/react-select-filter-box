@@ -580,4 +580,83 @@ describe('FilterBox', () => {
       expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
     })
   })
+
+  describe('Token Deletion', () => {
+    it('should delete last token on backspace in empty input', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
+
+      // When tokens exist, click on the combobox to focus it
+      const container = screen.getByRole('combobox')
+      await user.click(container)
+      
+      // Find the input (it may not have placeholder when tokens exist)
+      const input = container.querySelector('input')
+      if (input) {
+        await user.type(input, '{Backspace}')
+        // Should call onChange to remove the last token
+        expect(onChange).toHaveBeenCalled()
+      }
+    })
+  })
+
+  describe('Disabled State', () => {
+    it('should not open dropdown when disabled', async () => {
+      const user = userEvent.setup()
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={[]}
+          onChange={vi.fn()}
+          disabled
+        />
+      )
+
+      const container = screen.getByRole('combobox')
+      await user.click(container)
+
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    })
+
+    it('should not allow editing tokens when disabled', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={value}
+          onChange={onChange}
+          disabled
+        />
+      )
+
+      // Try clicking a value token
+      const valueToken = screen.getByText('active')
+      await user.click(valueToken)
+
+      // onChange should not have been called for editing
+      expect(onChange).not.toHaveBeenCalled()
+    })
+  })
 })
