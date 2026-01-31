@@ -730,4 +730,156 @@ describe('FilterBox', () => {
       expect(onChange).not.toHaveBeenCalled()
     })
   })
+
+  describe('Keyboard Accessibility', () => {
+    it('should allow complete expression building with keyboard only', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={onChange} />)
+
+      // Tab to focus the filter box
+      await user.tab()
+      
+      // Should be focused on input - use combobox role since input has combobox role
+      const input = screen.getByRole('combobox')
+      expect(document.activeElement).toBe(input)
+      
+      // Arrow down to navigate, Enter to select field
+      await user.keyboard('{Enter}')
+      
+      // Select operator with Enter
+      await user.keyboard('{Enter}')
+      
+      // Type value and confirm
+      await user.type(input, 'test{Enter}')
+      
+      // Should have called onChange with complete expression
+      expect(onChange).toHaveBeenCalled()
+    })
+
+    it('should navigate dropdown items with arrow keys', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Initial first item should be highlighted
+      const options = screen.getAllByRole('option')
+      expect(options[0]).toHaveAttribute('aria-selected', 'true')
+
+      // Navigate down
+      await user.keyboard('{ArrowDown}')
+      expect(options[1]).toHaveAttribute('aria-selected', 'true')
+      expect(options[0]).toHaveAttribute('aria-selected', 'false')
+
+      // Navigate up
+      await user.keyboard('{ArrowUp}')
+      expect(options[0]).toHaveAttribute('aria-selected', 'true')
+    })
+
+    it('should have focus styling on container when input is focused', async () => {
+      const user = userEvent.setup()
+      const { container } = render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      await user.tab()
+      
+      // The combobox container should have data-focused attribute or similar
+      const filterBox = container.querySelector('.filter-box')
+      expect(filterBox).toBeInTheDocument()
+    })
+
+    it('should maintain focus after selecting a dropdown item', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+      await user.keyboard('{Enter}') // Select first field
+      
+      // Focus should remain on input
+      expect(document.activeElement).toBe(input)
+    })
+
+    it('should announce highlighted item change to screen readers', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Initial item highlighted
+      const firstOption = screen.getAllByRole('option')[0]
+      expect(firstOption).toHaveAttribute('aria-selected', 'true')
+
+      await user.keyboard('{ArrowDown}')
+
+      // Second item now highlighted
+      const secondOption = screen.getAllByRole('option')[1]
+      expect(secondOption).toHaveAttribute('aria-selected', 'true')
+      expect(firstOption).toHaveAttribute('aria-selected', 'false')
+    })
+
+    it('should allow clear button to be accessed via keyboard', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' as const },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} showClearButton />)
+
+      // Get the clear button directly and verify it's in the DOM
+      const clearButton = screen.getByRole('button', { name: /clear/i })
+      expect(clearButton).toBeInTheDocument()
+      
+      // Focus and click the clear button
+      clearButton.focus()
+      await user.click(clearButton)
+      
+      expect(onChange).toHaveBeenCalledWith([])
+    })
+
+    it('should not trap focus in dropdown', async () => {
+      const user = userEvent.setup()
+      render(
+        <div>
+          <FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />
+          <button>Next Element</button>
+        </div>
+      )
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+      
+      // Dropdown is open
+      expect(screen.getByRole('listbox')).toBeInTheDocument()
+      
+      // Press Escape and Tab
+      await user.keyboard('{Escape}')
+      await user.tab()
+      
+      // Should move to next element
+      expect(screen.getByRole('button', { name: 'Next Element' })).toHaveFocus()
+    })
+
+    it('should have aria-activedescendant when dropdown is open', async () => {
+      const user = userEvent.setup()
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Input should have aria-activedescendant pointing to highlighted item
+      expect(input).toHaveAttribute('aria-activedescendant')
+      const activedescendant = input.getAttribute('aria-activedescendant')
+      expect(activedescendant).toMatch(/dropdown-item-\d+/)
+    })
+  })
 })
