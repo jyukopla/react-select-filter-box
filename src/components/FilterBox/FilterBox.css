@@ -12,6 +12,31 @@
   pointer-events: none;
 }
 
+/* Skip link - hidden by default, visible on focus */
+.filter-box__skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--filter-skip-link-bg, #1976d2);
+  color: var(--filter-skip-link-color, #fff);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, top 0.15s ease;
+}
+
+.filter-box__skip-link:focus {
+  top: 0;
+  opacity: 1;
+  pointer-events: auto;
+  outline: 2px solid var(--filter-focus-color, #1976d2);
+  outline-offset: 2px;
+}
+
 /* Screen reader only - visually hidden but accessible */
 .filter-box .sr-only {
   position: absolute;

@@ -292,6 +292,43 @@ describe('FilterBox', () => {
       const liveRegion = document.querySelector('[role="status"][aria-live="polite"]')
       expect(liveRegion).toBeInTheDocument()
     })
+
+    it('should render skip link when skipToId is provided', () => {
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={[]}
+          onChange={vi.fn()}
+          skipToId="main-content"
+        />
+      )
+      
+      const skipLink = screen.getByRole('link', { name: 'Skip to content' })
+      expect(skipLink).toBeInTheDocument()
+      expect(skipLink).toHaveAttribute('href', '#main-content')
+    })
+
+    it('should use custom skip link text when provided', () => {
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={[]}
+          onChange={vi.fn()}
+          skipToId="results"
+          skipLinkText="Skip to results"
+        />
+      )
+      
+      const skipLink = screen.getByRole('link', { name: 'Skip to results' })
+      expect(skipLink).toBeInTheDocument()
+    })
+
+    it('should not render skip link when skipToId is not provided', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+      
+      const skipLink = screen.queryByRole('link', { name: /skip/i })
+      expect(skipLink).not.toBeInTheDocument()
+    })
   })
 
   describe('Portal Rendering', () => {

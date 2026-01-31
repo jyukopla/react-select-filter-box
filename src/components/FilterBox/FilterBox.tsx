@@ -41,6 +41,10 @@ export interface FilterBoxProps extends UseFilterStateProps {
   showClearButton?: boolean
   /** Callback when validation errors occur */
   onError?: (errors: ValidationError[]) => void
+  /** ID of element to skip to (for skip link accessibility) */
+  skipToId?: string
+  /** Custom text for skip link (default: "Skip to content") */
+  skipLinkText?: string
 }
 
 export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function FilterBox(
@@ -56,6 +60,8 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     autoFocus = false,
     showClearButton = false,
     onError,
+    skipToId,
+    skipLinkText = 'Skip to content',
   },
   ref
 ) {
@@ -172,6 +178,15 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       aria-label={ariaLabel ?? 'Filter expression builder'}
       aria-describedby={tokens.length > 0 ? `${generatedId}-status` : undefined}
     >
+      {/* Skip link for keyboard accessibility */}
+      {skipToId && (
+        <a
+          href={`#${skipToId}`}
+          className="filter-box__skip-link"
+        >
+          {skipLinkText}
+        </a>
+      )}
       <LiveRegion>{announcement}</LiveRegion>
       {/* Separate live region for validation errors with assertive politeness */}
       <LiveRegion politeness="assertive">{validationErrorAnnouncement}</LiveRegion>
