@@ -1,0 +1,17 @@
+[**React Select Filter Box v0.0.0**](../README.md)
+
+***
+
+[React Select Filter Box](../README.md) / createSchema
+
+# Function: createSchema()
+
+> **createSchema**(): `SchemaBuilder`
+
+Defined in: [utils/schemaBuilder.ts:181](https://github.com/jyukopla/react-select-filter-box/blob/732c0bb5d34ae2c255c8387f5b4df9b4c06e4e67/src/utils/schemaBuilder.ts#L181)
+
+Create a new schema builder
+
+## Returns
+
+`SchemaBuilder`
