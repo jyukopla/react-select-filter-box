@@ -201,7 +201,7 @@ function getSuggestions(
         }))
       )
 
-    case 'selecting-operator':
+    case 'selecting-operator': {
       if (!currentField) return []
       const fieldConfig = schema.fields.find((f) => f.key === currentField.key)
       if (!fieldConfig) return []
@@ -213,8 +213,9 @@ function getSuggestions(
           description: op.symbol ? `Symbol: ${op.symbol}` : undefined,
         }))
       )
+    }
 
-    case 'selecting-connector':
+    case 'selecting-connector': {
       const connectors = schema.connectors ?? [
         { key: 'AND' as const, label: 'AND' },
         { key: 'OR' as const, label: 'OR' },
@@ -226,6 +227,7 @@ function getSuggestions(
           label: conn.label,
         }))
       )
+    }
 
     default:
       return []

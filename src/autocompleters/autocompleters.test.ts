@@ -240,7 +240,7 @@ describe('createAsyncAutocompleter', () => {
     const autocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0 })
     
     // Start first request
-    const promise1 = autocompleter.getSuggestions(createMockContext('first'))
+    const _promise1 = autocompleter.getSuggestions(createMockContext('first'))
     
     // Immediately start second request (should cancel first)
     const promise2 = autocompleter.getSuggestions(createMockContext('second'))
@@ -613,9 +613,9 @@ describe('withDebounce', () => {
     const context = createMockContext('test')
 
     // Start multiple requests rapidly
-    const promise1 = debounced.getSuggestions(context)
-    const promise2 = debounced.getSuggestions(context)
-    const promise3 = debounced.getSuggestions(context)
+    const _promise1 = debounced.getSuggestions(context)
+    const _promise2 = debounced.getSuggestions(context)
+    const _promise3 = debounced.getSuggestions(context)
 
     // Fast forward time
     await vi.advanceTimersByTimeAsync(150)

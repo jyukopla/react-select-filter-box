@@ -3,8 +3,6 @@ import { renderHook } from '@testing-library/react';
 import { useDropdownPosition } from './useDropdownPosition';
 
 describe('useDropdownPosition', () => {
-  const mockGetBoundingClientRect = vi.fn();
-  
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset window dimensions

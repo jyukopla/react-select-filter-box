@@ -1,7 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useFilterState } from './useFilterState'
-import type { FilterSchema, FieldValue, OperatorValue, ConditionValue, FilterExpression } from '@/types'
+import type { FilterSchema, FilterExpression } from '@/types'
 
 describe('useFilterState', () => {
   const createTestSchema = (): FilterSchema => ({

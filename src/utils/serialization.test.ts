@@ -287,7 +287,7 @@ describe('Serialization', () => {
         formatField: (field) => `[${field.label}]`,
         formatOperator: (operator) => operator.symbol || operator.label,
         formatValue: (value) => `"${value.display}"`,
-        formatConnector: (connector) => `&&`,
+        formatConnector: (_connector) => `&&`,
       })
 
       expect(result).toBe('[Status] = "Active" && [Count] > "10"')
@@ -647,6 +647,7 @@ describe('Serialization', () => {
     it('should use schema-level deserializer when available', () => {
       const data = [{ f: 'status', o: 'eq', v: 'active' }]
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = deserialize(data as any, schemaWithSchemaSerializer)
 
       expect(result).toHaveLength(1)

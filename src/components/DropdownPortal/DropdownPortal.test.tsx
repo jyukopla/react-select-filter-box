@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { DropdownPortal } from './DropdownPortal'
 
@@ -18,7 +18,7 @@ describe('DropdownPortal', () => {
     })
 
     it('should not render when not mounted', () => {
-      const { container } = render(
+      render(
         <div data-testid="parent">
           <DropdownPortal>
             <div data-testid="portal-content">Content</div>

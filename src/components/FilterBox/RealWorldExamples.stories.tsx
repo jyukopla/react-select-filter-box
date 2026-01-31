@@ -7,7 +7,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState, useCallback } from 'react'
-import type { FilterExpression, FilterSchema, AutocompleteItem } from '@/types'
+import type { FilterExpression, FilterSchema } from '@/types'
 import { FilterBox } from './FilterBox'
 import { createStaticAutocompleter, createEnumAutocompleter } from '@/autocompleters'
 

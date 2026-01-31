@@ -84,7 +84,7 @@ describe('Complete Filter Building Flow', () => {
   })
 
   it('builds multiple expressions with AND', async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     const onChange = vi.fn()
     
     // Start with one existing expression
@@ -109,7 +109,7 @@ describe('Complete Filter Building Flow', () => {
   })
 
   it('builds multiple expressions with OR', async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     const onChange = vi.fn()
     
     const existingValue: FilterExpression[] = [

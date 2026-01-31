@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest'
-import { FilterStateMachine, type FilterStep, type FilterAction } from './StateMachine'
+import { FilterStateMachine } from './StateMachine'
 import type { FieldValue, OperatorValue, ConditionValue, FilterExpression } from '@/types'
 
 describe('FilterStateMachine', () => {

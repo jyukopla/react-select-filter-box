@@ -3,7 +3,6 @@ import {
   validateExpression,
   validateExpressions,
   validateSchema,
-  type ValidationResult,
 } from './validation'
 import type { FilterSchema, FilterExpression } from '@/types'
 
