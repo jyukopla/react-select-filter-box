@@ -118,8 +118,10 @@ export interface TokenData {
   value: FieldValue | OperatorValue | ConditionValue | ConnectorValue
   /** Position in token sequence */
   position: number
-  /** Which expression this belongs to */
+  /** Which expression this belongs to (-1 for pending tokens) */
   expressionIndex: number
+  /** Whether this token is part of an incomplete expression being built */
+  isPending?: boolean
 }
 
 // =============================================================================

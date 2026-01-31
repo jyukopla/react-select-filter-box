@@ -179,6 +179,7 @@ export const Token = memo(function Token({
           'token--editable': isEditable,
           'token--selected': isSelected,
           'token--error': hasError,
+          'token--pending': data.isPending,
         },
         className
       )}

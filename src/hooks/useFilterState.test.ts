@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useFilterState } from './useFilterState'
-import type { FilterSchema, FieldValue, OperatorValue, ConditionValue } from '@/types'
+import type { FilterSchema, FieldValue, OperatorValue, ConditionValue, FilterExpression } from '@/types'
 
 describe('useFilterState', () => {
   const createTestSchema = (): FilterSchema => ({
@@ -835,6 +835,165 @@ describe('useFilterState', () => {
       // Should clear all expressions
       expect(onChange).toHaveBeenCalledWith([])
       expect(preventDefault).toHaveBeenCalled()
+    })
+  })
+
+  describe('Pending Tokens', () => {
+    it('should include pending field token after field selection', () => {
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: [], onChange: vi.fn() })
+      )
+
+      // Focus to start selecting
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      // Select a field
+      act(() => {
+        result.current.handleSelect({
+          type: 'field',
+          key: 'status',
+          label: 'Status',
+        })
+      })
+
+      // Should have pending field token
+      expect(result.current.tokens).toHaveLength(1)
+      expect(result.current.tokens[0]).toMatchObject({
+        type: 'field',
+        value: { key: 'status', label: 'Status' },
+        isPending: true,
+      })
+    })
+
+    it('should include pending field and operator tokens after operator selection', () => {
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: [], onChange: vi.fn() })
+      )
+
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      // Select field
+      act(() => {
+        result.current.handleSelect({
+          type: 'field',
+          key: 'status',
+          label: 'Status',
+        })
+      })
+
+      // Select operator
+      act(() => {
+        result.current.handleSelect({
+          type: 'operator',
+          key: 'eq',
+          label: 'equals',
+        })
+      })
+
+      // Should have pending field and operator tokens
+      expect(result.current.tokens).toHaveLength(2)
+      expect(result.current.tokens[0]).toMatchObject({
+        type: 'field',
+        isPending: true,
+      })
+      expect(result.current.tokens[1]).toMatchObject({
+        type: 'operator',
+        value: { key: 'eq', label: 'equals' },
+        isPending: true,
+      })
+    })
+
+    it('should convert pending tokens to completed after value confirmation', () => {
+      const onChange = vi.fn()
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: [], onChange })
+      )
+
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      // Select field
+      act(() => {
+        result.current.handleSelect({
+          type: 'field',
+          key: 'status',
+          label: 'Status',
+        })
+      })
+
+      // Select operator
+      act(() => {
+        result.current.handleSelect({
+          type: 'operator',
+          key: 'eq',
+          label: 'equals',
+        })
+      })
+
+      // Enter value and confirm
+      act(() => {
+        result.current.handleInputChange('active')
+      })
+
+      act(() => {
+        result.current.handleConfirmValue()
+      })
+
+      // onChange should be called with complete expression
+      expect(onChange).toHaveBeenCalled()
+    })
+
+    it('should clear pending tokens after value confirmation', () => {
+      const onChange = vi.fn()
+      const { result, rerender } = renderHook(
+        ({ value }) =>
+          useFilterState({ schema: createTestSchema(), value, onChange }),
+        { initialProps: { value: [] as FilterExpression[] } }
+      )
+
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      // Build complete expression
+      act(() => {
+        result.current.handleSelect({
+          type: 'field',
+          key: 'status',
+          label: 'Status',
+        })
+      })
+
+      act(() => {
+        result.current.handleSelect({
+          type: 'operator',
+          key: 'eq',
+          label: 'equals',
+        })
+      })
+
+      act(() => {
+        result.current.handleInputChange('active')
+      })
+
+      act(() => {
+        result.current.handleConfirmValue()
+      })
+
+      // Get the expression that was passed to onChange
+      const newExpression = onChange.mock.calls[0][0]
+
+      // Rerender with the new value (simulating controlled component)
+      rerender({ value: newExpression })
+
+      // Now tokens should be completed (no isPending)
+      expect(result.current.tokens.some(t => t.isPending)).toBe(false)
+      expect(result.current.tokens).toHaveLength(3) // field, operator, value
     })
   })
 })

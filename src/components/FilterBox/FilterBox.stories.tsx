@@ -731,4 +731,48 @@ export const AllTokenTypes: Story = {
     },
   },
 }
+
+// Pending Token Preview Story
+function PendingTokenPreviewFilterBox() {
+  const [value, setValue] = useState<FilterExpression[]>([])
+
+  return (
+    <div style={{ maxWidth: '700px' }}>
+      <h4 style={{ marginBottom: '0.5rem' }}>Incomplete Expression Preview</h4>
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        <p>As you build a filter expression, pending tokens are shown with a dashed border and subtle pulsing animation:</p>
+        <ol style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
+          <li>Click the filter box and select a field - see the pending field token appear</li>
+          <li>Select an operator - both field and operator show as pending</li>
+          <li>Enter a value and press Enter - tokens become solid (completed)</li>
+        </ol>
+        <p style={{ fontStyle: 'italic', marginTop: '8px' }}>
+          This preview helps users understand what they&apos;re building before committing the expression.
+        </p>
+      </div>
+      <FilterBox schema={basicSchema} value={value} onChange={setValue} />
+    </div>
+  )
+}
+
+export const PendingTokenPreview: Story = {
+  render: () => <PendingTokenPreviewFilterBox />,
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Demonstrates the **incomplete expression preview** feature. 
+
+As users build filter expressions step by step, pending tokens are displayed with:
+- **Dashed borders** to indicate incomplete state
+- **Reduced opacity** for visual distinction
+- **Subtle pulse animation** to draw attention
+- **Automatic conversion** to solid tokens when complete
+
+This provides immediate visual feedback about the expression being built.
+        `,
+      },
+    },
+  },
+}
 // Note: Theme-related stories have been moved to Theming.stories.tsx

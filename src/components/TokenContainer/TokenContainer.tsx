@@ -94,7 +94,7 @@ export function TokenContainer({
         <Token
           key={token.id}
           data={token}
-          isEditable={token.type === 'value'}
+          isEditable={token.type === 'value' && !token.isPending}
           isEditing={index === editingTokenIndex}
           isSelected={allTokensSelected || index === selectedTokenIndex}
           isDeletable={false}
@@ -111,7 +111,7 @@ export function TokenContainer({
         onFocus={handleFocus}
         onBlur={handleBlur}
         inputRef={inputRef}
-        placeholder={tokens.length === 0 ? placeholder : undefined}
+        placeholder={placeholder}
         disabled={disabled}
         {...inputProps}
       />

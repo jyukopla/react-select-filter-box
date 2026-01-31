@@ -88,6 +88,7 @@ function expressionsToTokens(expressions: FilterExpression[]): TokenData[] {
       value: expr.condition.field,
       position: position++,
       expressionIndex: exprIndex,
+      isPending: false,
     })
 
     // Operator token
@@ -97,6 +98,7 @@ function expressionsToTokens(expressions: FilterExpression[]): TokenData[] {
       value: expr.condition.operator,
       position: position++,
       expressionIndex: exprIndex,
+      isPending: false,
     })
 
     // Value token
@@ -106,6 +108,7 @@ function expressionsToTokens(expressions: FilterExpression[]): TokenData[] {
       value: expr.condition.value,
       position: position++,
       expressionIndex: exprIndex,
+      isPending: false,
     })
 
     // Connector token (if present)
@@ -116,9 +119,46 @@ function expressionsToTokens(expressions: FilterExpression[]): TokenData[] {
         value: { key: expr.connector, label: expr.connector },
         position: position++,
         expressionIndex: exprIndex,
+        isPending: false,
       })
     }
   })
+
+  return tokens
+}
+
+/**
+ * Generate pending tokens for incomplete expression being built
+ */
+function generatePendingTokens(
+  currentField?: FieldValue,
+  currentOperator?: OperatorValue,
+  completedExpressionsCount: number = 0
+): TokenData[] {
+  const tokens: TokenData[] = []
+  const basePosition = completedExpressionsCount * 4 // max 4 tokens per expression
+
+  if (currentField) {
+    tokens.push({
+      id: 'pending-field',
+      type: 'field',
+      value: currentField,
+      position: basePosition,
+      expressionIndex: -1, // -1 indicates pending
+      isPending: true,
+    })
+  }
+
+  if (currentOperator) {
+    tokens.push({
+      id: 'pending-operator',
+      type: 'operator',
+      value: currentOperator,
+      position: basePosition + 1,
+      expressionIndex: -1,
+      isPending: true,
+    })
+  }
 
   return tokens
 }
@@ -232,8 +272,12 @@ export function useFilterState({
     machine.loadExpressions(value)
   }, [machine, value])
 
-  // Derived state
-  const tokens = useMemo(() => expressionsToTokens(value), [value])
+  // Derived state - combine completed tokens with pending tokens
+  const tokens = useMemo(() => {
+    const completedTokens = expressionsToTokens(value)
+    const pendingTokens = generatePendingTokens(currentField, currentOperator, value.length)
+    return [...completedTokens, ...pendingTokens]
+  }, [value, currentField, currentOperator])
 
   const suggestions = useMemo(
     () => getSuggestions(state, schema, currentField, inputValue),

@@ -211,3 +211,35 @@
     transform: translateX(-50%) translateY(0);
   }
 }
+
+/* Pending Token State - for tokens being built */
+.token--pending {
+  opacity: var(--filter-token-pending-opacity, 0.7);
+  border-style: dashed;
+  animation: token-pending-pulse 1.5s ease-in-out infinite;
+}
+
+.token--pending.token--field {
+  background-color: var(--filter-token-field-pending-bg, #e3f2fd80);
+}
+
+.token--pending.token--operator {
+  background-color: var(--filter-token-operator-pending-bg, #fce4ec80);
+}
+
+@keyframes token-pending-pulse {
+  0%, 100% {
+    opacity: var(--filter-token-pending-opacity, 0.7);
+  }
+  50% {
+    opacity: var(--filter-token-pending-opacity-pulse, 0.9);
+  }
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .token--pending {
+    animation: none;
+    opacity: var(--filter-token-pending-opacity, 0.7);
+  }
+}
