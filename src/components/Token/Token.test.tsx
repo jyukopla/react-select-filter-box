@@ -266,6 +266,22 @@ describe('Token', () => {
       expect(token).toHaveAttribute('title', 'Invalid value')
     })
 
+    it('should have data-error-message attribute for CSS tooltip', () => {
+      render(
+        <Token {...defaultProps} data={createValueToken()} hasError errorMessage="Value is required" />
+      )
+      const token = screen.getByRole('option')
+      expect(token).toHaveAttribute('data-error-message', 'Value is required')
+    })
+
+    it('should not have data-error-message when no error message provided', () => {
+      render(
+        <Token {...defaultProps} data={createValueToken()} hasError />
+      )
+      const token = screen.getByRole('option')
+      expect(token).not.toHaveAttribute('data-error-message')
+    })
+
     it('should have aria-invalid="true" when hasError is true', () => {
       render(<Token {...defaultProps} data={createValueToken()} hasError />)
       const token = screen.getByRole('option')

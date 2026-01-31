@@ -171,6 +171,7 @@ export const Token = memo(function Token({
       aria-label={ariaLabel}
       aria-invalid={hasError ? 'true' : undefined}
       title={hasError && errorMessage ? errorMessage : undefined}
+      data-error-message={hasError && errorMessage ? errorMessage : undefined}
       className={clsx(
         'token',
         `token--${data.type}`,
