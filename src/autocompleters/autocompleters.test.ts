@@ -12,6 +12,7 @@ import {
   combineAutocompleters,
   mapAutocompleter,
   withCache,
+  withDebounce,
 } from './index'
 import type { AutocompleteContext, AutocompleteItem } from '@/types'
 
@@ -391,5 +392,188 @@ describe('withCache', () => {
     await cached.getSuggestions(context)
 
     expect(callCount).toBe(1)
+  })
+
+  it('should refresh cache after TTL expires', async () => {
+    let callCount = 0
+    const autocompleter = {
+      getSuggestions: () => {
+        callCount++
+        return [{ type: 'value' as const, key: '1', label: 'Result' }]
+      },
+    }
+
+    // Very short TTL
+    const cached = withCache(autocompleter, 1)
+    const context = createMockContext('test')
+
+    await cached.getSuggestions(context)
+    // Wait for cache to expire
+    await new Promise(resolve => setTimeout(resolve, 10))
+    await cached.getSuggestions(context)
+
+    expect(callCount).toBe(2)
+  })
+
+  it('should cache by input value', async () => {
+    let callCount = 0
+    const autocompleter = {
+      getSuggestions: () => {
+        callCount++
+        return [{ type: 'value' as const, key: '1', label: 'Result' }]
+      },
+    }
+
+    const cached = withCache(autocompleter, 60000)
+
+    await cached.getSuggestions(createMockContext('test1'))
+    await cached.getSuggestions(createMockContext('test2'))
+    await cached.getSuggestions(createMockContext('test1')) // Should hit cache
+
+    expect(callCount).toBe(2)
+  })
+})
+
+describe('withDebounce', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('should debounce multiple rapid calls', async () => {
+    let callCount = 0
+    const autocompleter = {
+      getSuggestions: vi.fn().mockImplementation(() => {
+        callCount++
+        return [{ type: 'value' as const, key: '1', label: 'Result' }]
+      }),
+    }
+
+    const debounced = withDebounce(autocompleter, 100)
+    const context = createMockContext('test')
+
+    // Start multiple requests rapidly
+    const promise1 = debounced.getSuggestions(context)
+    const promise2 = debounced.getSuggestions(context)
+    const promise3 = debounced.getSuggestions(context)
+
+    // Fast forward time
+    await vi.advanceTimersByTimeAsync(150)
+
+    // Only the last call should be made after debounce period
+    expect(callCount).toBe(1)
+  })
+
+  it('should return results after debounce period', async () => {
+    const autocompleter = {
+      getSuggestions: vi.fn().mockReturnValue([
+        { type: 'value' as const, key: '1', label: 'Result' },
+      ]),
+    }
+
+    const debounced = withDebounce(autocompleter, 50)
+    const context = createMockContext('test')
+
+    const resultPromise = debounced.getSuggestions(context)
+
+    await vi.advanceTimersByTimeAsync(100)
+
+    const result = await resultPromise
+    expect(result).toHaveLength(1)
+    expect(result[0].label).toBe('Result')
+  })
+})
+
+describe('createDateAutocompleter', () => {
+  describe('validate', () => {
+    it('should validate Date objects', () => {
+      const autocompleter = createDateAutocompleter()
+      expect(autocompleter.validate?.(new Date())).toBe(true)
+      expect(autocompleter.validate?.(new Date('invalid'))).toBe(false)
+    })
+
+    it('should validate ISO date strings', () => {
+      const autocompleter = createDateAutocompleter()
+      expect(autocompleter.validate?.('2024-01-15')).toBe(true)
+      expect(autocompleter.validate?.('invalid-date')).toBe(false)
+    })
+
+    it('should reject non-date values', () => {
+      const autocompleter = createDateAutocompleter()
+      expect(autocompleter.validate?.(null)).toBe(false)
+      expect(autocompleter.validate?.(123)).toBe(false)
+    })
+  })
+
+  describe('format', () => {
+    it('should format Date objects', () => {
+      const autocompleter = createDateAutocompleter()
+      const date = new Date('2024-01-15T00:00:00.000Z')
+      expect(autocompleter.format?.(date)).toBe('2024-01-15')
+    })
+
+    it('should format ISO date strings', () => {
+      const autocompleter = createDateAutocompleter()
+      expect(autocompleter.format?.('2024-01-15')).toBe('2024-01-15')
+    })
+
+    it('should return string representation for other values', () => {
+      const autocompleter = createDateAutocompleter()
+      expect(autocompleter.format?.(123)).toBe('123')
+      expect(autocompleter.format?.('invalid')).toBe('invalid')
+    })
+  })
+
+  describe('parse', () => {
+    it('should parse ISO date strings', () => {
+      const autocompleter = createDateAutocompleter()
+      const result = autocompleter.parse?.('2024-01-15')
+      expect(result).toBeInstanceOf(Date)
+      expect((result as Date).toISOString().startsWith('2024-01-15')).toBe(true)
+    })
+
+    it('should return null for invalid dates', () => {
+      const autocompleter = createDateAutocompleter()
+      expect(autocompleter.parse?.('invalid')).toBeNull()
+    })
+  })
+
+  describe('getSuggestions', () => {
+    it('should return presets when input is empty', () => {
+      const autocompleter = createDateAutocompleter()
+      const context = createMockContext('')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.length).toBeGreaterThan(0)
+      expect(result.some(r => r.label === 'Today')).toBe(true)
+    })
+
+    it('should filter presets by input', () => {
+      const autocompleter = createDateAutocompleter()
+      const context = createMockContext('tod')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.some(r => r.label === 'Today')).toBe(true)
+    })
+
+    it('should allow custom presets', () => {
+      const customPreset = { label: 'Custom', value: new Date('2024-07-04') }
+      const autocompleter = createDateAutocompleter({ presets: [customPreset] })
+      const context = createMockContext('')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.some(r => r.label === 'Custom')).toBe(true)
+    })
+
+    it('should parse date input and include in suggestions', () => {
+      const autocompleter = createDateAutocompleter()
+      const context = createMockContext('2024-01-15')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.some(r => r.key.includes('2024-01-15'))).toBe(true)
+    })
   })
 })
