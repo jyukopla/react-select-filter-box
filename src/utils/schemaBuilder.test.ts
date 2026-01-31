@@ -123,6 +123,31 @@ describe('schemaBuilder', () => {
       expect(schema.fields[0].allowMultiple).toBe(false)
     })
 
+    it('should support custom color for field', () => {
+      const schema = createSchema()
+        .field('priority', 'Priority')
+        .type('enum')
+        .color('#ff6b6b')
+        .done()
+        .build()
+
+      expect(schema.fields[0].color).toBe('#ff6b6b')
+    })
+
+    it('should support valueAutocompleter for field', () => {
+      const mockAutocompleter = {
+        getSuggestions: () => [{ type: 'value' as const, key: 'test', label: 'Test' }],
+      }
+      const schema = createSchema()
+        .field('category', 'Category')
+        .type('enum')
+        .valueAutocompleter(mockAutocompleter)
+        .done()
+        .build()
+
+      expect(schema.fields[0].valueAutocompleter).toBe(mockAutocompleter)
+    })
+
     it('should support max expressions', () => {
       const schema = createSchema()
         .field('name', 'Name')
