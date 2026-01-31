@@ -422,8 +422,8 @@ export const KeyboardNavigation: Story = {
   render: () => <KeyboardNavigationFilterBox schema={basicSchema} />,
 }
 
-// Camunda Process Instance Filter - Real-world example
-const camundaProcessInstanceSchema: FilterSchema = {
+// Process Engine Instance Filter - Real-world example
+const processEngineInstanceSchema: FilterSchema = {
   fields: [
     {
       key: 'processInstanceId',
@@ -433,7 +433,7 @@ const camundaProcessInstanceSchema: FilterSchema = {
       operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
     },
     {
-      key: 'processInstanceBusinessKey',
+      key: 'businessKey',
       label: 'Business Key',
       type: 'string',
       description: 'Business correlation key',
@@ -524,7 +524,7 @@ const camundaProcessInstanceSchema: FilterSchema = {
   ],
 }
 
-function CamundaProcessInstanceFilterBox() {
+function ProcessEngineInstanceFilterBox() {
   const [value, setValue] = useState<FilterExpression[]>([
     {
       condition: {
@@ -537,12 +537,12 @@ function CamundaProcessInstanceFilterBox() {
 
   return (
     <div style={{ maxWidth: '700px' }}>
-      <h3 style={{ marginBottom: '0.5rem' }}>Camunda 7 Process Instance Filter</h3>
+      <h3 style={{ marginBottom: '0.5rem' }}>Process Engine Instance Filter</h3>
       <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>
-        A real-world example demonstrating how to filter process instances in Camunda 7.
+        A real-world example demonstrating how to filter process instances in a process engine.
         Fields are grouped by category for easier navigation.
       </p>
-      <FilterBox schema={camundaProcessInstanceSchema} value={value} onChange={setValue} />
+      <FilterBox schema={processEngineInstanceSchema} value={value} onChange={setValue} />
       <details style={{ marginTop: '1rem' }}>
         <summary style={{ cursor: 'pointer', color: '#666', fontSize: '14px' }}>
           Show filter expressions JSON
@@ -555,12 +555,12 @@ function CamundaProcessInstanceFilterBox() {
   )
 }
 
-export const CamundaProcessInstance: Story = {
-  render: () => <CamundaProcessInstanceFilterBox />,
+export const ProcessEngineInstance: Story = {
+  render: () => <ProcessEngineInstanceFilterBox />,
   parameters: {
     docs: {
       description: {
-        story: 'A comprehensive example showing how to configure the FilterBox for Camunda 7 process instance queries, with grouped fields and various data types.',
+        story: 'A comprehensive example showing how to configure the FilterBox for process engine instance queries, with grouped fields and various data types.',
       },
     },
   },

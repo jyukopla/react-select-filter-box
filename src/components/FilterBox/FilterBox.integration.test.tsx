@@ -266,7 +266,6 @@ describe('Complete Filter Building Flow', () => {
         schema={createFullSchema()}
         value={existingValue}
         onChange={onChange}
-        showClearButton
       />
     )
 

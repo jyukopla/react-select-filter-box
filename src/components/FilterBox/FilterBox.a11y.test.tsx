@@ -311,7 +311,6 @@ describe('Screen Reader Tests', () => {
           schema={createTestSchema()}
           value={value}
           onChange={onChange}
-          showClearButton={true}
         />
       )
 

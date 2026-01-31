@@ -613,7 +613,7 @@ describe('FilterBox', () => {
   })
 
   describe('Clear Button', () => {
-    it('should not show clear button by default', () => {
+    it('should show clear button by default when has tokens', () => {
       const value = [
         {
           condition: {
@@ -626,10 +626,10 @@ describe('FilterBox', () => {
 
       render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
 
-      expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
     })
 
-    it('should show clear button when showClearButton is true and has tokens', () => {
+    it('should not show clear button when showClearButton is false', () => {
       const value = [
         {
           condition: {
@@ -640,13 +640,13 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} showClearButton />)
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} showClearButton={false} />)
 
-      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
     })
 
-    it('should not show clear button when showClearButton is true but no tokens', () => {
-      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} showClearButton />)
+    it('should not show clear button when no tokens', () => {
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
 
       expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
     })
@@ -664,7 +664,7 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} showClearButton />)
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
 
       const clearButton = screen.getByRole('button', { name: /clear/i })
       await user.click(clearButton)
@@ -683,7 +683,7 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} showClearButton disabled />)
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} disabled />)
 
       expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
     })

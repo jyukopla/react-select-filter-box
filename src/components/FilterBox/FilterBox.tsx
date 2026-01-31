@@ -37,7 +37,7 @@ export interface FilterBoxProps extends UseFilterStateProps {
   usePortal?: boolean
   /** Auto-focus the input on mount */
   autoFocus?: boolean
-  /** Show a clear button when there are filters (default: false) */
+  /** Show a clear button when there are filters (default: true) */
   showClearButton?: boolean
   /** Callback when validation errors occur */
   onError?: (errors: ValidationError[]) => void
@@ -58,7 +58,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     'aria-label': ariaLabel,
     usePortal = true,
     autoFocus = false,
-    showClearButton = false,
+    showClearButton = true,
     onError,
     skipToId,
     skipLinkText = 'Skip to content',
