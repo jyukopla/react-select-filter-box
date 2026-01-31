@@ -1,4 +1,5 @@
 import type { Preview } from '@storybook/react-vite'
+import React from 'react'
 
 const preview: Preview = {
   parameters: {
@@ -15,7 +16,23 @@ const preview: Preview = {
       // 'off' - skip a11y checks entirely
       test: 'todo',
     },
+
+    // Fix viewport height issue - ensure enough space for dropdowns
+    layout: 'padded',
+    docs: {
+      story: {
+        inline: true,
+        iframeHeight: 400,
+      },
+    },
   },
+  decorators: [
+    (Story) => (
+      <div style={{ minHeight: '350px', paddingBottom: '20px' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export default preview
