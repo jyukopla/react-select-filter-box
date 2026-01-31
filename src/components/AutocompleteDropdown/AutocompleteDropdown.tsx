@@ -5,7 +5,7 @@
  * Supports virtual scrolling for large lists (>100 items).
  */
 
-import { type ReactNode, useRef, useCallback } from 'react'
+import { type ReactNode, useRef, useCallback, memo } from 'react'
 import { clsx } from 'clsx'
 import type { AutocompleteItem } from '@/types'
 import { useVirtualList } from '@/hooks'
@@ -48,9 +48,10 @@ export interface AutocompleteDropdownProps {
 }
 
 /**
- * Default item renderer
+ * Memoized default item renderer for performance optimization.
+ * Only re-renders when item, highlight, or disabled state changes.
  */
-function DefaultItem({
+const DefaultItem = memo(function DefaultItem({
   item,
   isHighlighted,
   isDisabled,
@@ -75,7 +76,7 @@ function DefaultItem({
       </div>
     </div>
   )
-}
+})
 
 /**
  * AutocompleteDropdown component
