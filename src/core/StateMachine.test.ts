@@ -318,4 +318,95 @@ describe('FilterStateMachine', () => {
       expect(machine.getContext().completedExpressions).toEqual(expressions)
     })
   })
+
+  describe('Invalid Transition Handling', () => {
+    it('should not allow SELECT_FIELD from idle state', () => {
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      expect(machine.canTransition({ type: 'SELECT_FIELD', payload: field })).toBe(false)
+    })
+
+    it('should not allow SELECT_OPERATOR from idle state', () => {
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      expect(machine.canTransition({ type: 'SELECT_OPERATOR', payload: operator })).toBe(false)
+    })
+
+    it('should not allow CONFIRM_VALUE from idle state', () => {
+      const value: ConditionValue = { raw: 'test', display: 'test', serialized: 'test' }
+      expect(machine.canTransition({ type: 'CONFIRM_VALUE', payload: value })).toBe(false)
+    })
+
+    it('should not allow SELECT_CONNECTOR from idle state', () => {
+      expect(machine.canTransition({ type: 'SELECT_CONNECTOR', payload: 'AND' })).toBe(false)
+    })
+
+    it('should not allow SELECT_OPERATOR from selecting-field state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      expect(machine.canTransition({ type: 'SELECT_OPERATOR', payload: operator })).toBe(false)
+    })
+
+    it('should not allow CONFIRM_VALUE from selecting-field state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const value: ConditionValue = { raw: 'test', display: 'test', serialized: 'test' }
+      expect(machine.canTransition({ type: 'CONFIRM_VALUE', payload: value })).toBe(false)
+    })
+
+    it('should not allow SELECT_FIELD from selecting-operator state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const anotherField: FieldValue = { key: 'name', label: 'Name', type: 'string' }
+      expect(machine.canTransition({ type: 'SELECT_FIELD', payload: anotherField })).toBe(false)
+    })
+
+    it('should not allow CONFIRM_VALUE from selecting-operator state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const value: ConditionValue = { raw: 'test', display: 'test', serialized: 'test' }
+      expect(machine.canTransition({ type: 'CONFIRM_VALUE', payload: value })).toBe(false)
+    })
+
+    it('should not allow SELECT_FIELD from entering-value state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const anotherField: FieldValue = { key: 'name', label: 'Name', type: 'string' }
+      expect(machine.canTransition({ type: 'SELECT_FIELD', payload: anotherField })).toBe(false)
+    })
+
+    it('should not allow SELECT_CONNECTOR from entering-value state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      expect(machine.canTransition({ type: 'SELECT_CONNECTOR', payload: 'AND' })).toBe(false)
+    })
+
+    it('should not allow SELECT_OPERATOR from selecting-connector state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+      const anotherOperator: OperatorValue = { key: 'neq', label: 'not equals' }
+      expect(machine.canTransition({ type: 'SELECT_OPERATOR', payload: anotherOperator })).toBe(false)
+    })
+
+    it('should not allow CONFIRM_VALUE from selecting-connector state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+      expect(machine.canTransition({ type: 'CONFIRM_VALUE', payload: value })).toBe(false)
+    })
+  })
 })
