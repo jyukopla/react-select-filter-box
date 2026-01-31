@@ -672,4 +672,93 @@ describe('Serialization', () => {
       expect(result[0]).toEqual({ field: 'status', operator: 'eq', value: 'active' })
     })
   })
+
+  describe('Serialization Roundtrip Integration', () => {
+    it('should roundtrip single expression through serialize/deserialize', () => {
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const serialized = serialize(original)
+      const deserialized = deserialize(serialized, testSchema)
+
+      expect(deserialized).toHaveLength(1)
+      expect(deserialized[0]?.condition.field.key).toBe(original[0]?.condition.field.key)
+      expect(deserialized[0]?.condition.operator.key).toBe(original[0]?.condition.operator.key)
+      expect(deserialized[0]?.condition.value.raw).toBe(original[0]?.condition.value.raw)
+    })
+
+    it('should roundtrip multiple expressions with AND connector', () => {
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+          connector: 'AND',
+        },
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'John', display: 'John', serialized: 'John' },
+          },
+        },
+      ]
+
+      const serialized = serialize(original)
+      const deserialized = deserialize(serialized, testSchema)
+
+      expect(deserialized).toHaveLength(2)
+      expect(deserialized[0]?.connector).toBe('AND')
+      expect(deserialized[1]?.condition.field.key).toBe('name')
+    })
+
+    it('should roundtrip expressions through query string format', () => {
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const queryString = toQueryString(original)
+      const parsed = fromQueryString(queryString, testSchema)
+
+      expect(parsed).toHaveLength(1)
+      expect(parsed[0]?.condition.field.key).toBe('status')
+      expect(parsed[0]?.condition.value.raw).toBe('active')
+    })
+
+    it('should preserve data integrity through JSON stringify/parse', () => {
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'age', label: 'Age', type: 'number' },
+            operator: { key: 'gt', label: 'greater than', symbol: '>' },
+            value: { raw: '25', display: '25', serialized: '25' },
+          },
+        },
+      ]
+
+      const serialized = serialize(original)
+      const jsonString = JSON.stringify(serialized)
+      const parsed = JSON.parse(jsonString)
+      const deserialized = deserialize(parsed, testSchema)
+
+      expect(deserialized).toHaveLength(1)
+      expect(deserialized[0]?.condition.field.key).toBe('age')
+      expect(deserialized[0]?.condition.value.raw).toBe('25')
+    })
+  })
 })
