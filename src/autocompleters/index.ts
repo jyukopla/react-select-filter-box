@@ -708,3 +708,66 @@ export function withDebounce(
     },
   }
 }
+
+/**
+ * Options for stale-while-revalidate wrapper
+ */
+export interface StaleWhileRevalidateOptions {
+  /** Time in ms before cached data is considered stale (triggers background revalidation) */
+  maxAge: number
+  /** Time in ms before cached data is completely expired (forces fresh fetch). Default: maxAge * 2 */
+  staleAge?: number
+  /** Callback when fresh data arrives after returning stale data */
+  onUpdate?: (items: AutocompleteItem[]) => void
+}
+
+/**
+ * Add stale-while-revalidate caching to any autocompleter.
+ * Returns stale cached data immediately while fetching fresh data in the background.
+ */
+export function withStaleWhileRevalidate(
+  autocompleter: Autocompleter,
+  options: StaleWhileRevalidateOptions
+): Autocompleter {
+  const { maxAge, staleAge = maxAge * 2, onUpdate } = options
+  const cache = new Map<string, { items: AutocompleteItem[]; timestamp: number }>()
+
+  return {
+    getSuggestions: async (
+      context: AutocompleteContext
+    ): Promise<AutocompleteItem[]> => {
+      const key = context.inputValue
+      const cached = cache.get(key)
+      const now = Date.now()
+
+      if (cached) {
+        const age = now - cached.timestamp
+        
+        // Fresh data - return directly
+        if (age < maxAge) {
+          return cached.items
+        }
+        
+        // Stale but not expired - return stale, fetch in background
+        if (age < staleAge) {
+          // Fire and forget background revalidation
+          autocompleter.getSuggestions(context).then((items) => {
+            cache.set(key, { items, timestamp: Date.now() })
+            onUpdate?.(items)
+          }).catch(() => {
+            // Ignore errors during background revalidation
+          })
+          
+          return cached.items
+        }
+        
+        // Completely expired - fall through to fresh fetch
+      }
+
+      // No cache or expired - fetch fresh
+      const items = await autocompleter.getSuggestions(context)
+      cache.set(key, { items, timestamp: Date.now() })
+      return items
+    },
+  }
+}

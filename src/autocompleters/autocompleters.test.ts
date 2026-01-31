@@ -13,6 +13,7 @@ import {
   mapAutocompleter,
   withCache,
   withDebounce,
+  withStaleWhileRevalidate,
 } from './index'
 import type { AutocompleteContext, AutocompleteItem } from '@/types'
 
@@ -271,6 +272,105 @@ describe('createAsyncAutocompleter', () => {
       expect.any(Object),
       expect.any(AbortSignal)
     )
+  })
+})
+
+describe('withStaleWhileRevalidate', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('should return cached results immediately while fetching fresh data', async () => {
+    let fetchCount = 0
+    const fetchFn = vi.fn().mockImplementation(async () => {
+      fetchCount++
+      return [{ type: 'value', key: `result-${fetchCount}`, label: `Result ${fetchCount}` }]
+    })
+
+    const onUpdate = vi.fn()
+    // Disable the async autocompleter's built-in cache to test SWR behavior
+    const baseAutocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0, cacheResults: false })
+    const autocompleter = withStaleWhileRevalidate(baseAutocompleter, {
+      maxAge: 1000,
+      onUpdate,
+    })
+    const context = createMockContext('test')
+
+    // First call - no cache, should fetch
+    const result1 = await autocompleter.getSuggestions(context)
+    expect(result1).toHaveLength(1)
+    expect(result1[0].key).toBe('result-1')
+
+    // Advance time past maxAge to make cache stale (but not expired)
+    vi.advanceTimersByTime(1500)
+
+    // Second call - should return stale data immediately
+    const result2 = await autocompleter.getSuggestions(context)
+    expect(result2).toHaveLength(1)
+    expect(result2[0].key).toBe('result-1') // Stale data
+
+    // Wait for background fetch to complete
+    await vi.runAllTimersAsync()
+
+    // onUpdate should have been called with fresh data
+    expect(onUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({ key: 'result-2' }),
+    ])
+  })
+
+  it('should return fresh cached data without triggering revalidation', async () => {
+    const fetchFn = vi.fn().mockResolvedValue([
+      { type: 'value', key: 'cached', label: 'Cached' },
+    ])
+
+    const onUpdate = vi.fn()
+    const baseAutocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0, cacheResults: false })
+    const autocompleter = withStaleWhileRevalidate(baseAutocompleter, {
+      maxAge: 5000,
+      onUpdate,
+    })
+    const context = createMockContext('test')
+
+    // First call
+    await autocompleter.getSuggestions(context)
+    
+    // Second call within maxAge
+    vi.advanceTimersByTime(1000)
+    const result = await autocompleter.getSuggestions(context)
+
+    expect(result[0].key).toBe('cached')
+    expect(fetchFn).toHaveBeenCalledTimes(1) // No refetch
+    expect(onUpdate).not.toHaveBeenCalled()
+  })
+
+  it('should completely expire cache after staleAge', async () => {
+    let fetchCount = 0
+    const fetchFn = vi.fn().mockImplementation(async () => {
+      fetchCount++
+      return [{ type: 'value', key: `result-${fetchCount}`, label: `Result ${fetchCount}` }]
+    })
+
+    const baseAutocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0, cacheResults: false })
+    const autocompleter = withStaleWhileRevalidate(baseAutocompleter, {
+      maxAge: 1000,
+      staleAge: 5000,
+    })
+    const context = createMockContext('test')
+
+    // First call
+    await autocompleter.getSuggestions(context)
+
+    // Advance past staleAge - cache should be completely expired
+    vi.advanceTimersByTime(6000)
+
+    // Should fetch fresh, not return stale
+    const result = await autocompleter.getSuggestions(context)
+    expect(result[0].key).toBe('result-2')
+    expect(fetchFn).toHaveBeenCalledTimes(2)
   })
 })
 
