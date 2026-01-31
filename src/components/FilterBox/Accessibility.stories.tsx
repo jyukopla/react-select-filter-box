@@ -229,78 +229,126 @@ export const KeyboardOnlyNavigation: Story = {
 // High Contrast Mode
 // =============================================================================
 
-export const HighContrastMode: Story = {
-  args: {
-    schema: accessibleSchema,
-    expressions: [
-      {
-        condition: {
-          field: { key: 'status', label: 'Status', type: 'enum' },
-          operator: { key: 'eq', label: 'is equal to', symbol: '=' },
-          value: { raw: 'active', display: 'Active', serialized: 'active' },
-        },
-        connector: 'AND',
+function HighContrastComponent() {
+  const [expressions, setExpressions] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is equal to', symbol: '=' },
+        value: { raw: 'active', display: 'Active', serialized: 'active' },
       },
-      {
-        condition: {
-          field: { key: 'name', label: 'Name', type: 'string' },
-          operator: { key: 'contains', label: 'contains' },
-          value: { raw: 'test', display: 'test', serialized: 'test' },
-        },
+      connector: 'AND',
+    },
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'test', display: 'test', serialized: 'test' },
       },
-    ],
-    placeholder: 'High contrast theme...',
-    className: 'filter-box-high-contrast',
-  },
-  decorators: [
-    (Story) => (
-      <div data-theme="high-contrast">
-        <style>
-          {`
-            [data-theme="high-contrast"] {
-              --filter-container-bg: #000000;
-              --filter-container-border: #ffffff;
-              --filter-container-border-focus: #ffff00;
-              
-              --filter-token-field-bg: #000080;
-              --filter-token-field-border: #00ffff;
-              --filter-token-field-text: #ffffff;
-              
-              --filter-token-operator-bg: #800000;
-              --filter-token-operator-border: #ff00ff;
-              --filter-token-operator-text: #ffffff;
-              
-              --filter-token-value-bg: #008000;
-              --filter-token-value-border: #00ff00;
-              --filter-token-value-text: #ffffff;
-              
-              --filter-token-connector-bg: #808000;
-              --filter-token-connector-border: #ffff00;
-              --filter-token-connector-text: #000000;
-              
-              --filter-dropdown-bg: #000000;
-              --filter-dropdown-border: #ffffff;
-              --filter-dropdown-item-hover: #333333;
-              --filter-dropdown-item-selected: #0000ff;
-              
-              --filter-input-placeholder: #cccccc;
-            }
-          `}
-        </style>
-        <Story />
+    },
+  ])
+  const [theme, setTheme] = useState<'default' | 'high-contrast' | 'high-contrast-dark'>('high-contrast')
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+        <button
+          onClick={() => setTheme('default')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: theme === 'default' ? '#2196f3' : '#f0f0f0',
+            color: theme === 'default' ? 'white' : 'black',
+            border: '2px solid #2196f3',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          Default
+        </button>
+        <button
+          onClick={() => setTheme('high-contrast')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: theme === 'high-contrast' ? '#000066' : '#f0f0f0',
+            color: theme === 'high-contrast' ? 'white' : 'black',
+            border: '3px solid #000066',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          High Contrast
+        </button>
+        <button
+          onClick={() => setTheme('high-contrast-dark')}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: theme === 'high-contrast-dark' ? '#000000' : '#f0f0f0',
+            color: theme === 'high-contrast-dark' ? '#00ffff' : 'black',
+            border: '3px solid #00ffff',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          High Contrast Dark
+        </button>
       </div>
-    ),
-  ],
+
+      <div 
+        data-theme={theme !== 'default' ? theme : undefined}
+        style={{ 
+          padding: '20px',
+          backgroundColor: theme === 'high-contrast-dark' ? '#000000' : theme === 'high-contrast' ? '#ffffff' : 'transparent',
+          borderRadius: '8px',
+          border: theme !== 'default' ? '2px solid currentColor' : 'none',
+        }}
+      >
+        <FilterBox
+          schema={accessibleSchema}
+          value={expressions}
+          onChange={setExpressions}
+          placeholder="High contrast theme..."
+          aria-label="Filter with high contrast support"
+        />
+      </div>
+
+      <div
+        style={{
+          padding: '16px',
+          backgroundColor: '#f3f4f6',
+          borderRadius: '8px',
+          fontSize: '14px',
+        }}
+      >
+        <strong>High Contrast Mode Features:</strong>
+        <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+          <li>Increased color contrast (meets WCAG AAA 7:1 ratio)</li>
+          <li>Thicker borders for better visibility</li>
+          <li>Larger text size for improved readability</li>
+          <li>Distinct focus indicators</li>
+          <li>Respects <code>prefers-contrast: more</code> media query</li>
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+export const HighContrastMode: Story = {
+  render: () => <HighContrastComponent />,
   parameters: {
     docs: {
       description: {
         story: `
 High contrast mode for users with low vision. This theme:
 
-- Uses pure black and white backgrounds
+- Uses pure black and white backgrounds  
 - Has bright, distinct colors for different token types
 - Increases border visibility
 - Ensures minimum 7:1 contrast ratio for text
+- Supports both light and dark high-contrast variants
+- Automatically activates with \`prefers-contrast: more\` media query
         `,
       },
     },

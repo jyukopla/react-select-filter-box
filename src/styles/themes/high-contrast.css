@@ -1,0 +1,181 @@
+/**
+ * High Contrast Theme
+ *
+ * Designed for users who need increased contrast for visibility.
+ * Applies when @media (prefers-contrast: more) is detected or
+ * when [data-theme="high-contrast"] is applied to a parent element.
+ * 
+ * This theme meets WCAG AAA contrast requirements (7:1 for normal text).
+ */
+
+/* Media query for system high contrast preference */
+@media (prefers-contrast: more) {
+  :root {
+    /* Token type colors - high contrast version */
+    --filter-token-field-bg: #000066;
+    --filter-token-field-border: #0000ff;
+    --filter-token-field-text: #ffffff;
+
+    --filter-token-operator-bg: #660033;
+    --filter-token-operator-border: #ff0066;
+    --filter-token-operator-text: #ffffff;
+
+    --filter-token-value-bg: #003300;
+    --filter-token-value-border: #00cc00;
+    --filter-token-value-text: #ffffff;
+
+    --filter-token-connector-bg: #663300;
+    --filter-token-connector-border: #ff9900;
+    --filter-token-connector-text: #ffffff;
+
+    /* Field type colors */
+    --filter-type-string-bg: #003300;
+    --filter-type-number-bg: #000066;
+    --filter-type-date-bg: #660033;
+    --filter-type-boolean-bg: #330066;
+    --filter-type-enum-bg: #663300;
+    --filter-type-id-bg: #006666;
+
+    /* Container */
+    --filter-container-bg: #ffffff;
+    --filter-container-border: #000000;
+    --filter-container-border-focus: #0000ff;
+    --filter-container-shadow: 0 0 0 3px #000000;
+
+    /* Dropdown */
+    --filter-dropdown-bg: #ffffff;
+    --filter-dropdown-border: #000000;
+    --filter-dropdown-shadow: 0 0 0 3px #000000;
+    --filter-dropdown-item-hover: #ffff00;
+    --filter-dropdown-item-selected: #0000ff;
+
+    /* Input */
+    --filter-input-text: #000000;
+    --filter-input-placeholder: #333333;
+
+    /* Focus ring - more visible */
+    --filter-focus-ring-color: #0000ff;
+    --filter-focus-ring-width: 4px;
+
+    /* Typography - slightly larger for readability */
+    --filter-font-size: 16px;
+    --filter-font-size-small: 14px;
+
+    /* Borders - thicker for visibility */
+    --filter-token-border-width: 3px;
+  }
+}
+
+/* Explicit class/attribute for high contrast */
+[data-theme='high-contrast'],
+.high-contrast {
+  /* Token type colors - high contrast version */
+  --filter-token-field-bg: #000066;
+  --filter-token-field-border: #0000ff;
+  --filter-token-field-text: #ffffff;
+
+  --filter-token-operator-bg: #660033;
+  --filter-token-operator-border: #ff0066;
+  --filter-token-operator-text: #ffffff;
+
+  --filter-token-value-bg: #003300;
+  --filter-token-value-border: #00cc00;
+  --filter-token-value-text: #ffffff;
+
+  --filter-token-connector-bg: #663300;
+  --filter-token-connector-border: #ff9900;
+  --filter-token-connector-text: #ffffff;
+
+  /* Field type colors */
+  --filter-type-string-bg: #003300;
+  --filter-type-number-bg: #000066;
+  --filter-type-date-bg: #660033;
+  --filter-type-boolean-bg: #330066;
+  --filter-type-enum-bg: #663300;
+  --filter-type-id-bg: #006666;
+
+  /* Container */
+  --filter-container-bg: #ffffff;
+  --filter-container-border: #000000;
+  --filter-container-border-focus: #0000ff;
+  --filter-container-shadow: 0 0 0 3px #000000;
+
+  /* Dropdown */
+  --filter-dropdown-bg: #ffffff;
+  --filter-dropdown-border: #000000;
+  --filter-dropdown-shadow: 0 0 0 3px #000000;
+  --filter-dropdown-item-hover: #ffff00;
+  --filter-dropdown-item-selected: #0000ff;
+
+  /* Input */
+  --filter-input-text: #000000;
+  --filter-input-placeholder: #333333;
+
+  /* Focus ring - more visible */
+  --filter-focus-ring-color: #0000ff;
+  --filter-focus-ring-width: 4px;
+
+  /* Typography - slightly larger for readability */
+  --filter-font-size: 16px;
+  --filter-font-size-small: 14px;
+
+  /* Borders - thicker for visibility */
+  --filter-token-border-width: 3px;
+}
+
+/* Dark high contrast variant */
+[data-theme='high-contrast-dark'],
+.high-contrast-dark {
+  /* Token type colors - high contrast dark version */
+  --filter-token-field-bg: #000000;
+  --filter-token-field-border: #00ffff;
+  --filter-token-field-text: #00ffff;
+
+  --filter-token-operator-bg: #000000;
+  --filter-token-operator-border: #ff00ff;
+  --filter-token-operator-text: #ff00ff;
+
+  --filter-token-value-bg: #000000;
+  --filter-token-value-border: #00ff00;
+  --filter-token-value-text: #00ff00;
+
+  --filter-token-connector-bg: #000000;
+  --filter-token-connector-border: #ffff00;
+  --filter-token-connector-text: #ffff00;
+
+  /* Field type colors */
+  --filter-type-string-bg: #000000;
+  --filter-type-number-bg: #000000;
+  --filter-type-date-bg: #000000;
+  --filter-type-boolean-bg: #000000;
+  --filter-type-enum-bg: #000000;
+  --filter-type-id-bg: #000000;
+
+  /* Container */
+  --filter-container-bg: #000000;
+  --filter-container-border: #ffffff;
+  --filter-container-border-focus: #00ffff;
+  --filter-container-shadow: 0 0 0 3px #ffffff;
+
+  /* Dropdown */
+  --filter-dropdown-bg: #000000;
+  --filter-dropdown-border: #ffffff;
+  --filter-dropdown-shadow: 0 0 0 3px #ffffff;
+  --filter-dropdown-item-hover: #333333;
+  --filter-dropdown-item-selected: #003366;
+
+  /* Input */
+  --filter-input-text: #ffffff;
+  --filter-input-placeholder: #cccccc;
+
+  /* Focus ring */
+  --filter-focus-ring-color: #00ffff;
+  --filter-focus-ring-width: 4px;
+
+  /* Typography */
+  --filter-font-size: 16px;
+  --filter-font-size-small: 14px;
+
+  /* Borders */
+  --filter-token-border-width: 3px;
+}
