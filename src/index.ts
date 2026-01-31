@@ -83,6 +83,7 @@ export {
   createAsyncAutocompleter,
   createNumberAutocompleter,
   createDateAutocompleter,
+  createDateTimeAutocompleter,
   combineAutocompleters,
   mapAutocompleter,
   withCache,
@@ -92,8 +93,10 @@ export {
   type AsyncAutocompleterOptions,
   type NumberAutocompleterOptions,
   type DateAutocompleterOptions,
+  type DateTimeAutocompleterOptions,
   type EnumValue,
   type DatePreset,
+  type DateTimePreset,
 } from './autocompleters'
 
 // Core (for advanced use cases)

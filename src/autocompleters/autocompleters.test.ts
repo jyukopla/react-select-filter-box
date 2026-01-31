@@ -577,3 +577,92 @@ describe('createDateAutocompleter', () => {
     })
   })
 })
+
+// =============================================================================
+// DateTimeAutocompleter Tests
+// =============================================================================
+
+import { createDateTimeAutocompleter } from './index'
+
+describe('createDateTimeAutocompleter', () => {
+  describe('getSuggestions', () => {
+    it('should return presets when input is empty', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      const context = createMockContext('')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.length).toBeGreaterThan(0)
+      // Check that presets include "Now" or similar
+      expect(result.some(r => r.label === 'Now' || r.label === 'Today')).toBe(true)
+    })
+
+    it('should filter presets by input', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      const context = createMockContext('yester')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.some(r => r.label.toLowerCase().includes('yesterday'))).toBe(true)
+    })
+
+    it('should parse ISO datetime string', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      const context = createMockContext('2024-01-15T10:30:00')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.some(r => r.key.includes('2024-01-15'))).toBe(true)
+    })
+
+    it('should handle custom presets', () => {
+      const customPreset = { label: 'Meeting Time', value: new Date('2024-01-15T14:00:00') }
+      const autocompleter = createDateTimeAutocompleter({ presets: [customPreset] })
+      const context = createMockContext('')
+      const result = autocompleter.getSuggestions(context)
+
+      expect(result.some(r => r.label === 'Meeting Time')).toBe(true)
+    })
+  })
+
+  describe('validate', () => {
+    it('should validate Date objects', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      expect(autocompleter.validate?.(new Date())).toBe(true)
+      expect(autocompleter.validate?.(new Date('invalid'))).toBe(false)
+    })
+
+    it('should validate ISO datetime strings', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      expect(autocompleter.validate?.('2024-01-15T10:30:00.000Z')).toBe(true)
+      expect(autocompleter.validate?.('invalid')).toBe(false)
+    })
+  })
+
+  describe('format', () => {
+    it('should format Date to ISO datetime string', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      const date = new Date('2024-01-15T10:30:00.000Z')
+      const formatted = autocompleter.format?.(date, createMockContext(''))
+      expect(formatted).toBe('2024-01-15T10:30:00.000Z')
+    })
+
+    it('should return string values as-is if valid', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      const result = autocompleter.format?.('2024-01-15T10:30:00.000Z', createMockContext(''))
+      expect(result).toContain('2024-01-15')
+    })
+  })
+
+  describe('parse', () => {
+    it('should parse ISO datetime string to Date', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      const result = autocompleter.parse?.('2024-01-15T10:30:00.000Z', createMockContext(''))
+      expect(result).toBeInstanceOf(Date)
+      expect((result as Date).toISOString()).toBe('2024-01-15T10:30:00.000Z')
+    })
+
+    it('should return null for invalid strings', () => {
+      const autocompleter = createDateTimeAutocompleter()
+      const result = autocompleter.parse?.('invalid', createMockContext(''))
+      expect(result).toBeNull()
+    })
+  })
+})

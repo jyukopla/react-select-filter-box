@@ -441,6 +441,153 @@ function getDefaultDatePresets(): DatePreset[] {
 }
 
 // =============================================================================
+// DateTime Autocompleter
+// =============================================================================
+
+export interface DateTimePreset {
+  label: string
+  value: Date
+}
+
+export interface DateTimeAutocompleterOptions {
+  /** Minimum datetime */
+  minDateTime?: Date
+  /** Maximum datetime */
+  maxDateTime?: Date
+  /** Preset datetime options */
+  presets?: DateTimePreset[]
+}
+
+/**
+ * Format a date as ISO datetime string
+ */
+function formatDateTimeISO(date: Date): string {
+  return date.toISOString()
+}
+
+/**
+ * Format a date for display (human-readable with time)
+ */
+function formatDateTimeDisplay(date: Date): string {
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+/**
+ * Parse an ISO datetime string to Date
+ */
+function parseDateTimeISO(str: string): Date | null {
+  const date = new Date(str)
+  return isNaN(date.getTime()) ? null : date
+}
+
+/**
+ * Create an autocompleter for datetime input
+ */
+export function createDateTimeAutocompleter(
+  options: DateTimeAutocompleterOptions = {}
+): Autocompleter {
+  const { presets = getDefaultDateTimePresets() } = options
+
+  return {
+    getSuggestions: (context: AutocompleteContext): AutocompleteItem[] => {
+      const { inputValue } = context
+
+      // If no input, show presets
+      if (!inputValue) {
+        return presets.map((preset) => ({
+          type: 'value' as const,
+          key: formatDateTimeISO(preset.value),
+          label: preset.label,
+          description: formatDateTimeDisplay(preset.value),
+        }))
+      }
+
+      // Filter presets by input
+      const query = inputValue.toLowerCase()
+      const matchingPresets = presets
+        .filter((preset) => preset.label.toLowerCase().includes(query))
+        .map((preset) => ({
+          type: 'value' as const,
+          key: formatDateTimeISO(preset.value),
+          label: preset.label,
+          description: formatDateTimeDisplay(preset.value),
+        }))
+
+      // Try to parse as datetime
+      const parsedDate = parseDateTimeISO(inputValue)
+      if (parsedDate) {
+        return [
+          {
+            type: 'value' as const,
+            key: formatDateTimeISO(parsedDate),
+            label: formatDateTimeDisplay(parsedDate),
+            description: formatDateTimeISO(parsedDate),
+          },
+          ...matchingPresets,
+        ]
+      }
+
+      return matchingPresets
+    },
+
+    validate: (value: unknown): boolean => {
+      if (value instanceof Date) return !isNaN(value.getTime())
+      if (typeof value === 'string') return parseDateTimeISO(value) !== null
+      return false
+    },
+
+    format: (value: unknown): string => {
+      if (value instanceof Date) return formatDateTimeISO(value)
+      if (typeof value === 'string') {
+        const date = parseDateTimeISO(value)
+        return date ? formatDateTimeISO(date) : value
+      }
+      return String(value)
+    },
+
+    parse: (display: string): unknown => {
+      return parseDateTimeISO(display)
+    },
+  }
+}
+
+/**
+ * Get default datetime presets
+ */
+function getDefaultDateTimePresets(): DateTimePreset[] {
+  const now = new Date()
+
+  const today = new Date(now)
+  today.setHours(0, 0, 0, 0)
+
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+
+  const oneHourAgo = new Date(now)
+  oneHourAgo.setHours(oneHourAgo.getHours() - 1)
+
+  const startOfDay = new Date(now)
+  startOfDay.setHours(0, 0, 0, 0)
+
+  const endOfDay = new Date(now)
+  endOfDay.setHours(23, 59, 59, 999)
+
+  return [
+    { label: 'Now', value: now },
+    { label: 'One hour ago', value: oneHourAgo },
+    { label: 'Today (start)', value: startOfDay },
+    { label: 'Today (end)', value: endOfDay },
+    { label: 'Yesterday', value: yesterday },
+  ]
+}
+
+// =============================================================================
 // Autocompleter Composition
 // =============================================================================
 
