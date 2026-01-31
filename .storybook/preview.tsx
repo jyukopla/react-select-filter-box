@@ -18,11 +18,14 @@ const preview: Preview = {
     },
 
     // Fix viewport height issue - ensure enough space for dropdowns
-    layout: 'fullscreen',
+    layout: 'padded',
+    viewport: {
+      viewports: {},
+    },
     docs: {
       story: {
         inline: true,
-        iframeHeight: 450,
+        iframeHeight: 600,
       },
       canvas: {
         sourceState: 'shown',
@@ -31,7 +34,16 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <div style={{ minHeight: '400px', padding: '20px', boxSizing: 'border-box' }}>
+      <div style={{ 
+        height: '100%', 
+        minHeight: '600px', 
+        width: '100%',
+        padding: '20px', 
+        boxSizing: 'border-box', 
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         <Story />
       </div>
     ),

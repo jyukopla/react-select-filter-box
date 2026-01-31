@@ -74,11 +74,17 @@ const accessibleSchema: FilterSchema = {
 // =============================================================================
 
 export const ScreenReaderDemo: Story = {
-  args: {
-    schema: accessibleSchema,
-    expressions: [],
-    placeholder: 'Start typing to filter...',
-    'aria-label': 'Filter expressions',
+  render: () => {
+    const [value, setValue] = useState<FilterExpression[]>([])
+    return (
+      <FilterBox
+        schema={accessibleSchema}
+        value={value}
+        onChange={setValue}
+        placeholder="Start typing to filter..."
+        aria-label="Filter expressions"
+      />
+    )
   },
   parameters: {
     docs: {
@@ -362,7 +368,8 @@ High contrast mode for users with low vision. This theme:
 export const ReducedMotion: Story = {
   args: {
     schema: accessibleSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Animations disabled...',
   },
   decorators: [
@@ -413,7 +420,7 @@ export const ReducedMotion: Story = {
 export const LargeTextZoom: Story = {
   args: {
     schema: accessibleSchema,
-    expressions: [
+    value: [
       {
         condition: {
           field: { key: 'status', label: 'Status', type: 'enum' },
@@ -422,6 +429,7 @@ export const LargeTextZoom: Story = {
         },
       },
     ],
+    onChange: () => {},
     placeholder: 'Large text mode...',
   },
   decorators: [

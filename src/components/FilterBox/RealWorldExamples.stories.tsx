@@ -137,7 +137,8 @@ const processInstanceSchema: FilterSchema = {
 export const ProcessInstanceFilter: Story = {
   args: {
     schema: processInstanceSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Filter process instances...',
   },
   parameters: {
@@ -248,7 +249,8 @@ const taskSchema: FilterSchema = {
 export const TaskFilter: Story = {
   args: {
     schema: taskSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Filter tasks...',
   },
 }
@@ -374,7 +376,8 @@ const productSchema: FilterSchema = {
 export const EcommerceProductFilter: Story = {
   args: {
     schema: productSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Search products...',
   },
 }
@@ -530,7 +533,8 @@ const issueSchema: FilterSchema = {
 export const IssueTrackerFilter: Story = {
   args: {
     schema: issueSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Search issues... (e.g., status = Open)',
   },
 }
@@ -659,7 +663,8 @@ const userSchema: FilterSchema = {
 export const UserManagementFilter: Story = {
   args: {
     schema: userSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Search users...',
   },
 }
@@ -802,7 +807,8 @@ const logSchema: FilterSchema = {
 export const LogSearchFilter: Story = {
   args: {
     schema: logSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Search logs... (level = ERROR, service = api-gateway)',
   },
 }

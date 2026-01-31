@@ -75,7 +75,8 @@ const longValueExpressions: FilterExpression[] = [
 export const VeryLongValues: Story = {
   args: {
     schema: longValueSchema,
-    expressions: longValueExpressions,
+    value: longValueExpressions,
+    onChange: () => {},
     placeholder: 'Add filter...',
   },
 }
@@ -146,7 +147,8 @@ const specialCharExpressions: FilterExpression[] = [
 export const SpecialCharacters: Story = {
   args: {
     schema: specialCharSchema,
-    expressions: specialCharExpressions,
+    value: specialCharExpressions,
+    onChange: () => {},
     placeholder: 'Add filter...',
   },
 }
@@ -162,7 +164,8 @@ const emptySchema: FilterSchema = {
 export const EmptySchema: Story = {
   args: {
     schema: emptySchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'No fields available',
   },
 }
@@ -185,7 +188,8 @@ const singleFieldSchema: FilterSchema = {
 export const SingleFieldSchema: Story = {
   args: {
     schema: singleFieldSchema,
-    expressions: [],
+    value: [],
+    onChange: () => {},
     placeholder: 'Filter by status...',
   },
 }
@@ -234,7 +238,8 @@ const prefilledExpressions: FilterExpression[] = [
 export const DisabledState: Story = {
   args: {
     schema: standardSchema,
-    expressions: prefilledExpressions,
+    value: prefilledExpressions,
+    onChange: () => {},
     placeholder: 'Add filter...',
     disabled: true,
   },
@@ -247,7 +252,8 @@ export const DisabledState: Story = {
 export const ReadOnlyState: Story = {
   args: {
     schema: standardSchema,
-    expressions: prefilledExpressions,
+    value: prefilledExpressions,
+    onChange: () => {},
     placeholder: 'Add filter...',
     readOnly: true,
   },
@@ -291,7 +297,8 @@ const maxExpressions: FilterExpression[] = [
 export const MaxExpressionsReached: Story = {
   args: {
     schema: maxExpressionsSchema,
-    expressions: maxExpressions,
+    value: maxExpressions,
+    onChange: () => {},
     placeholder: 'Maximum filters reached',
   },
 }
@@ -329,7 +336,8 @@ const unicodeExpressions: FilterExpression[] = [
 export const UnicodeAndEmoji: Story = {
   args: {
     schema: standardSchema,
-    expressions: unicodeExpressions,
+    value: unicodeExpressions,
+    onChange: () => {},
     placeholder: 'Add filter...',
   },
 }
@@ -367,7 +375,8 @@ const whitespaceExpressions: FilterExpression[] = [
 export const WhitespaceValues: Story = {
   args: {
     schema: standardSchema,
-    expressions: whitespaceExpressions,
+    value: whitespaceExpressions,
+    onChange: () => {},
     placeholder: 'Add filter...',
   },
 }
@@ -403,7 +412,8 @@ const manyExpressions: FilterExpression[] = Array.from({ length: 10 }, (_, i) =>
 export const ManyExpressions: Story = {
   args: {
     schema: manyExpressionsSchema,
-    expressions: manyExpressions,
+    value: manyExpressions,
+    onChange: () => {},
     placeholder: 'Add more tags...',
   },
 }
@@ -450,7 +460,8 @@ const errorExpressions: FilterExpression[] = [
 export const ErrorState: Story = {
   args: {
     schema: errorSchema,
-    expressions: errorExpressions,
+    value: errorExpressions,
+    onChange: () => {},
     placeholder: 'Enter valid email...',
   },
 }
