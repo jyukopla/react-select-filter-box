@@ -49,6 +49,8 @@ export interface UseFilterStateReturn {
   selectedTokenIndex: number
   /** Whether all tokens are selected (via Ctrl+A) */
   allTokensSelected: boolean
+  /** Index of expression whose operator is being edited (-1 if not editing) */
+  editingOperatorIndex: number
   /** Handle focus event */
   handleFocus: () => void
   /** Handle blur event */
@@ -71,6 +73,10 @@ export interface UseFilterStateReturn {
   handleTokenEditComplete: (newValue: ConditionValue) => void
   /** Cancel editing a token */
   handleTokenEditCancel: () => void
+  /** Start editing an operator in an existing expression */
+  handleOperatorEdit: (expressionIndex: number) => void
+  /** Cancel operator editing */
+  handleOperatorEditCancel: () => void
 }
 
 /**
@@ -266,6 +272,7 @@ export function useFilterState({
   const [currentField, setCurrentField] = useState<FieldValue | undefined>()
   const [currentOperator, setCurrentOperator] = useState<OperatorValue | undefined>()
   const [announcement, setAnnouncement] = useState('')
+  const [editingOperatorIndex, setEditingOperatorIndex] = useState(-1)
 
   // Sync machine with external value on mount
   useEffect(() => {
@@ -279,10 +286,25 @@ export function useFilterState({
     return [...completedTokens, ...pendingTokens]
   }, [value, currentField, currentOperator])
 
-  const suggestions = useMemo(
-    () => getSuggestions(state, schema, currentField, inputValue),
-    [state, schema, currentField, inputValue]
-  )
+  // Get suggestions - handles both normal state and operator editing mode
+  const suggestions = useMemo(() => {
+    // If editing an operator, show operators for that expression's field
+    if (editingOperatorIndex >= 0 && value[editingOperatorIndex]) {
+      const expr = value[editingOperatorIndex]
+      const fieldKey = expr.condition.field.key
+      const fieldConfig = schema.fields.find((f) => f.key === fieldKey)
+      if (fieldConfig) {
+        return fieldConfig.operators.map((op) => ({
+          type: 'operator' as const,
+          key: op.key,
+          label: op.label,
+          description: op.symbol ? `Symbol: ${op.symbol}` : undefined,
+        }))
+      }
+      return []
+    }
+    return getSuggestions(state, schema, currentField, inputValue)
+  }, [state, schema, currentField, inputValue, editingOperatorIndex, value])
 
   const placeholder = useMemo(() => getPlaceholder(state), [state])
 
@@ -335,6 +357,34 @@ export function useFilterState({
 
   const handleSelect = useCallback(
     (item: AutocompleteItem) => {
+      // Handle operator editing mode
+      if (editingOperatorIndex >= 0 && item.type === 'operator') {
+        const expr = value[editingOperatorIndex]
+        const fieldConfig = schema.fields.find((f) => f.key === expr.condition.field.key)
+        const opConfig = fieldConfig?.operators.find((op) => op.key === item.key)
+        if (opConfig) {
+          const operatorValue: OperatorValue = {
+            key: opConfig.key,
+            label: opConfig.label,
+            symbol: opConfig.symbol,
+          }
+          // Update the expression with new operator
+          const newExpressions = [...value]
+          newExpressions[editingOperatorIndex] = {
+            ...expr,
+            condition: {
+              ...expr.condition,
+              operator: operatorValue,
+            },
+          }
+          onChange(newExpressions)
+          setEditingOperatorIndex(-1)
+          setIsDropdownOpen(false)
+          setAnnouncement(`Operator changed to ${operatorValue.label}`)
+        }
+        return
+      }
+
       const currentState = machine.getState()
 
       if (currentState === 'selecting-field') {
@@ -377,7 +427,7 @@ export function useFilterState({
         setAnnouncement(`Added ${item.key} connector. Now select a field.`)
       }
     },
-    [machine, schema, currentField, onChange]
+    [machine, schema, currentField, onChange, editingOperatorIndex, value]
   )
 
   const handleConfirmValue = useCallback(() => {
@@ -569,6 +619,20 @@ export function useFilterState({
     setEditingTokenIndex(-1)
   }, [])
 
+  // Operator editing handlers
+  const handleOperatorEdit = useCallback((expressionIndex: number) => {
+    if (expressionIndex < 0 || expressionIndex >= value.length) return
+    setEditingOperatorIndex(expressionIndex)
+    setIsDropdownOpen(true)
+    setHighlightedIndex(0)
+    setAnnouncement('Select a new operator')
+  }, [value.length])
+
+  const handleOperatorEditCancel = useCallback(() => {
+    setEditingOperatorIndex(-1)
+    setIsDropdownOpen(false)
+  }, [])
+
   return {
     state,
     tokens,
@@ -581,6 +645,7 @@ export function useFilterState({
     editingTokenIndex,
     selectedTokenIndex,
     allTokensSelected,
+    editingOperatorIndex,
     handleFocus,
     handleBlur,
     handleInputChange,
@@ -592,5 +657,7 @@ export function useFilterState({
     handleTokenEdit,
     handleTokenEditComplete,
     handleTokenEditCancel,
+    handleOperatorEdit,
+    handleOperatorEditCancel,
   }
 }

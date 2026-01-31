@@ -22,6 +22,8 @@ export interface TokenContainerProps {
   onInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
   /** Called when a token is clicked */
   onTokenClick?: (position: number) => void
+  /** Called when an operator token is clicked (for editing) */
+  onOperatorClick?: (expressionIndex: number) => void
   /** Called when input gains focus */
   onInputFocus?: () => void
   /** Called when input loses focus */
@@ -61,6 +63,7 @@ export function TokenContainer({
   onInputChange,
   onInputKeyDown,
   onTokenClick,
+  onOperatorClick,
   onInputFocus,
   onInputBlur,
   onFocus,
@@ -85,6 +88,15 @@ export function TokenContainer({
     inputRef.current?.focus()
   }
 
+  // Handle token click - operators get special handling
+  const handleTokenClick = (token: TokenData, index: number) => {
+    if (token.type === 'operator' && !token.isPending && token.expressionIndex >= 0 && onOperatorClick) {
+      onOperatorClick(token.expressionIndex)
+    } else {
+      onTokenClick?.(index)
+    }
+  }
+
   return (
     <div
       className={clsx('token-container', { 'token-container--disabled': disabled }, className)}
@@ -94,11 +106,11 @@ export function TokenContainer({
         <Token
           key={token.id}
           data={token}
-          isEditable={token.type === 'value' && !token.isPending}
+          isEditable={(token.type === 'value' || token.type === 'operator') && !token.isPending}
           isEditing={index === editingTokenIndex}
           isSelected={allTokensSelected || index === selectedTokenIndex}
           isDeletable={false}
-          onEdit={() => onTokenClick?.(index)}
+          onEdit={() => handleTokenClick(token, index)}
           onDelete={() => {}}
           onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}
           onEditCancel={() => onTokenEditCancel?.()}

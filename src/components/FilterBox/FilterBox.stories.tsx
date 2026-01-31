@@ -775,4 +775,63 @@ This provides immediate visual feedback about the expression being built.
     },
   },
 }
+
+// Operator Editing Story
+function OperatorEditingFilterBox() {
+  const [value, setValue] = useState<FilterExpression[]>([
+    {
+      condition: {
+        field: { key: 'status', label: 'Status', type: 'enum' },
+        operator: { key: 'eq', label: 'is', symbol: '=' },
+        value: { raw: 'active', display: 'Active', serialized: 'active' },
+      },
+      connector: 'AND',
+    },
+    {
+      condition: {
+        field: { key: 'name', label: 'Name', type: 'string' },
+        operator: { key: 'contains', label: 'contains' },
+        value: { raw: 'John', display: 'John', serialized: 'John' },
+      },
+    },
+  ])
+
+  return (
+    <div style={{ maxWidth: '700px' }}>
+      <h4 style={{ marginBottom: '0.5rem' }}>Click on an Operator to Change It</h4>
+      <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
+        <p>Operators can now be changed by clicking directly on them:</p>
+        <ol style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
+          <li>Click on the <span style={{ color: '#c2185b', fontWeight: 'bold' }}>=</span> or <span style={{ color: '#c2185b', fontWeight: 'bold' }}>contains</span> operator</li>
+          <li>A dropdown appears with available operators for that field</li>
+          <li>Select a new operator to update the expression</li>
+        </ol>
+        <p style={{ fontStyle: 'italic', marginTop: '8px' }}>
+          Previously, you had to delete the entire expression to change an operator!
+        </p>
+      </div>
+      <FilterBox schema={basicSchema} value={value} onChange={setValue} />
+    </div>
+  )
+}
+
+export const OperatorEditing: Story = {
+  render: () => <OperatorEditingFilterBox />,
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Demonstrates the **operator editing** feature.
+
+Users can now click on an operator token to change it without deleting the entire expression:
+- **Click on any operator** (pink/magenta tokens) to open the operator dropdown
+- **Select a different operator** to update the expression in place
+- **Press Escape** to cancel without changing
+
+This significantly improves the editing experience for filter expressions.
+        `,
+      },
+    },
+  },
+}
 // Note: Theme-related stories have been moved to Theming.stories.tsx

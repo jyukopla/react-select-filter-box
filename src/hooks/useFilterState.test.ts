@@ -996,4 +996,103 @@ describe('useFilterState', () => {
       expect(result.current.tokens).toHaveLength(3) // field, operator, value
     })
   })
+
+  describe('Operator Editing', () => {
+    it('should allow clicking operator token to start editing', () => {
+      const initialValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
+      )
+
+      // Find the operator token index (second token, index 1)
+      expect(result.current.tokens[1].type).toBe('operator')
+
+      // Click on operator token to start editing
+      act(() => {
+        result.current.handleOperatorEdit(0) // expression index
+      })
+
+      // Should be in operator editing mode
+      expect(result.current.editingOperatorIndex).toBe(0)
+      expect(result.current.isDropdownOpen).toBe(true)
+      // Suggestions should be operators for that field
+      expect(result.current.suggestions.every(s => s.type === 'operator')).toBe(true)
+    })
+
+    it('should update operator when new one is selected during editing', () => {
+      const initialValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const onChange = vi.fn()
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange })
+      )
+
+      // Start editing operator
+      act(() => {
+        result.current.handleOperatorEdit(0)
+      })
+
+      // Select a different operator
+      act(() => {
+        result.current.handleSelect({
+          type: 'operator',
+          key: 'neq',
+          label: 'not equals',
+        })
+      })
+
+      // onChange should be called with updated expression
+      expect(onChange).toHaveBeenCalled()
+      const updatedExpressions = onChange.mock.calls[0][0]
+      expect(updatedExpressions[0].condition.operator.key).toBe('neq')
+    })
+
+    it('should cancel operator editing on Escape', () => {
+      const initialValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
+      )
+
+      // Start editing operator
+      act(() => {
+        result.current.handleOperatorEdit(0)
+      })
+
+      expect(result.current.editingOperatorIndex).toBe(0)
+
+      // Cancel with escape
+      act(() => {
+        result.current.handleOperatorEditCancel()
+      })
+
+      expect(result.current.editingOperatorIndex).toBe(-1)
+      expect(result.current.isDropdownOpen).toBe(false)
+    })
+  })
 })

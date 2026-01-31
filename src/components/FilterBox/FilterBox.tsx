@@ -95,6 +95,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     handleTokenEdit,
     handleTokenEditComplete,
     handleTokenEditCancel,
+    handleOperatorEdit,
   } = useFilterState({ schema, value, onChange })
 
   // Focus management for trap and restoration
@@ -171,6 +172,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
         onInputBlur={handleBlur}
         onInputKeyDown={handleKeyDown}
         onTokenClick={handleTokenEdit}
+        onOperatorClick={handleOperatorEdit}
         editingTokenIndex={editingTokenIndex}
         selectedTokenIndex={selectedTokenIndex}
         allTokensSelected={allTokensSelected}
