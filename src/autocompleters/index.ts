@@ -751,7 +751,7 @@ export function withStaleWhileRevalidate(
         // Stale but not expired - return stale, fetch in background
         if (age < staleAge) {
           // Fire and forget background revalidation
-          autocompleter.getSuggestions(context).then((items) => {
+          Promise.resolve(autocompleter.getSuggestions(context)).then((items) => {
             cache.set(key, { items, timestamp: Date.now() })
             onUpdate?.(items)
           }).catch(() => {

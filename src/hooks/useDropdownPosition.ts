@@ -125,7 +125,7 @@ export function useDropdownPosition({
   // Update position when open state changes or on scroll/resize
   useEffect(() => {
     if (!isOpen) {
-      return;
+      return undefined;
     }
 
     calculatePosition();

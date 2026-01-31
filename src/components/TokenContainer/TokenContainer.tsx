@@ -117,6 +117,7 @@ export function TokenContainer({
         />
       ))}
       <TokenInput
+        {...inputProps}
         value={inputValue}
         onChange={onInputChange}
         onKeyDown={onInputKeyDown}
@@ -125,7 +126,6 @@ export function TokenContainer({
         inputRef={inputRef}
         placeholder={placeholder}
         disabled={disabled}
-        {...inputProps}
       />
     </div>
   )

@@ -151,6 +151,8 @@ export interface FieldConfig {
   group?: string
   /** Whether this field can appear multiple times (default: true) */
   allowMultiple?: boolean
+  /** Whether a value is required (default: true) */
+  valueRequired?: boolean
   /** Custom autocompleter for values */
   valueAutocompleter?: Autocompleter
   /** Custom value validation */

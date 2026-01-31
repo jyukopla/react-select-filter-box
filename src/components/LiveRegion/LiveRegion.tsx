@@ -97,7 +97,7 @@ export function useLiveAnnounce({
 
   // Clear message after timeout
   useEffect(() => {
-    if (!message) return
+    if (!message) return undefined
 
     const timeout = setTimeout(() => {
       clear()

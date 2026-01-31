@@ -2,7 +2,7 @@
  * Serialization utilities for filter expressions
  */
 
-import type { FilterExpression, FilterSchema, FieldConfig, FieldType, ConditionValue } from '@/types'
+import type { FilterExpression, FilterSchema, ConditionValue, FieldValue, OperatorValue } from '@/types'
 
 /**
  * Serialized expression format (for JSON/API)

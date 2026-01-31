@@ -1,12 +1,49 @@
 {
   "name": "react-select-filter-box",
-  "private": true,
   "version": "0.0.0",
   "license": "EUPL-1.2",
+  "description": "A Sequential Filter Box component for React that provides a Select2-like single-line filter expression builder",
+  "keywords": [
+    "react",
+    "filter",
+    "filter-box",
+    "select",
+    "autocomplete",
+    "search",
+    "expression-builder",
+    "query-builder"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/react-select-filter-box.git"
+  },
   "type": "module",
+  "main": "./dist/react-select-filter-box.cjs",
+  "module": "./dist/react-select-filter-box.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/react-select-filter-box.mjs",
+      "require": "./dist/react-select-filter-box.cjs"
+    },
+    "./styles": {
+      "import": "./dist/styles/style.css",
+      "require": "./dist/styles/style.css"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:lib": "vite build && tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run --project unit",
@@ -18,11 +55,15 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "prepublishOnly": "npm run build:lib"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "clsx": "^2.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -34,7 +75,6 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/coverage-v8": "^4.0.18",
-    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -42,6 +82,8 @@
     "globals": "^16.5.0",
     "jsdom": "^27.4.0",
     "prettier": "^3.8.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",

@@ -94,11 +94,11 @@ export function useFocusManagement({
    */
   useEffect(() => {
     if (!isDropdownOpen && !isEditing) {
-      return
+      return undefined
     }
 
     const container = containerRef.current
-    if (!container) return
+    if (!container) return undefined
 
     const handleFocusOut = (e: FocusEvent) => {
       const relatedTarget = e.relatedTarget as Node | null
