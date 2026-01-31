@@ -37,7 +37,19 @@ export default defineConfig({
         'src/main.tsx',
         'src/vite-env.d.ts',
         'src/stories/**',
+        'src/index.ts',
+        'src/App.tsx',
+        'src/index.css',
+        'src/App.css',
       ],
+      thresholds: {
+        // Note: 100% is the target, but currently set to 80% to allow gradual improvement
+        // Increase these thresholds as coverage improves
+        statements: 80,
+        branches: 75,
+        functions: 80,
+        lines: 80,
+      },
     },
     projects: [
       // Unit tests project
