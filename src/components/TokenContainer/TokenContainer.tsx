@@ -135,7 +135,10 @@ export function TokenContainer({
           <Token
             key={token.id}
             data={token}
-            isEditable={(token.type === 'value' || token.type === 'operator' || token.type === 'connector') && !token.isPending}
+            isEditable={
+              (token.type === 'value' || token.type === 'operator' || token.type === 'connector') &&
+              !token.isPending
+            }
             isEditing={index === editingTokenIndex}
             isSelected={isSelected}
             isDeletable={isDeletable}

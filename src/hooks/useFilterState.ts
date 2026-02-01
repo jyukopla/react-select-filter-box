@@ -492,7 +492,9 @@ export function useFilterState({
             // Close dropdown for value entry (free text) unless there's a custom widget
             const hasCustomWidget = opConfig.customInput !== undefined
             setIsDropdownOpen(hasCustomWidget)
-            setAnnouncement(`Selected ${fieldValue.label} with ${operatorValue.label}. Now enter a value.`)
+            setAnnouncement(
+              `Selected ${fieldValue.label} with ${operatorValue.label}. Now enter a value.`
+            )
           } else {
             setAnnouncement(`Selected ${fieldValue.label}. Now select an operator.`)
           }
