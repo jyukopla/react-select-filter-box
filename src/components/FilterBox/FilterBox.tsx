@@ -11,7 +11,12 @@ import { TokenContainer } from '@/components/TokenContainer'
 import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
 import { DropdownPortal } from '@/components/DropdownPortal'
 import { LiveRegion } from '@/components/LiveRegion'
-import { useFilterState, useDropdownPosition, useFocusManagement, type UseFilterStateProps } from '@/hooks'
+import {
+  useFilterState,
+  useDropdownPosition,
+  useFocusManagement,
+  type UseFilterStateProps,
+} from '@/hooks'
 import { validateExpressions, type ValidationError } from '@/utils'
 import './FilterBox.css'
 
@@ -45,6 +50,8 @@ export interface FilterBoxProps extends UseFilterStateProps {
   skipToId?: string
   /** Custom text for skip link (default: "Skip to content") */
   skipLinkText?: string
+  /** Whether the token container should take full available width (default: true) */
+  fullWidth?: boolean
 }
 
 export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function FilterBox(
@@ -62,6 +69,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     onError,
     skipToId,
     skipLinkText = 'Skip to content',
+    fullWidth = true,
   },
   ref
 ) {
@@ -88,10 +96,14 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
   useEffect(() => {
     if (!validationResult.valid && validationResult.errors.length > 0) {
       const errorCount = validationResult.errors.length
-      const errorMessages = validationResult.errors.map(e => e.message).slice(0, 3).join('. ')
-      const announcement = errorCount === 1
-        ? `Validation error: ${errorMessages}`
-        : `${errorCount} validation errors. ${errorMessages}${errorCount > 3 ? '...' : ''}`
+      const errorMessages = validationResult.errors
+        .map((e) => e.message)
+        .slice(0, 3)
+        .join('. ')
+      const announcement =
+        errorCount === 1
+          ? `Validation error: ${errorMessages}`
+          : `${errorCount} validation errors. ${errorMessages}${errorCount > 3 ? '...' : ''}`
       setValidationErrorAnnouncement(announcement)
     } else {
       setValidationErrorAnnouncement('')
@@ -131,17 +143,21 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
   })
 
   // Expose imperative handle
-  useImperativeHandle(ref, () => ({
-    focus: () => {
-      focusInput()
-    },
-    blur: () => {
-      inputRef.current?.blur()
-    },
-    clear: () => {
-      handleClear()
-    },
-  }), [handleClear, focusInput])
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        focusInput()
+      },
+      blur: () => {
+        inputRef.current?.blur()
+      },
+      clear: () => {
+        handleClear()
+      },
+    }),
+    [handleClear, focusInput]
+  )
 
   // Auto-focus on mount
   useEffect(() => {
@@ -180,10 +196,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     >
       {/* Skip link for keyboard accessibility */}
       {skipToId && (
-        <a
-          href={`#${skipToId}`}
-          className="filter-box__skip-link"
-        >
+        <a href={`#${skipToId}`} className="filter-box__skip-link">
           {skipLinkText}
         </a>
       )}
@@ -201,30 +214,31 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
           tokens={tokens}
           inputRef={inputRef}
           inputValue={inputValue}
-        placeholder={placeholder}
-        onInputChange={handleInputChange}
-        onInputFocus={handleFocus}
-        onInputBlur={handleBlur}
-        onInputKeyDown={handleKeyDown}
-        onTokenClick={handleTokenEdit}
-        onOperatorClick={handleOperatorEdit}
-        editingTokenIndex={editingTokenIndex}
-        selectedTokenIndex={selectedTokenIndex}
-        allTokensSelected={allTokensSelected}
-        onTokenEditComplete={handleTokenEditComplete}
-        onTokenEditCancel={handleTokenEditCancel}
-        disabled={disabled}
-        inputProps={{
-          'aria-autocomplete': 'list',
-          'aria-controls': isDropdownOpen ? dropdownId : undefined,
-          'aria-expanded': isDropdownOpen,
-          'aria-label': ariaLabel,
-          'aria-activedescendant':
-            isDropdownOpen && suggestions[highlightedIndex]
-              ? `${dropdownId}-item-${highlightedIndex}`
-              : undefined,
-        }}
-      />
+          placeholder={placeholder}
+          onInputChange={handleInputChange}
+          onInputFocus={handleFocus}
+          onInputBlur={handleBlur}
+          onInputKeyDown={handleKeyDown}
+          onTokenClick={handleTokenEdit}
+          onOperatorClick={handleOperatorEdit}
+          editingTokenIndex={editingTokenIndex}
+          selectedTokenIndex={selectedTokenIndex}
+          allTokensSelected={allTokensSelected}
+          onTokenEditComplete={handleTokenEditComplete}
+          onTokenEditCancel={handleTokenEditCancel}
+          disabled={disabled}
+          fullWidth={fullWidth}
+          inputProps={{
+            'aria-autocomplete': 'list',
+            'aria-controls': isDropdownOpen ? dropdownId : undefined,
+            'aria-expanded': isDropdownOpen,
+            'aria-label': ariaLabel,
+            'aria-activedescendant':
+              isDropdownOpen && suggestions[highlightedIndex]
+                ? `${dropdownId}-item-${highlightedIndex}`
+                : undefined,
+          }}
+        />
         {showClearButton && tokens.length > 0 && !disabled && (
           <button
             type="button"

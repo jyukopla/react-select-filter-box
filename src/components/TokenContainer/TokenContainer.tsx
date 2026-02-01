@@ -52,6 +52,8 @@ export interface TokenContainerProps {
   onTokenEditComplete?: (newValue: ConditionValue) => void
   /** Called when token edit is cancelled */
   onTokenEditCancel?: () => void
+  /** Whether the container should take full available width (default: true) */
+  fullWidth?: boolean
 }
 
 /**
@@ -78,6 +80,7 @@ export function TokenContainer({
   allTokensSelected = false,
   onTokenEditComplete,
   onTokenEditCancel,
+  fullWidth = true,
 }: TokenContainerProps) {
   // Support both onInputFocus/onInputBlur and legacy onFocus/onBlur
   const handleFocus = onInputFocus ?? onFocus
@@ -90,7 +93,12 @@ export function TokenContainer({
 
   // Handle token click - operators get special handling
   const handleTokenClick = (token: TokenData, index: number) => {
-    if (token.type === 'operator' && !token.isPending && token.expressionIndex >= 0 && onOperatorClick) {
+    if (
+      token.type === 'operator' &&
+      !token.isPending &&
+      token.expressionIndex >= 0 &&
+      onOperatorClick
+    ) {
       onOperatorClick(token.expressionIndex)
     } else {
       onTokenClick?.(index)
@@ -99,7 +107,11 @@ export function TokenContainer({
 
   return (
     <div
-      className={clsx('token-container', { 'token-container--disabled': disabled }, className)}
+      className={clsx(
+        'token-container',
+        { 'token-container--disabled': disabled, 'token-container--full-width': fullWidth },
+        className
+      )}
       onClick={handleContainerClick}
     >
       {tokens.map((token, index) => (
