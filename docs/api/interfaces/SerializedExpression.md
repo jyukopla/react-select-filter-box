@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / SerializedExpression
 
@@ -18,7 +18,7 @@ Serialized expression format (for JSON/API)
 
 Defined in: [utils/serialization.ts:14](https://github.com/jyukopla/react-select-filter-box/blob/732c0bb5d34ae2c255c8387f5b4df9b4c06e4e67/src/utils/serialization.ts#L14)
 
-***
+---
 
 ### field
 
@@ -26,7 +26,7 @@ Defined in: [utils/serialization.ts:14](https://github.com/jyukopla/react-select
 
 Defined in: [utils/serialization.ts:11](https://github.com/jyukopla/react-select-filter-box/blob/732c0bb5d34ae2c255c8387f5b4df9b4c06e4e67/src/utils/serialization.ts#L11)
 
-***
+---
 
 ### operator
 
@@ -34,7 +34,7 @@ Defined in: [utils/serialization.ts:11](https://github.com/jyukopla/react-select
 
 Defined in: [utils/serialization.ts:12](https://github.com/jyukopla/react-select-filter-box/blob/732c0bb5d34ae2c255c8387f5b4df9b4c06e4e67/src/utils/serialization.ts#L12)
 
-***
+---
 
 ### value
 

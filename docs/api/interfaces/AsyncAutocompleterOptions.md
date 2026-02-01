@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / AsyncAutocompleterOptions
 
@@ -18,7 +18,7 @@ Defined in: [autocompleters/index.ts:141](https://github.com/jyukopla/react-sele
 
 Whether to cache results
 
-***
+---
 
 ### debounceMs?
 
@@ -28,7 +28,7 @@ Defined in: [autocompleters/index.ts:137](https://github.com/jyukopla/react-sele
 
 Debounce time in milliseconds
 
-***
+---
 
 ### loadingMessage?
 
@@ -38,7 +38,7 @@ Defined in: [autocompleters/index.ts:143](https://github.com/jyukopla/react-sele
 
 Message shown while loading
 
-***
+---
 
 ### minChars?
 

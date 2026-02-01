@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / UseFilterStateProps
 
@@ -32,7 +32,7 @@ Called when expressions change
 
 `void`
 
-***
+---
 
 ### schema
 
@@ -42,7 +42,7 @@ Defined in: [hooks/useFilterState.ts:22](https://github.com/jyukopla/react-selec
 
 Schema defining available fields and operators
 
-***
+---
 
 ### value
 

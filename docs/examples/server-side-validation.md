@@ -5,6 +5,7 @@ This example demonstrates how to implement server-side validation with the React
 ## Overview
 
 Server-side validation allows you to:
+
 - Validate filter expressions against business rules
 - Check permissions for certain filter combinations
 - Validate against current database state
@@ -55,19 +56,23 @@ function FilterWithServerValidation({ schema }: { schema: FilterSchema }) {
       const result: ServerValidationResult = await response.json()
 
       if (!result.valid) {
-        setServerErrors(result.errors.map(err => ({
-          field: err.field,
-          expressionIndex: err.expressionIndex,
-          message: err.message,
-        })))
+        setServerErrors(
+          result.errors.map((err) => ({
+            field: err.field,
+            expressionIndex: err.expressionIndex,
+            message: err.message,
+          }))
+        )
       } else {
         setServerErrors([])
       }
     } catch (error) {
       console.error('Validation request failed:', error)
-      setServerErrors([{
-        message: 'Unable to validate filters. Please try again.',
-      }])
+      setServerErrors([
+        {
+          message: 'Unable to validate filters. Please try again.',
+        },
+      ])
     } finally {
       setValidating(false)
     }
@@ -101,9 +106,7 @@ function FilterWithServerValidation({ schema }: { schema: FilterSchema }) {
         onError={handleClientError}
       />
 
-      {validating && (
-        <div className="validation-status">Validating...</div>
-      )}
+      {validating && <div className="validation-status">Validating...</div>}
 
       {serverErrors.length > 0 && (
         <div className="server-errors">
@@ -155,7 +158,7 @@ router.post('/api/filters/validate', async (req, res) => {
   for (let i = 0; i < filters.length; i++) {
     const filter = filters[i]
     const errors = await validateFilter(filter, i, filters, req.user)
-    
+
     if (errors.length > 0) {
       result.valid = false
       result.errors.push(...errors)
@@ -245,9 +248,8 @@ function checkConflictingFilters(
 
   // Example: Can't filter for both completed AND active state
   if (currentFilter.field === 'state') {
-    const stateFilters = filters
-      .filter((f, i) => f.field === 'state' && i !== currentIndex)
-    
+    const stateFilters = filters.filter((f, i) => f.field === 'state' && i !== currentIndex)
+
     for (const other of stateFilters) {
       if (
         (currentFilter.value === 'ACTIVE' && other.value === 'COMPLETED') ||
@@ -270,11 +272,7 @@ function checkConflictingFilters(
 ## Displaying Errors on Tokens
 
 ```tsx
-import {
-  FilterBox,
-  type FilterExpression,
-  type ValidationError,
-} from 'react-select-filter-box'
+import { FilterBox, type FilterExpression, type ValidationError } from 'react-select-filter-box'
 
 function FilterWithTokenErrors({ schema }: { schema: FilterSchema }) {
   const [expressions, setExpressions] = useState<FilterExpression[]>([])
@@ -283,7 +281,7 @@ function FilterWithTokenErrors({ schema }: { schema: FilterSchema }) {
   // Map errors to expressions for display
   const expressionsWithErrors = useMemo(() => {
     return expressions.map((expr, index) => {
-      const error = serverErrors.find(e => e.expressionIndex === index)
+      const error = serverErrors.find((e) => e.expressionIndex === index)
       if (error) {
         return {
           ...expr,
@@ -296,13 +294,7 @@ function FilterWithTokenErrors({ schema }: { schema: FilterSchema }) {
 
   // ... validation logic from above
 
-  return (
-    <FilterBox
-      schema={schema}
-      value={expressionsWithErrors}
-      onChange={setExpressions}
-    />
-  )
+  return <FilterBox schema={schema} value={expressionsWithErrors} onChange={setExpressions} />
 }
 ```
 
@@ -315,26 +307,22 @@ import { createAsyncAutocompleter } from 'react-select-filter-box'
 const validatingAutocompleter = createAsyncAutocompleter(
   async (query, context, signal) => {
     // Fetch suggestions
-    const response = await fetch(
-      `/api/validate-and-suggest/${context.field.key}?q=${query}`,
-      { signal }
-    )
-    
+    const response = await fetch(`/api/validate-and-suggest/${context.field.key}?q=${query}`, {
+      signal,
+    })
+
     const result = await response.json()
-    
+
     // Return suggestions with validation status
-    return result.suggestions.map((item: { 
-      value: string
-      label: string
-      valid: boolean
-      validationMessage?: string
-    }) => ({
-      type: 'value',
-      key: item.value,
-      label: item.label,
-      description: item.valid ? undefined : item.validationMessage,
-      disabled: !item.valid, // Disable invalid options
-    }))
+    return result.suggestions.map(
+      (item: { value: string; label: string; valid: boolean; validationMessage?: string }) => ({
+        type: 'value',
+        key: item.value,
+        label: item.label,
+        description: item.valid ? undefined : item.validationMessage,
+        disabled: !item.valid, // Disable invalid options
+      })
+    )
   },
   { debounceMs: 300 }
 )
@@ -364,7 +352,7 @@ function FilterFormWithSubmit({ schema, onSubmit }) {
     const result = await fetch('/api/filters/validate', {
       method: 'POST',
       body: serialize(exprs),
-    }).then(r => r.json())
+    }).then((r) => r.json())
 
     setErrors(result.errors || [])
     setIsValid(result.valid)
@@ -372,11 +360,11 @@ function FilterFormWithSubmit({ schema, onSubmit }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!isValid) {
       return // Don't submit with errors
     }
-    
+
     onSubmit(expressions)
   }
 
@@ -392,7 +380,9 @@ function FilterFormWithSubmit({ schema, onSubmit }) {
       {errors.length > 0 && (
         <div className="form-errors">
           {errors.map((e, i) => (
-            <p key={i} className="error">{e.message}</p>
+            <p key={i} className="error">
+              {e.message}
+            </p>
           ))}
         </div>
       )}
@@ -429,7 +419,9 @@ function FilterFormWithSubmit({ schema, onSubmit }) {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Server errors */
@@ -457,7 +449,7 @@ function FilterFormWithSubmit({ schema, onSubmit }) {
 }
 
 /* Form submit button */
-button[type="submit"]:disabled {
+button[type='submit']:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

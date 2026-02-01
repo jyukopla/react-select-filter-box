@@ -1,12 +1,12 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
-[React Select Filter Box](../README.md) / STRING\_OPERATORS
+[React Select Filter Box](../README.md) / STRING_OPERATORS
 
-# Variable: STRING\_OPERATORS
+# Variable: STRING_OPERATORS
 
-> `const` **STRING\_OPERATORS**: [`OperatorConfig`](../interfaces/OperatorConfig.md)[]
+> `const` **STRING_OPERATORS**: [`OperatorConfig`](../interfaces/OperatorConfig.md)[]
 
 Defined in: [types/Schema.ts:233](https://github.com/jyukopla/react-select-filter-box/blob/732c0bb5d34ae2c255c8387f5b4df9b4c06e4e67/src/types/Schema.ts#L233)
 

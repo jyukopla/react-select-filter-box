@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterStateMachine
 
@@ -41,7 +41,7 @@ Check if a transition is allowed from the current state
 
 `boolean`
 
-***
+---
 
 ### clear()
 
@@ -55,7 +55,7 @@ Clear all expressions but maintain current state
 
 `void`
 
-***
+---
 
 ### getAvailableActions()
 
@@ -69,7 +69,7 @@ Get available action types for the current state
 
 `FilterActionType`[]
 
-***
+---
 
 ### getContext()
 
@@ -83,7 +83,7 @@ Get the current context
 
 `FilterContext`
 
-***
+---
 
 ### getState()
 
@@ -97,7 +97,7 @@ Get the current state
 
 [`FilterStep`](../type-aliases/FilterStep.md)
 
-***
+---
 
 ### loadExpressions()
 
@@ -117,7 +117,7 @@ Load expressions from external source
 
 `void`
 
-***
+---
 
 ### reset()
 
@@ -131,7 +131,7 @@ Reset the state machine to initial state
 
 `void`
 
-***
+---
 
 ### transition()
 

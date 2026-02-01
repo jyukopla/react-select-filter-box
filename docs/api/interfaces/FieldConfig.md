@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FieldConfig
 
@@ -20,7 +20,7 @@ Defined in: [types/Schema.ts:153](https://github.com/jyukopla/react-select-filte
 
 Whether this field can appear multiple times (default: true)
 
-***
+---
 
 ### color?
 
@@ -30,7 +30,7 @@ Defined in: [types/Schema.ts:147](https://github.com/jyukopla/react-select-filte
 
 Field-level color
 
-***
+---
 
 ### defaultOperator?
 
@@ -40,7 +40,7 @@ Defined in: [types/Schema.ts:145](https://github.com/jyukopla/react-select-filte
 
 Default operator key (first if not specified)
 
-***
+---
 
 ### description?
 
@@ -50,7 +50,7 @@ Defined in: [types/Schema.ts:139](https://github.com/jyukopla/react-select-filte
 
 Optional description
 
-***
+---
 
 ### deserialize()?
 
@@ -70,7 +70,7 @@ Custom deserialization for field values
 
 [`ConditionValue`](ConditionValue.md)
 
-***
+---
 
 ### group?
 
@@ -80,7 +80,7 @@ Defined in: [types/Schema.ts:151](https://github.com/jyukopla/react-select-filte
 
 Group for autocomplete display
 
-***
+---
 
 ### icon?
 
@@ -90,7 +90,7 @@ Defined in: [types/Schema.ts:149](https://github.com/jyukopla/react-select-filte
 
 Field icon
 
-***
+---
 
 ### key
 
@@ -100,7 +100,7 @@ Defined in: [types/Schema.ts:135](https://github.com/jyukopla/react-select-filte
 
 Field key (used in API)
 
-***
+---
 
 ### label
 
@@ -110,7 +110,7 @@ Defined in: [types/Schema.ts:137](https://github.com/jyukopla/react-select-filte
 
 Display label
 
-***
+---
 
 ### operators
 
@@ -120,7 +120,7 @@ Defined in: [types/Schema.ts:143](https://github.com/jyukopla/react-select-filte
 
 Available operators for this field
 
-***
+---
 
 ### serialize()?
 
@@ -140,7 +140,7 @@ Custom serialization for field values
 
 `unknown`
 
-***
+---
 
 ### type
 
@@ -150,7 +150,7 @@ Defined in: [types/Schema.ts:141](https://github.com/jyukopla/react-select-filte
 
 Field type (determines default operators and input)
 
-***
+---
 
 ### validate()?
 
@@ -174,7 +174,7 @@ Custom value validation
 
 [`ValidationResult`](ValidationResult.md)
 
-***
+---
 
 ### valueAutocompleter?
 
@@ -184,7 +184,7 @@ Defined in: [types/Schema.ts:157](https://github.com/jyukopla/react-select-filte
 
 Custom autocompleter for values
 
-***
+---
 
 ### valueRequired?
 

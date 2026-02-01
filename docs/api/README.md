@@ -1,6 +1,6 @@
 **React Select Filter Box v0.0.0**
 
-***
+---
 
 # React Select Filter Box v0.0.0
 
@@ -99,13 +99,13 @@
 
 ## Variables
 
-- [BOOLEAN\_OPERATORS](variables/BOOLEAN_OPERATORS.md)
-- [DATE\_OPERATORS](variables/DATE_OPERATORS.md)
-- [DEFAULT\_CONNECTORS](variables/DEFAULT_CONNECTORS.md)
-- [ENUM\_OPERATORS](variables/ENUM_OPERATORS.md)
+- [BOOLEAN_OPERATORS](variables/BOOLEAN_OPERATORS.md)
+- [DATE_OPERATORS](variables/DATE_OPERATORS.md)
+- [DEFAULT_CONNECTORS](variables/DEFAULT_CONNECTORS.md)
+- [ENUM_OPERATORS](variables/ENUM_OPERATORS.md)
 - [FilterBox](variables/FilterBox.md)
-- [ID\_OPERATORS](variables/ID_OPERATORS.md)
-- [NUMBER\_OPERATORS](variables/NUMBER_OPERATORS.md)
-- [STRING\_OPERATORS](variables/STRING_OPERATORS.md)
+- [ID_OPERATORS](variables/ID_OPERATORS.md)
+- [NUMBER_OPERATORS](variables/NUMBER_OPERATORS.md)
+- [STRING_OPERATORS](variables/STRING_OPERATORS.md)
 - [themes](variables/themes.md)
 - [Token](variables/Token.md)

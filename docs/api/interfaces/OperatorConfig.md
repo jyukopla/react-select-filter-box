@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / OperatorConfig
 
@@ -20,7 +20,7 @@ Defined in: [types/Schema.ts:121](https://github.com/jyukopla/react-select-filte
 
 Custom input widget
 
-***
+---
 
 ### key
 
@@ -30,7 +30,7 @@ Defined in: [types/Schema.ts:109](https://github.com/jyukopla/react-select-filte
 
 Operator key (e.g., 'eq', 'before')
 
-***
+---
 
 ### label
 
@@ -40,7 +40,7 @@ Defined in: [types/Schema.ts:111](https://github.com/jyukopla/react-select-filte
 
 Display label (e.g., 'equals', 'before')
 
-***
+---
 
 ### multiValue?
 
@@ -50,7 +50,7 @@ Defined in: [types/Schema.ts:123](https://github.com/jyukopla/react-select-filte
 
 For operators needing multiple values
 
-***
+---
 
 ### symbol?
 
@@ -60,7 +60,7 @@ Defined in: [types/Schema.ts:113](https://github.com/jyukopla/react-select-filte
 
 Optional symbol for compact display (e.g., '=', '≠')
 
-***
+---
 
 ### valueAutocompleter?
 
@@ -70,7 +70,7 @@ Defined in: [types/Schema.ts:119](https://github.com/jyukopla/react-select-filte
 
 Custom autocompleter for values
 
-***
+---
 
 ### valueRequired?
 
@@ -80,7 +80,7 @@ Defined in: [types/Schema.ts:117](https://github.com/jyukopla/react-select-filte
 
 Whether a value is required (default: true)
 
-***
+---
 
 ### valueType?
 

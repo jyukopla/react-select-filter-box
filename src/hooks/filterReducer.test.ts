@@ -440,7 +440,9 @@ describe('filterReducer', () => {
 
   describe('unknown action', () => {
     it('should return current state for unknown action', () => {
-      const result = filterReducer(initialFilterState, { type: 'UNKNOWN' } as unknown as FilterAction)
+      const result = filterReducer(initialFilterState, {
+        type: 'UNKNOWN',
+      } as unknown as FilterAction)
       expect(result).toEqual(initialFilterState)
     })
   })

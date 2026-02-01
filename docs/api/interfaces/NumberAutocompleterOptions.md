@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / NumberAutocompleterOptions
 
@@ -28,7 +28,7 @@ Custom formatter
 
 `string`
 
-***
+---
 
 ### integer?
 
@@ -38,7 +38,7 @@ Defined in: [autocompleters/index.ts:255](https://github.com/jyukopla/react-sele
 
 Whether only integers are allowed
 
-***
+---
 
 ### max?
 
@@ -48,7 +48,7 @@ Defined in: [autocompleters/index.ts:251](https://github.com/jyukopla/react-sele
 
 Maximum value
 
-***
+---
 
 ### min?
 
@@ -58,7 +58,7 @@ Defined in: [autocompleters/index.ts:249](https://github.com/jyukopla/react-sele
 
 Minimum value
 
-***
+---
 
 ### parse()?
 
@@ -78,7 +78,7 @@ Custom parser
 
 `number`
 
-***
+---
 
 ### step?
 

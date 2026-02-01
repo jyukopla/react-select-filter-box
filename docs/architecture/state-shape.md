@@ -18,31 +18,31 @@ The FilterBox manages several layers of state:
 ```typescript
 interface FilterExpression {
   condition: {
-    field: string        // Field identifier (e.g., "status", "createdAt")
-    operator: string     // Operator identifier (e.g., "eq", "contains")
+    field: string // Field identifier (e.g., "status", "createdAt")
+    operator: string // Operator identifier (e.g., "eq", "contains")
     value: ConditionValue
   }
   connector?: 'AND' | 'OR'
 }
 
-type ConditionValue = 
-  | string 
-  | number 
-  | boolean 
-  | Date 
-  | [Date, Date]  // For range operators
-  | string[]      // For "in" operators
+type ConditionValue =
+  | string
+  | number
+  | boolean
+  | Date
+  | [Date, Date] // For range operators
+  | string[] // For "in" operators
 ```
 
 ### 2. State Machine State
 
 ```typescript
 type FilterStep =
-  | 'IDLE'              // No active input, waiting for interaction
-  | 'FIELD_SELECT'      // User is selecting a field
-  | 'OPERATOR_SELECT'   // User is selecting an operator for chosen field
-  | 'VALUE_INPUT'       // User is entering/selecting a value
-  | 'CONNECTOR_SELECT'  // Expression complete, choosing AND/OR or done
+  | 'IDLE' // No active input, waiting for interaction
+  | 'FIELD_SELECT' // User is selecting a field
+  | 'OPERATOR_SELECT' // User is selecting an operator for chosen field
+  | 'VALUE_INPUT' // User is entering/selecting a value
+  | 'CONNECTOR_SELECT' // Expression complete, choosing AND/OR or done
 
 interface StateMachineContext {
   currentField: FieldDefinition | null
@@ -59,19 +59,19 @@ interface UIState {
   // Dropdown state
   isDropdownOpen: boolean
   highlightedIndex: number
-  
+
   // Input state
   inputValue: string
   isFocused: boolean
-  
+
   // Token selection/editing
-  selectedTokenIndex: number      // -1 if none selected
-  editingTokenIndex: number       // -1 if not editing
-  editingOperatorIndex: number    // -1 if not editing operator
-  allTokensSelected: boolean      // true when Ctrl+A pressed
-  
+  selectedTokenIndex: number // -1 if none selected
+  editingTokenIndex: number // -1 if not editing
+  editingOperatorIndex: number // -1 if not editing operator
+  allTokensSelected: boolean // true when Ctrl+A pressed
+
   // Announcements
-  announcement: string            // For screen readers
+  announcement: string // For screen readers
 }
 ```
 
@@ -81,19 +81,19 @@ interface UIState {
 interface DerivedState {
   // Token representation of expressions
   tokens: TokenData[]
-  
+
   // Pending tokens (incomplete expression)
   pendingTokens: TokenData[]
-  
+
   // Combined tokens for display
-  allTokens: TokenData[]  // [...tokens, ...pendingTokens]
-  
+  allTokens: TokenData[] // [...tokens, ...pendingTokens]
+
   // Current suggestions based on state
   suggestions: AutocompleteItem[]
-  
+
   // Dynamic placeholder
   placeholder: string
-  
+
   // Validation state
   validationResult: {
     valid: boolean
@@ -109,7 +109,7 @@ interface FilterBoxInternalState {
   // === State Machine ===
   step: FilterStep
   context: StateMachineContext
-  
+
   // === UI State ===
   ui: {
     isDropdownOpen: boolean
@@ -122,7 +122,7 @@ interface FilterBoxInternalState {
     allTokensSelected: boolean
     announcement: string
   }
-  
+
   // === Derived (computed on render) ===
   derived: {
     tokens: TokenData[]
@@ -170,17 +170,17 @@ interface FilterBoxInternalState {
 
 ### UI State Transitions
 
-| Current State | Action | Next State |
-|--------------|--------|------------|
-| Dropdown closed | Focus input | Dropdown open |
-| Dropdown open | Select item | Dropdown may stay open |
-| Dropdown open | Escape/blur | Dropdown closed |
-| No token selected | Arrow left | Last token selected |
-| Token selected | Arrow left/right | Adjacent token selected |
-| Token selected | Backspace | Delete token (if last) |
-| Token selected | Enter | Edit token (if value) |
-| Editing token | Escape | Cancel edit |
-| Editing token | Enter | Confirm edit |
+| Current State     | Action           | Next State              |
+| ----------------- | ---------------- | ----------------------- |
+| Dropdown closed   | Focus input      | Dropdown open           |
+| Dropdown open     | Select item      | Dropdown may stay open  |
+| Dropdown open     | Escape/blur      | Dropdown closed         |
+| No token selected | Arrow left       | Last token selected     |
+| Token selected    | Arrow left/right | Adjacent token selected |
+| Token selected    | Backspace        | Delete token (if last)  |
+| Token selected    | Enter            | Edit token (if value)   |
+| Editing token     | Escape           | Cancel edit             |
+| Editing token     | Enter            | Confirm edit            |
 
 ## State Hook Implementation
 
@@ -190,7 +190,7 @@ The `useFilterState` hook encapsulates all state logic:
 function useFilterState(props: UseFilterStateProps): UseFilterStateReturn {
   // State machine instance
   const [machine] = useState(() => new FilterStateMachine())
-  
+
   // UI state
   const [isDropdownOpen, setDropdownOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(0)
@@ -199,30 +199,26 @@ function useFilterState(props: UseFilterStateProps): UseFilterStateReturn {
   const [editingTokenIndex, setEditingTokenIndex] = useState(-1)
   const [allTokensSelected, setAllTokensSelected] = useState(false)
   const [announcement, setAnnouncement] = useState('')
-  
+
   // Derived state (memoized)
-  const tokens = useMemo(
-    () => expressionsToTokens(props.value),
-    [props.value]
-  )
-  
+  const tokens = useMemo(() => expressionsToTokens(props.value), [props.value])
+
   const pendingTokens = useMemo(
     () => getPendingTokens(machine.getContext()),
     [machine.getState(), machine.getContext()]
   )
-  
+
   const suggestions = useMemo(
     () => getSuggestions(machine.getState(), props.schema, inputValue),
     [machine.getState(), props.schema, inputValue]
   )
-  
-  const placeholder = useMemo(
-    () => getPlaceholder(machine.getState()),
-    [machine.getState()]
-  )
-  
+
+  const placeholder = useMemo(() => getPlaceholder(machine.getState()), [machine.getState()])
+
   // Event handlers...
-  return { /* all state and handlers */ }
+  return {
+    /* all state and handlers */
+  }
 }
 ```
 
@@ -236,23 +232,23 @@ interface TokenData {
   id: string
   position: number
   expressionIndex: number
-  
+
   // Type and value
   type: 'field' | 'operator' | 'value' | 'connector'
   value: unknown
-  displayValue?: string  // Human-readable display
-  
+  displayValue?: string // Human-readable display
+
   // State flags
-  isPending: boolean     // Part of incomplete expression
-  isEditing?: boolean    // Currently being edited
-  isSelected?: boolean   // Keyboard selected
-  
+  isPending: boolean // Part of incomplete expression
+  isEditing?: boolean // Currently being edited
+  isSelected?: boolean // Keyboard selected
+
   // Validation
-  error?: string         // Validation error message
-  
+  error?: string // Validation error message
+
   // Metadata
-  fieldType?: string     // For value tokens
-  fieldId?: string       // Associated field
+  fieldType?: string // For value tokens
+  fieldId?: string // Associated field
 }
 ```
 
@@ -294,7 +290,7 @@ The external state (`FilterExpression[]`) can be serialized:
 // To JSON
 const json = serialize(expressions)
 
-// To URL query string  
+// To URL query string
 const query = serializeToQueryString(expressions)
 
 // From JSON

@@ -5,6 +5,7 @@ This guide explains how to define filter schemas for the React Sequential Filter
 ## Overview
 
 A filter schema defines:
+
 - What fields are available for filtering
 - What operators apply to each field
 - How values are entered and validated
@@ -43,7 +44,7 @@ const schema: FilterSchema = {
 
 function App() {
   const [expressions, setExpressions] = useState([])
-  
+
   return (
     <FilterBox
       schema={schema}
@@ -61,17 +62,17 @@ import { SchemaBuilder } from 'react-select-filter-box'
 
 const schema = new SchemaBuilder()
   .field('name', 'Name')
-    .type('string')
-    .description('Person name')
-    .operators(['eq', 'contains', 'startsWith'])
-    .done()
+  .type('string')
+  .description('Person name')
+  .operators(['eq', 'contains', 'startsWith'])
+  .done()
   .field('age', 'Age')
-    .type('number')
-    .done()
+  .type('number')
+  .done()
   .field('status', 'Status')
-    .type('enum')
-    .group('Process')
-    .done()
+  .type('enum')
+  .group('Process')
+  .done()
   .maxExpressions(5)
   .build()
 ```
@@ -80,16 +81,16 @@ const schema = new SchemaBuilder()
 
 The component supports these built-in field types:
 
-| Type | Description | Default Operators |
-|------|-------------|-------------------|
-| `string` | Text values | equals, not equals, contains, starts with, ends with, like |
-| `number` | Numeric values | equals, not equals, >, ≥, <, ≤, between |
-| `date` | Date values | before, after, on, between |
-| `datetime` | Date and time values | before, after, on, between |
-| `boolean` | True/false values | is |
-| `enum` | Predefined options | is, is not, in |
-| `id` | Unique identifiers | equals, in list |
-| `custom` | Custom behavior | (defined per field) |
+| Type       | Description          | Default Operators                                          |
+| ---------- | -------------------- | ---------------------------------------------------------- |
+| `string`   | Text values          | equals, not equals, contains, starts with, ends with, like |
+| `number`   | Numeric values       | equals, not equals, >, ≥, <, ≤, between                    |
+| `date`     | Date values          | before, after, on, between                                 |
+| `datetime` | Date and time values | before, after, on, between                                 |
+| `boolean`  | True/false values    | is                                                         |
+| `enum`     | Predefined options   | is, is not, in                                             |
+| `id`       | Unique identifiers   | equals, in list                                            |
+| `custom`   | Custom behavior      | (defined per field)                                        |
 
 ## Field Configuration
 
@@ -98,23 +99,23 @@ The component supports these built-in field types:
 ```typescript
 interface FieldConfig {
   // Required
-  key: string          // Field identifier (used in API calls)
-  label: string        // Display label
-  type: FieldType      // Field type (see above)
-  operators: OperatorConfig[]  // Available operators
+  key: string // Field identifier (used in API calls)
+  label: string // Display label
+  type: FieldType // Field type (see above)
+  operators: OperatorConfig[] // Available operators
 
   // Optional
-  description?: string         // Tooltip description
-  group?: string               // Group in autocomplete dropdown
-  defaultOperator?: string     // Default operator key
-  color?: string               // Custom color for field tokens
-  icon?: ReactNode             // Icon in autocomplete
-  allowMultiple?: boolean      // Can appear multiple times (default: true)
-  valueRequired?: boolean      // Requires a value (default: true)
-  valueAutocompleter?: Autocompleter  // Custom value suggestions
-  validate?: (value, context) => ValidationResult  // Custom validation
-  serialize?: (value) => unknown   // Custom serialization
-  deserialize?: (data) => value    // Custom deserialization
+  description?: string // Tooltip description
+  group?: string // Group in autocomplete dropdown
+  defaultOperator?: string // Default operator key
+  color?: string // Custom color for field tokens
+  icon?: ReactNode // Icon in autocomplete
+  allowMultiple?: boolean // Can appear multiple times (default: true)
+  valueRequired?: boolean // Requires a value (default: true)
+  valueAutocompleter?: Autocompleter // Custom value suggestions
+  validate?: (value, context) => ValidationResult // Custom validation
+  serialize?: (value) => unknown // Custom serialization
+  deserialize?: (data) => value // Custom deserialization
 }
 ```
 
@@ -172,8 +173,8 @@ import { createDateAutocompleter } from 'react-select-filter-box'
     { key: 'after', label: 'after' },
     { key: 'before', label: 'before' },
     { key: 'on', label: 'on' },
-    { 
-      key: 'between', 
+    {
+      key: 'between',
       label: 'between',
       multiValue: { count: 2, separator: 'and', labels: ['from', 'to'] },
     },
@@ -192,14 +193,14 @@ import { createDateAutocompleter } from 'react-select-filter-box'
 
 ```typescript
 interface OperatorConfig {
-  key: string          // Operator identifier
-  label: string        // Display label
-  symbol?: string      // Short symbol (e.g., '=', '≠', '>')
-  valueType?: FieldType     // Override field's value type
-  valueRequired?: boolean   // Whether value is needed (default: true)
-  valueAutocompleter?: Autocompleter  // Custom autocompleter
-  customInput?: CustomAutocompleteWidget  // Custom input widget
-  multiValue?: MultiValueConfig  // For operators needing multiple values
+  key: string // Operator identifier
+  label: string // Display label
+  symbol?: string // Short symbol (e.g., '=', '≠', '>')
+  valueType?: FieldType // Override field's value type
+  valueRequired?: boolean // Whether value is needed (default: true)
+  valueAutocompleter?: Autocompleter // Custom autocompleter
+  customInput?: CustomAutocompleteWidget // Custom input widget
+  multiValue?: MultiValueConfig // For operators needing multiple values
 }
 ```
 
@@ -267,7 +268,7 @@ import {
   key: 'name',
   label: 'Name',
   type: 'string',
-  operators: STRING_OPERATORS.filter(op => 
+  operators: STRING_OPERATORS.filter(op =>
     ['eq', 'contains'].includes(op.key)
   ),
 }
@@ -280,11 +281,11 @@ import {
 ```typescript
 interface FilterSchema {
   fields: FieldConfig[]
-  connectors?: ConnectorConfig[]  // Default: AND, OR
-  maxExpressions?: number         // Limit number of expressions
-  validate?: (expressions) => ValidationResult  // Schema validation
-  serialize?: (expressions) => unknown    // Custom serialization
-  deserialize?: (data) => expressions     // Custom deserialization
+  connectors?: ConnectorConfig[] // Default: AND, OR
+  maxExpressions?: number // Limit number of expressions
+  validate?: (expressions) => ValidationResult // Schema validation
+  serialize?: (expressions) => unknown // Custom serialization
+  deserialize?: (data) => expressions // Custom deserialization
 }
 ```
 
@@ -322,24 +323,24 @@ const schema: FilterSchema = {
         errors: [{ message: 'At least one filter is required' }],
       }
     }
-    
+
     // Check for conflicting filters
-    const hasActive = expressions.some(e => 
+    const hasActive = expressions.some(e =>
       e.condition.field === 'status' && e.condition.value === 'active'
     )
-    const hasTerminated = expressions.some(e => 
+    const hasTerminated = expressions.some(e =>
       e.condition.field === 'status' && e.condition.value === 'terminated'
     )
-    
+
     if (hasActive && hasTerminated) {
       return {
         valid: false,
-        errors: [{ 
-          message: 'Cannot filter for both active and terminated status' 
+        errors: [{
+          message: 'Cannot filter for both active and terminated status'
         }],
       }
     }
-    
+
     return { valid: true, errors: [] }
   },
 }
@@ -356,11 +357,11 @@ const schema: FilterSchema = {
     { key: 'processId', label: 'Process ID', type: 'id', group: 'Process' },
     { key: 'processName', label: 'Name', type: 'string', group: 'Process' },
     { key: 'status', label: 'Status', type: 'enum', group: 'Process' },
-    
+
     // Time fields
     { key: 'startDate', label: 'Start Date', type: 'date', group: 'Time' },
     { key: 'endDate', label: 'End Date', type: 'date', group: 'Time' },
-    
+
     // Variables (ungrouped - appears at top)
     { key: 'priority', label: 'Priority', type: 'number' },
   ],
@@ -406,46 +407,50 @@ import {
 const processSchema = new SchemaBuilder()
   // Process identification
   .field('processInstanceId', 'Process ID')
-    .type('id')
-    .group('Identification')
-    .description('Unique process instance identifier')
-    .done()
+  .type('id')
+  .group('Identification')
+  .description('Unique process instance identifier')
+  .done()
   .field('processDefinitionKey', 'Definition Key')
-    .type('string')
-    .group('Identification')
-    .valueAutocompleter(createAsyncAutocompleter({
+  .type('string')
+  .group('Identification')
+  .valueAutocompleter(
+    createAsyncAutocompleter({
       fetchSuggestions: async (query) => {
         const response = await fetch(`/api/process-definitions?q=${query}`)
         return response.json()
       },
       debounceMs: 300,
-    }))
-    .done()
-    
+    })
+  )
+  .done()
+
   // Status
   .field('state', 'State')
-    .type('enum')
-    .group('Status')
-    .valueAutocompleter(createEnumAutocompleter([
+  .type('enum')
+  .group('Status')
+  .valueAutocompleter(
+    createEnumAutocompleter([
       { value: 'ACTIVE', label: 'Active' },
       { value: 'COMPLETED', label: 'Completed' },
       { value: 'SUSPENDED', label: 'Suspended' },
       { value: 'TERMINATED', label: 'Terminated' },
-    ]))
-    .done()
-    
+    ])
+  )
+  .done()
+
   // Time
   .field('startDate', 'Start Date')
-    .type('date')
-    .group('Time')
-    .valueAutocompleter(createDateAutocompleter())
-    .done()
+  .type('date')
+  .group('Time')
+  .valueAutocompleter(createDateAutocompleter())
+  .done()
   .field('endDate', 'End Date')
-    .type('date')
-    .group('Time')
-    .valueAutocompleter(createDateAutocompleter())
-    .done()
-    
+  .type('date')
+  .group('Time')
+  .valueAutocompleter(createDateAutocompleter())
+  .done()
+
   // Configuration
   .maxExpressions(10)
   .build()

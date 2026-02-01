@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterExpression
 
@@ -20,7 +20,7 @@ Defined in: [types/Expression.ts:95](https://github.com/jyukopla/react-select-fi
 
 The condition for this expression
 
-***
+---
 
 ### connector?
 

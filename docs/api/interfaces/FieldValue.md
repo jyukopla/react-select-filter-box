@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FieldValue
 
@@ -20,7 +20,7 @@ Defined in: [types/Expression.ts:33](https://github.com/jyukopla/react-select-fi
 
 API field key
 
-***
+---
 
 ### label
 
@@ -30,7 +30,7 @@ Defined in: [types/Expression.ts:35](https://github.com/jyukopla/react-select-fi
 
 Display label
 
-***
+---
 
 ### type
 

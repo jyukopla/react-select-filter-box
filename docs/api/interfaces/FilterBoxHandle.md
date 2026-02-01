@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterBoxHandle
 
@@ -27,7 +27,7 @@ Blur the input
 
 `void`
 
-***
+---
 
 ### clear()
 
@@ -41,7 +41,7 @@ Clear all filters
 
 `void`
 
-***
+---
 
 ### focus()
 

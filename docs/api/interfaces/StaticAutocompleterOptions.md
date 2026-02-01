@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / StaticAutocompleterOptions
 
@@ -18,7 +18,7 @@ Defined in: [autocompleters/index.ts:21](https://github.com/jyukopla/react-selec
 
 Whether matching is case-sensitive
 
-***
+---
 
 ### matchMode?
 
@@ -28,7 +28,7 @@ Defined in: [autocompleters/index.ts:19](https://github.com/jyukopla/react-selec
 
 Match mode for filtering suggestions
 
-***
+---
 
 ### maxResults?
 

@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / TokenStyles
 
@@ -20,7 +20,7 @@ Defined in: [theme/index.tsx:46](https://github.com/jyukopla/react-select-filter
 
 Border radius of tokens
 
-***
+---
 
 ### connectorBg?
 
@@ -30,7 +30,7 @@ Defined in: [theme/index.tsx:35](https://github.com/jyukopla/react-select-filter
 
 Background color for connector tokens
 
-***
+---
 
 ### connectorBorder?
 
@@ -40,7 +40,7 @@ Defined in: [theme/index.tsx:37](https://github.com/jyukopla/react-select-filter
 
 Border color for connector tokens
 
-***
+---
 
 ### connectorText?
 
@@ -50,7 +50,7 @@ Defined in: [theme/index.tsx:39](https://github.com/jyukopla/react-select-filter
 
 Text color for connector tokens
 
-***
+---
 
 ### fieldBg?
 
@@ -60,7 +60,7 @@ Defined in: [theme/index.tsx:14](https://github.com/jyukopla/react-select-filter
 
 Background color for field tokens
 
-***
+---
 
 ### fieldBorder?
 
@@ -70,7 +70,7 @@ Defined in: [theme/index.tsx:16](https://github.com/jyukopla/react-select-filter
 
 Border color for field tokens
 
-***
+---
 
 ### fieldText?
 
@@ -80,7 +80,7 @@ Defined in: [theme/index.tsx:18](https://github.com/jyukopla/react-select-filter
 
 Text color for field tokens
 
-***
+---
 
 ### gap?
 
@@ -90,7 +90,7 @@ Defined in: [theme/index.tsx:42](https://github.com/jyukopla/react-select-filter
 
 Gap between tokens
 
-***
+---
 
 ### operatorBg?
 
@@ -100,7 +100,7 @@ Defined in: [theme/index.tsx:21](https://github.com/jyukopla/react-select-filter
 
 Background color for operator tokens
 
-***
+---
 
 ### operatorBorder?
 
@@ -110,7 +110,7 @@ Defined in: [theme/index.tsx:23](https://github.com/jyukopla/react-select-filter
 
 Border color for operator tokens
 
-***
+---
 
 ### operatorText?
 
@@ -120,7 +120,7 @@ Defined in: [theme/index.tsx:25](https://github.com/jyukopla/react-select-filter
 
 Text color for operator tokens
 
-***
+---
 
 ### padding?
 
@@ -130,7 +130,7 @@ Defined in: [theme/index.tsx:44](https://github.com/jyukopla/react-select-filter
 
 Padding inside tokens
 
-***
+---
 
 ### valueBg?
 
@@ -140,7 +140,7 @@ Defined in: [theme/index.tsx:28](https://github.com/jyukopla/react-select-filter
 
 Background color for value tokens
 
-***
+---
 
 ### valueBorder?
 
@@ -150,7 +150,7 @@ Defined in: [theme/index.tsx:30](https://github.com/jyukopla/react-select-filter
 
 Border color for value tokens
 
-***
+---
 
 ### valueText?
 

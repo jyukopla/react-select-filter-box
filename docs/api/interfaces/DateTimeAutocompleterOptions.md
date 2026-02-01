@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / DateTimeAutocompleterOptions
 
@@ -18,7 +18,7 @@ Defined in: [autocompleters/index.ts:486](https://github.com/jyukopla/react-sele
 
 Maximum datetime
 
-***
+---
 
 ### minDateTime?
 
@@ -28,7 +28,7 @@ Defined in: [autocompleters/index.ts:484](https://github.com/jyukopla/react-sele
 
 Minimum datetime
 
-***
+---
 
 ### presets?
 

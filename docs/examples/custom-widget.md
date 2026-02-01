@@ -5,6 +5,7 @@ This example demonstrates how to create and use custom input widgets in the Reac
 ## Overview
 
 Custom widgets allow you to provide specialized input interfaces for complex value types, such as:
+
 - Color pickers
 - Slider ranges
 - Multi-select with tags
@@ -19,16 +20,11 @@ import type { CustomAutocompleteWidget, CustomWidgetProps } from 'react-select-f
 // Simple color picker widget
 const colorPickerWidget: CustomAutocompleteWidget = {
   render: ({ onConfirm, onCancel, initialValue }: CustomWidgetProps) => {
-    const [color, setColor] = useState(initialValue as string || '#000000')
+    const [color, setColor] = useState((initialValue as string) || '#000000')
 
     return (
       <div className="color-picker-widget">
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          autoFocus
-        />
+        <input type="color" value={color} onChange={(e) => setColor(e.target.value)} autoFocus />
         <div className="color-picker-widget__preview" style={{ backgroundColor: color }}>
           {color}
         </div>
@@ -60,11 +56,13 @@ const schema: FilterSchema = {
       key: 'color',
       label: 'Color',
       type: 'custom',
-      operators: [{
-        key: 'eq',
-        label: 'is',
-        customInput: colorPickerWidget,
-      }],
+      operators: [
+        {
+          key: 'eq',
+          label: 'is',
+          customInput: colorPickerWidget,
+        },
+      ],
     },
   ],
 }
@@ -133,9 +131,7 @@ const sliderRangeWidget: CustomAutocompleteWidget = {
   validate: (value: unknown): boolean => {
     if (typeof value !== 'object' || value === null) return false
     const range = value as RangeValue
-    return typeof range.min === 'number' && 
-           typeof range.max === 'number' && 
-           range.min <= range.max
+    return typeof range.min === 'number' && typeof range.max === 'number' && range.min <= range.max
   },
 
   serialize: (value: unknown): string => {
@@ -157,11 +153,13 @@ const schema: FilterSchema = {
       label: 'Price',
       type: 'number',
       widgetOptions: { min: 0, max: 1000, step: 10 },
-      operators: [{
-        key: 'between',
-        label: 'between',
-        customInput: sliderRangeWidget,
-      }],
+      operators: [
+        {
+          key: 'between',
+          label: 'between',
+          customInput: sliderRangeWidget,
+        },
+      ],
     },
   ],
 }
@@ -174,7 +172,7 @@ import { useState } from 'react'
 
 const tagsWidget: CustomAutocompleteWidget = {
   render: ({ onConfirm, onCancel, initialValue }: CustomWidgetProps) => {
-    const [tags, setTags] = useState<string[]>(initialValue as string[] || [])
+    const [tags, setTags] = useState<string[]>((initialValue as string[]) || [])
     const [input, setInput] = useState('')
 
     const addTag = () => {
@@ -185,7 +183,7 @@ const tagsWidget: CustomAutocompleteWidget = {
     }
 
     const removeTag = (tag: string) => {
-      setTags(tags.filter(t => t !== tag))
+      setTags(tags.filter((t) => t !== tag))
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -207,7 +205,7 @@ const tagsWidget: CustomAutocompleteWidget = {
     return (
       <div className="tags-widget">
         <div className="tags-widget__container">
-          {tags.map(tag => (
+          {tags.map((tag) => (
             <span key={tag} className="tags-widget__tag">
               {tag}
               <button onClick={() => removeTag(tag)}>×</button>
@@ -241,7 +239,10 @@ const tagsWidget: CustomAutocompleteWidget = {
   },
 
   parse: (serialized: string): unknown => {
-    return serialized.split(',').map(s => s.trim()).filter(Boolean)
+    return serialized
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
   },
 }
 ```
@@ -298,8 +299,8 @@ const dateRangeWidget: CustomAutocompleteWidget = {
 
         {startDate && endDate && (
           <div className="date-range-widget__summary">
-            Selected: {formatDate(startDate)} to {formatDate(endDate)}
-            ({Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days)
+            Selected: {formatDate(startDate)} to {formatDate(endDate)}(
+            {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days)
           </div>
         )}
 
@@ -325,7 +326,7 @@ const dateRangeWidget: CustomAutocompleteWidget = {
   },
 
   parse: (serialized: string): unknown => {
-    const [start, end] = serialized.split(',').map(s => new Date(s))
+    const [start, end] = serialized.split(',').map((s) => new Date(s))
     return [start, end]
   },
 }
@@ -435,7 +436,7 @@ function formatDate(date: Date): string {
   font-weight: 500;
 }
 
-.slider-range-widget__row input[type="range"] {
+.slider-range-widget__row input[type='range'] {
   width: 100%;
 }
 
@@ -481,11 +482,13 @@ const schema: FilterSchema = {
       label: 'Background Color',
       type: 'custom',
       group: 'Appearance',
-      operators: [{
-        key: 'eq',
-        label: 'is',
-        customInput: colorPickerWidget,
-      }],
+      operators: [
+        {
+          key: 'eq',
+          label: 'is',
+          customInput: colorPickerWidget,
+        },
+      ],
     },
 
     // Tags field with multi-select
@@ -494,15 +497,18 @@ const schema: FilterSchema = {
       label: 'Tags',
       type: 'custom',
       group: 'Organization',
-      operators: [{
-        key: 'containsAny',
-        label: 'contains any of',
-        customInput: tagsWidget,
-      }, {
-        key: 'containsAll',
-        label: 'contains all of',
-        customInput: tagsWidget,
-      }],
+      operators: [
+        {
+          key: 'containsAny',
+          label: 'contains any of',
+          customInput: tagsWidget,
+        },
+        {
+          key: 'containsAll',
+          label: 'contains all of',
+          customInput: tagsWidget,
+        },
+      ],
     },
 
     // Price range with slider
@@ -512,11 +518,13 @@ const schema: FilterSchema = {
       type: 'number',
       group: 'Details',
       widgetOptions: { min: 0, max: 10000, step: 100 },
-      operators: [{
-        key: 'between',
-        label: 'between',
-        customInput: sliderRangeWidget,
-      }],
+      operators: [
+        {
+          key: 'between',
+          label: 'between',
+          customInput: sliderRangeWidget,
+        },
+      ],
     },
 
     // Date range with rich picker
@@ -525,11 +533,13 @@ const schema: FilterSchema = {
       label: 'Created Date',
       type: 'date',
       group: 'Dates',
-      operators: [{
-        key: 'between',
-        label: 'between',
-        customInput: dateRangeWidget,
-      }],
+      operators: [
+        {
+          key: 'between',
+          label: 'between',
+          customInput: dateRangeWidget,
+        },
+      ],
     },
   ],
 }

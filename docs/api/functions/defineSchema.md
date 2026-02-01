@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / defineSchema
 
@@ -16,7 +16,7 @@ Define a schema directly (type-safe helper)
 
 ### T
 
-`T` *extends* [`FilterSchema`](../interfaces/FilterSchema.md)
+`T` _extends_ [`FilterSchema`](../interfaces/FilterSchema.md)
 
 ## Parameters
 

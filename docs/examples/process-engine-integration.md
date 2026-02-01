@@ -5,6 +5,7 @@ This example demonstrates how to integrate the React Sequential Filter Box with 
 ## Overview
 
 This example shows:
+
 - Complex schema with multiple field types
 - Async autocompleters for API-backed suggestions
 - Date filters with presets
@@ -39,16 +40,17 @@ const api = {
 export const processInstanceSchema = new SchemaBuilder()
   // Identification
   .field('processInstanceId', 'Process Instance ID')
-    .type('id')
-    .group('Identification')
-    .description('Unique process instance identifier')
-    .done()
+  .type('id')
+  .group('Identification')
+  .description('Unique process instance identifier')
+  .done()
 
   .field('processDefinitionKey', 'Process Definition')
-    .type('string')
-    .group('Identification')
-    .description('Process definition key or name')
-    .valueAutocompleter(createAsyncAutocompleter(
+  .type('string')
+  .group('Identification')
+  .description('Process definition key or name')
+  .valueAutocompleter(
+    createAsyncAutocompleter(
       async (query, context, signal) => {
         const definitions = await api.fetchProcessDefinitions(query)
         return definitions.map((def: { key: string; name: string }) => ({
@@ -59,34 +61,38 @@ export const processInstanceSchema = new SchemaBuilder()
         }))
       },
       { debounceMs: 300, minChars: 2, cacheResults: true }
-    ))
-    .done()
+    )
+  )
+  .done()
 
   // Status
   .field('state', 'State')
-    .type('enum')
-    .group('Status')
-    .description('Current process instance state')
-    .valueAutocompleter(createEnumAutocompleter([
+  .type('enum')
+  .group('Status')
+  .description('Current process instance state')
+  .valueAutocompleter(
+    createEnumAutocompleter([
       { key: 'ACTIVE', label: 'Active', description: 'Currently running' },
       { key: 'COMPLETED', label: 'Completed', description: 'Finished successfully' },
       { key: 'SUSPENDED', label: 'Suspended', description: 'Temporarily paused' },
       { key: 'TERMINATED', label: 'Terminated', description: 'Cancelled or failed' },
-    ]))
-    .done()
+    ])
+  )
+  .done()
 
   .field('hasIncidents', 'Has Incidents')
-    .type('boolean')
-    .group('Status')
-    .description('Whether the process has open incidents')
-    .done()
+  .type('boolean')
+  .group('Status')
+  .description('Whether the process has open incidents')
+  .done()
 
   // Assignments
   .field('assignee', 'Assignee')
-    .type('string')
-    .group('Assignments')
-    .description('Currently assigned user')
-    .valueAutocompleter(createAsyncAutocompleter(
+  .type('string')
+  .group('Assignments')
+  .description('Currently assigned user')
+  .valueAutocompleter(
+    createAsyncAutocompleter(
       async (query) => {
         const users = await api.fetchUsers(query)
         return users.map((user: { id: string; name: string; email: string }) => ({
@@ -97,41 +103,46 @@ export const processInstanceSchema = new SchemaBuilder()
         }))
       },
       { debounceMs: 300 }
-    ))
-    .done()
+    )
+  )
+  .done()
 
   // Dates
   .field('startDate', 'Start Date')
-    .type('date')
-    .group('Dates')
-    .description('When the process was started')
-    .valueAutocompleter(createDateAutocompleter({
+  .type('date')
+  .group('Dates')
+  .description('When the process was started')
+  .valueAutocompleter(
+    createDateAutocompleter({
       presets: [
         { label: 'Today', value: new Date() },
         { label: 'Last 7 days', value: daysAgo(7) },
         { label: 'Last 30 days', value: daysAgo(30) },
         { label: 'This quarter', value: startOfQuarter(new Date()) },
       ],
-    }))
-    .done()
+    })
+  )
+  .done()
 
   .field('endDate', 'End Date')
-    .type('date')
-    .group('Dates')
-    .description('When the process was completed')
-    .done()
+  .type('date')
+  .group('Dates')
+  .description('When the process was completed')
+  .done()
 
   // Variables
   .field('priority', 'Priority')
-    .type('number')
-    .group('Variables')
-    .description('Process priority (1-10)')
-    .valueAutocompleter(createNumberAutocompleter({
+  .type('number')
+  .group('Variables')
+  .description('Process priority (1-10)')
+  .valueAutocompleter(
+    createNumberAutocompleter({
       min: 1,
       max: 10,
       integer: true,
-    }))
-    .done()
+    })
+  )
+  .done()
 
   // Configuration
   .maxExpressions(10)
@@ -154,11 +165,7 @@ function startOfQuarter(date: Date): Date {
 
 ```tsx
 import { useState, useCallback } from 'react'
-import {
-  FilterBox,
-  type FilterExpression,
-  serialize,
-} from 'react-select-filter-box'
+import { FilterBox, type FilterExpression, serialize } from 'react-select-filter-box'
 import { processInstanceSchema } from './processInstanceSchema'
 import 'react-select-filter-box/styles.css'
 
@@ -207,16 +214,19 @@ function ProcessInstanceFilter() {
   }, [])
 
   // Handle filter changes with debounce
-  const handleChange = useCallback((newExpressions: FilterExpression[]) => {
-    setExpressions(newExpressions)
-    
-    // Debounce API calls
-    const timer = setTimeout(() => {
-      fetchResults(newExpressions)
-    }, 500)
+  const handleChange = useCallback(
+    (newExpressions: FilterExpression[]) => {
+      setExpressions(newExpressions)
 
-    return () => clearTimeout(timer)
-  }, [fetchResults])
+      // Debounce API calls
+      const timer = setTimeout(() => {
+        fetchResults(newExpressions)
+      }, 500)
+
+      return () => clearTimeout(timer)
+    },
+    [fetchResults]
+  )
 
   // Handle validation errors
   const handleError = useCallback((errors: ValidationError[]) => {
@@ -241,9 +251,7 @@ function ProcessInstanceFilter() {
       <main className="process-filter__results">
         {loading && <div className="loading">Loading...</div>}
         {error && <div className="error">Error: {error}</div>}
-        {!loading && !error && (
-          <ProcessInstanceTable data={results} />
-        )}
+        {!loading && !error && <ProcessInstanceTable data={results} />}
       </main>
     </div>
   )
@@ -277,11 +285,11 @@ function expressionsToQuery(expressions: FilterExpression[]): ProcessInstanceQue
       case 'processInstanceId':
         query.processInstanceId = String(rawValue)
         break
-        
+
       case 'processDefinitionKey':
         query.processDefinitionKey = String(rawValue)
         break
-        
+
       case 'state':
         if (operator === 'in') {
           query.state = Array.isArray(rawValue) ? rawValue : [String(rawValue)]
@@ -289,11 +297,11 @@ function expressionsToQuery(expressions: FilterExpression[]): ProcessInstanceQue
           query.state = [String(rawValue)]
         }
         break
-        
+
       case 'hasIncidents':
         query.hasIncidents = rawValue === 'true' || rawValue === true
         break
-        
+
       case 'startDate':
         if (operator === 'after') {
           query.startDateAfter = formatDateForAPI(rawValue as Date)
@@ -305,7 +313,7 @@ function expressionsToQuery(expressions: FilterExpression[]): ProcessInstanceQue
           query.startDateBefore = formatDateForAPI(end)
         }
         break
-        
+
       case 'priority':
         query.priority = Number(rawValue)
         break
@@ -324,20 +332,14 @@ function formatDateForAPI(date: Date): string {
 
 ```tsx
 import { useSearchParams } from 'react-router-dom'
-import {
-  serializeToQueryString,
-  deserializeFromQueryString,
-} from 'react-select-filter-box'
+import { serializeToQueryString, deserializeFromQueryString } from 'react-select-filter-box'
 
 function ProcessInstanceFilterWithURL() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Initialize from URL
   const initialExpressions = useMemo(() => {
-    return deserializeFromQueryString(
-      searchParams.toString(),
-      processInstanceSchema
-    )
+    return deserializeFromQueryString(searchParams.toString(), processInstanceSchema)
   }, [])
 
   const [expressions, setExpressions] = useState(initialExpressions)
@@ -348,13 +350,7 @@ function ProcessInstanceFilterWithURL() {
     setSearchParams(new URLSearchParams(queryString))
   }, [expressions, setSearchParams])
 
-  return (
-    <FilterBox
-      schema={processInstanceSchema}
-      value={expressions}
-      onChange={setExpressions}
-    />
-  )
+  return <FilterBox schema={processInstanceSchema} value={expressions} onChange={setExpressions} />
 }
 ```
 

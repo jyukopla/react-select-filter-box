@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / OperatorValue
 
@@ -20,7 +20,7 @@ Defined in: [types/Expression.ts:45](https://github.com/jyukopla/react-select-fi
 
 Operator key (e.g., 'eq', 'before')
 
-***
+---
 
 ### label
 
@@ -30,7 +30,7 @@ Defined in: [types/Expression.ts:47](https://github.com/jyukopla/react-select-fi
 
 Display label (e.g., 'equals', 'before')
 
-***
+---
 
 ### symbol?
 

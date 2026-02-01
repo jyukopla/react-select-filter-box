@@ -65,13 +65,13 @@ describe('Filter Schema', () => {
   })
 
   it('should contain required fields', () => {
-    const fieldKeys = mySchema.fields.map(f => f.key)
+    const fieldKeys = mySchema.fields.map((f) => f.key)
     expect(fieldKeys).toContain('status')
     expect(fieldKeys).toContain('createdAt')
   })
 
   it('should have operators for each field', () => {
-    mySchema.fields.forEach(field => {
+    mySchema.fields.forEach((field) => {
       expect(field.operators.length).toBeGreaterThan(0)
     })
   })
@@ -86,7 +86,7 @@ import { createAsyncAutocompleter } from 'react-select-filter-box'
 
 describe('UserAutocompleter', () => {
   const mockFetch = vi.fn()
-  
+
   const autocompleter = createAsyncAutocompleter(
     async (query) => {
       return mockFetch(query)
@@ -116,10 +116,8 @@ describe('UserAutocompleter', () => {
     mockFetch.mockRejectedValue(new Error('Network error'))
 
     const context = createTestContext({ inputValue: 'test' })
-    
-    await expect(
-      autocompleter.getSuggestions(context)
-    ).rejects.toThrow('Network error')
+
+    await expect(autocompleter.getSuggestions(context)).rejects.toThrow('Network error')
   })
 })
 ```
@@ -144,18 +142,22 @@ describe('Expression Serialization', () => {
 
   it('should serialize expressions to JSON', () => {
     const json = serialize(expressions)
-    expect(json).toBe(JSON.stringify([{
-      field: 'status',
-      operator: 'eq',
-      value: 'active',
-      connector: 'AND',
-    }]))
+    expect(json).toBe(
+      JSON.stringify([
+        {
+          field: 'status',
+          operator: 'eq',
+          value: 'active',
+          connector: 'AND',
+        },
+      ])
+    )
   })
 
   it('should deserialize JSON to expressions', () => {
     const json = '[{"field":"status","operator":"eq","value":"active"}]'
     const result = deserialize(json, mySchema)
-    
+
     expect(result).toHaveLength(1)
     expect(result[0].condition.field).toBe('status')
   })
@@ -164,7 +166,7 @@ describe('Expression Serialization', () => {
     const serialized = serialize(expressions)
     const deserialized = deserialize(serialized, mySchema)
     const reserialized = serialize(deserialized)
-    
+
     expect(reserialized).toBe(serialized)
   })
 })
@@ -231,7 +233,7 @@ import { FilterBox } from 'react-select-filter-box'
 describe('FilterBox Interactions', () => {
   it('should open dropdown on focus', async () => {
     const user = userEvent.setup()
-    
+
     render(
       <FilterBox
         schema={mySchema}
@@ -250,7 +252,7 @@ describe('FilterBox Interactions', () => {
 
   it('should filter fields by typing', async () => {
     const user = userEvent.setup()
-    
+
     render(
       <FilterBox
         schema={mySchema}
@@ -272,7 +274,7 @@ describe('FilterBox Interactions', () => {
   it('should call onChange when expression is completed', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    
+
     render(
       <FilterBox
         schema={mySchema}
@@ -282,14 +284,14 @@ describe('FilterBox Interactions', () => {
     )
 
     const input = screen.getByRole('textbox')
-    
+
     // Select field
     await user.click(input)
     await user.click(screen.getByText('Status'))
-    
+
     // Select operator
     await user.click(screen.getByText('equals'))
-    
+
     // Select value
     await user.click(screen.getByText('Active'))
 
@@ -315,21 +317,21 @@ describe('FilterBox Interactions', () => {
 describe('Keyboard Navigation', () => {
   it('should navigate dropdown with arrow keys', async () => {
     const user = userEvent.setup()
-    
+
     render(
       <FilterBox schema={mySchema} value={[]} onChange={() => {}} />
     )
 
     const input = screen.getByRole('textbox')
     await user.click(input)
-    
+
     // First item should be highlighted
     const firstOption = screen.getAllByRole('option')[0]
     expect(firstOption).toHaveClass('autocomplete-item--highlighted')
-    
+
     // Arrow down to highlight second item
     await user.keyboard('{ArrowDown}')
-    
+
     const secondOption = screen.getAllByRole('option')[1]
     expect(secondOption).toHaveClass('autocomplete-item--highlighted')
   })
@@ -337,7 +339,7 @@ describe('Keyboard Navigation', () => {
   it('should select highlighted item with Enter', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    
+
     render(
       <FilterBox schema={mySchema} value={[]} onChange={onChange} />
     )
@@ -353,18 +355,18 @@ describe('Keyboard Navigation', () => {
 
   it('should close dropdown with Escape', async () => {
     const user = userEvent.setup()
-    
+
     render(
       <FilterBox schema={mySchema} value={[]} onChange={() => {}} />
     )
 
     const input = screen.getByRole('textbox')
     await user.click(input)
-    
+
     expect(screen.getByRole('listbox')).toBeInTheDocument()
-    
+
     await user.keyboard('{Escape}')
-    
+
     await waitFor(() => {
       expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
     })
@@ -373,7 +375,7 @@ describe('Keyboard Navigation', () => {
   it('should delete last token with Backspace', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    
+
     const expressions = [
       {
         condition: {
@@ -383,7 +385,7 @@ describe('Keyboard Navigation', () => {
         },
       },
     ]
-    
+
     render(
       <FilterBox
         schema={mySchema}
@@ -412,7 +414,7 @@ describe('Complete Filter Flow', () => {
   it('should build and modify a complete filter expression', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    
+
     const { rerender } = render(
       <FilterBox
         schema={mySchema}
@@ -470,16 +472,16 @@ describe('Accessibility', () => {
 
   it('should have correct ARIA attributes on dropdown', async () => {
     const user = userEvent.setup()
-    
+
     render(
       <FilterBox schema={mySchema} value={[]} onChange={() => {}} />
     )
 
     await user.click(screen.getByRole('textbox'))
-    
+
     const listbox = screen.getByRole('listbox')
     expect(listbox).toBeInTheDocument()
-    
+
     const options = screen.getAllByRole('option')
     options.forEach(option => {
       expect(option).toHaveAttribute('aria-selected')
@@ -488,7 +490,7 @@ describe('Accessibility', () => {
 
   it('should announce changes to screen readers', async () => {
     const user = userEvent.setup()
-    
+
     render(
       <FilterBox schema={mySchema} value={[]} onChange={() => {}} />
     )
@@ -510,7 +512,7 @@ describe('Keyboard Accessibility', () => {
   it('should be fully operable with keyboard', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    
+
     render(
       <FilterBox schema={mySchema} value={[]} onChange={onChange} />
     )
@@ -518,16 +520,16 @@ describe('Keyboard Accessibility', () => {
     // Tab to focus
     await user.tab()
     expect(screen.getByRole('textbox')).toHaveFocus()
-    
+
     // Open dropdown
     await user.keyboard('{Enter}')
     expect(screen.getByRole('listbox')).toBeInTheDocument()
-    
+
     // Navigate and select
     await user.keyboard('{ArrowDown}{Enter}')
     await user.keyboard('{Enter}')
     await user.keyboard('{Enter}')
-    
+
     expect(onChange).toHaveBeenCalled()
   })
 })

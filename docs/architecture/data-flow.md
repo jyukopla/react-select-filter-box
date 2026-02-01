@@ -67,13 +67,13 @@ const [expressions, setExpressions] = useState<FilterExpression[]>([])
 
 The core state machine enforces valid state transitions:
 
-| State | Description | Valid Transitions |
-|-------|-------------|-------------------|
-| `IDLE` | No active input | → `FIELD_SELECT` (on focus/type) |
-| `FIELD_SELECT` | Selecting a field | → `OPERATOR_SELECT` (on select) |
-| `OPERATOR_SELECT` | Selecting an operator | → `VALUE_INPUT` (on select) |
-| `VALUE_INPUT` | Entering/selecting value | → `CONNECTOR_SELECT` (on confirm) |
-| `CONNECTOR_SELECT` | Adding AND/OR | → `FIELD_SELECT` (on select), → `IDLE` (on blur) |
+| State              | Description              | Valid Transitions                                |
+| ------------------ | ------------------------ | ------------------------------------------------ |
+| `IDLE`             | No active input          | → `FIELD_SELECT` (on focus/type)                 |
+| `FIELD_SELECT`     | Selecting a field        | → `OPERATOR_SELECT` (on select)                  |
+| `OPERATOR_SELECT`  | Selecting an operator    | → `VALUE_INPUT` (on select)                      |
+| `VALUE_INPUT`      | Entering/selecting value | → `CONNECTOR_SELECT` (on confirm)                |
+| `CONNECTOR_SELECT` | Adding AND/OR            | → `FIELD_SELECT` (on select), → `IDLE` (on blur) |
 
 ### 3. Token Generation
 
@@ -83,7 +83,7 @@ Expressions are converted to tokens for display:
 FilterExpression[] → TokenData[]
 
 // Example:
-[{ 
+[{
   condition: { field: 'status', operator: 'eq', value: 'active' },
   connector: 'AND'
 }]
@@ -175,7 +175,7 @@ interface FilterExpression {
   condition: {
     field: string
     operator: string
-    value: ConditionValue  // string | number | boolean | Date | [Date, Date]
+    value: ConditionValue // string | number | boolean | Date | [Date, Date]
   }
   connector?: 'AND' | 'OR'
 }

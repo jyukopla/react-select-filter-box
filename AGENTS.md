@@ -51,6 +51,7 @@ Tokens must be entered in strict order: `field → operator → value → [conne
 ### State Machine
 
 The component uses a finite state machine (`src/core/StateMachine.ts`) with states:
+
 - `idle` - No partial expression
 - `field-selected` - Field chosen, awaiting operator
 - `operator-selected` - Operator chosen, awaiting value
@@ -59,6 +60,7 @@ The component uses a finite state machine (`src/core/StateMachine.ts`) with stat
 ### Autocompleters
 
 Autocompleters are pluggable providers for suggestions:
+
 - `createEnumAutocompleter()` - Static list of options
 - `createAsyncAutocompleter()` - API-backed with caching
 - `createDateAutocompleter()` - Date picker widget

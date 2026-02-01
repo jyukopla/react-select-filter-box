@@ -7,7 +7,7 @@ This guide covers best practices for optimizing bundle size when using react-sel
 The library is designed to be lightweight:
 
 | Format | Size (gzipped) |
-|--------|----------------|
+| ------ | -------------- |
 | ESM    | ~15-20kB       |
 | CJS    | ~12-15kB       |
 | CSS    | ~3-5kB         |
@@ -55,10 +55,12 @@ const customDateAutocompleter = {
     // Use date-fns for parsing
     const date = parse(inputValue, 'MM/dd/yyyy', new Date())
     if (isValid(date)) {
-      return [{
-        key: format(date, 'yyyy-MM-dd'),
-        label: format(date, 'MMMM d, yyyy')
-      }]
+      return [
+        {
+          key: format(date, 'yyyy-MM-dd'),
+          label: format(date, 'MMMM d, yyyy'),
+        },
+      ]
     }
     return []
   },
@@ -78,17 +80,19 @@ import { lazy, Suspense } from 'react'
 const DatePickerWidget = lazy(() => import('./widgets/DatePickerWidget'))
 
 const schema = {
-  fields: [{
-    key: 'date',
-    label: 'Date',
-    type: 'date',
-    operators: [{ key: 'eq', label: 'is' }],
-    customWidget: (props) => (
-      <Suspense fallback={<input type="date" {...props} />}>
-        <DatePickerWidget {...props} />
-      </Suspense>
-    ),
-  }]
+  fields: [
+    {
+      key: 'date',
+      label: 'Date',
+      type: 'date',
+      operators: [{ key: 'eq', label: 'is' }],
+      customWidget: (props) => (
+        <Suspense fallback={<input type="date" {...props} />}>
+          <DatePickerWidget {...props} />
+        </Suspense>
+      ),
+    },
+  ],
 }
 ```
 
@@ -101,13 +105,10 @@ import { createPaginatedAutocompleter } from 'react-select-filter-box/autocomple
 
 const userAutocompleter = createPaginatedAutocompleter(
   async (query, page, pageSize, cursor, signal) => {
-    const response = await fetch(
-      `/api/users?q=${query}&page=${page}&limit=${pageSize}`,
-      { signal }
-    )
+    const response = await fetch(`/api/users?q=${query}&page=${page}&limit=${pageSize}`, { signal })
     const data = await response.json()
     return {
-      items: data.users.map(u => ({ key: u.id, label: u.name })),
+      items: data.users.map((u) => ({ key: u.id, label: u.name })),
       hasMore: data.hasNextPage,
       total: data.totalCount,
     }
@@ -132,7 +133,7 @@ export const loadProductSchema = () => import('./productSchema')
 const [schema, setSchema] = useState(null)
 
 useEffect(() => {
-  loadOrderSchema().then(mod => setSchema(mod.default))
+  loadOrderSchema().then((mod) => setSchema(mod.default))
 }, [])
 ```
 
@@ -142,7 +143,11 @@ Heavy autocompleters (with caching, validation, etc.) can be loaded dynamically:
 
 ```tsx
 // autocompleters/heavyAutocompleter.ts
-import { createAsyncAutocompleter, withCache, withStaleWhileRevalidate } from 'react-select-filter-box/autocompleters'
+import {
+  createAsyncAutocompleter,
+  withCache,
+  withStaleWhileRevalidate,
+} from 'react-select-filter-box/autocompleters'
 
 export const createHeavyAutocompleter = () => {
   return withStaleWhileRevalidate(
@@ -160,7 +165,7 @@ const loadAutocompleter = () => import('./autocompleters/heavyAutocompleter')
 
 // In component
 useEffect(() => {
-  loadAutocompleter().then(mod => {
+  loadAutocompleter().then((mod) => {
     setAutocompleter(mod.createHeavyAutocompleter())
   })
 }, [])
@@ -189,7 +194,7 @@ The library's CSS is modular. If you're using CSS-in-JS or custom styles, you ca
 import { FilterBox } from 'react-select-filter-box'
 
 // Apply your own styles via className
-<FilterBox className="my-custom-filter" />
+;<FilterBox className="my-custom-filter" />
 ```
 
 ## Build Configuration

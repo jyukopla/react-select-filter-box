@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / DateAutocompleterOptions
 
@@ -18,7 +18,7 @@ Defined in: [autocompleters/index.ts:352](https://github.com/jyukopla/react-sele
 
 Disabled dates
 
-***
+---
 
 ### format?
 
@@ -28,7 +28,7 @@ Defined in: [autocompleters/index.ts:346](https://github.com/jyukopla/react-sele
 
 Date format string
 
-***
+---
 
 ### maxDate?
 
@@ -38,7 +38,7 @@ Defined in: [autocompleters/index.ts:350](https://github.com/jyukopla/react-sele
 
 Maximum date
 
-***
+---
 
 ### minDate?
 
@@ -48,7 +48,7 @@ Defined in: [autocompleters/index.ts:348](https://github.com/jyukopla/react-sele
 
 Minimum date
 
-***
+---
 
 ### presets?
 

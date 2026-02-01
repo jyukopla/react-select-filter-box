@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / TokenContainerProps
 
@@ -18,7 +18,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:50](https://github.com
 
 Whether all tokens are selected
 
-***
+---
 
 ### className?
 
@@ -28,7 +28,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:42](https://github.com
 
 Additional CSS class
 
-***
+---
 
 ### disabled?
 
@@ -38,7 +38,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:40](https://github.com
 
 Whether the container is disabled
 
-***
+---
 
 ### editingTokenIndex?
 
@@ -48,7 +48,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:46](https://github.com
 
 Index of token currently being edited (-1 if not editing)
 
-***
+---
 
 ### inputProps?
 
@@ -58,7 +58,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:44](https://github.com
 
 Additional props for the input element
 
-***
+---
 
 ### inputRef
 
@@ -68,7 +68,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:36](https://github.com
 
 Ref to the input element
 
-***
+---
 
 ### inputValue
 
@@ -78,7 +78,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:18](https://github.com
 
 Current input value
 
-***
+---
 
 ### onBlur()?
 
@@ -92,7 +92,7 @@ Called when container loses focus (legacy)
 
 `void`
 
-***
+---
 
 ### onFocus()?
 
@@ -106,7 +106,7 @@ Called when container gains focus (legacy)
 
 `void`
 
-***
+---
 
 ### onInputBlur()?
 
@@ -120,7 +120,7 @@ Called when input loses focus
 
 `void`
 
-***
+---
 
 ### onInputChange()
 
@@ -140,7 +140,7 @@ Called when input value changes
 
 `void`
 
-***
+---
 
 ### onInputFocus()?
 
@@ -154,7 +154,7 @@ Called when input gains focus
 
 `void`
 
-***
+---
 
 ### onInputKeyDown()
 
@@ -174,7 +174,7 @@ Called on input keydown
 
 `void`
 
-***
+---
 
 ### onOperatorClick()?
 
@@ -194,7 +194,7 @@ Called when an operator token is clicked (for editing)
 
 `void`
 
-***
+---
 
 ### onTokenClick()?
 
@@ -214,7 +214,7 @@ Called when a token is clicked
 
 `void`
 
-***
+---
 
 ### onTokenEditCancel()?
 
@@ -228,7 +228,7 @@ Called when token edit is cancelled
 
 `void`
 
-***
+---
 
 ### onTokenEditComplete()?
 
@@ -248,7 +248,7 @@ Called when token edit is complete
 
 `void`
 
-***
+---
 
 ### placeholder?
 
@@ -258,7 +258,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:38](https://github.com
 
 Placeholder for the input
 
-***
+---
 
 ### selectedTokenIndex?
 
@@ -268,7 +268,7 @@ Defined in: [components/TokenContainer/TokenContainer.tsx:48](https://github.com
 
 Index of currently selected token (-1 if none)
 
-***
+---
 
 ### tokens
 

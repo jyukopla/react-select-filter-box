@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterSchema
 
@@ -20,7 +20,7 @@ Defined in: [types/Schema.ts:207](https://github.com/jyukopla/react-select-filte
 
 Available connectors (default: AND, OR)
 
-***
+---
 
 ### deserialize()?
 
@@ -40,7 +40,7 @@ Custom deserialization
 
 [`FilterExpression`](FilterExpression.md)[]
 
-***
+---
 
 ### fields
 
@@ -50,7 +50,7 @@ Defined in: [types/Schema.ts:205](https://github.com/jyukopla/react-select-filte
 
 Available fields
 
-***
+---
 
 ### maxExpressions?
 
@@ -60,7 +60,7 @@ Defined in: [types/Schema.ts:211](https://github.com/jyukopla/react-select-filte
 
 Maximum number of expressions allowed
 
-***
+---
 
 ### serialize()?
 
@@ -80,7 +80,7 @@ Custom serialization
 
 `unknown`
 
-***
+---
 
 ### validate()?
 

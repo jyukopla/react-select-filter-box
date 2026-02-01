@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterBoxTheme
 
@@ -20,7 +20,7 @@ Defined in: [theme/index.tsx:108](https://github.com/jyukopla/react-select-filte
 
 Container styles
 
-***
+---
 
 ### dropdown?
 
@@ -30,7 +30,7 @@ Defined in: [theme/index.tsx:110](https://github.com/jyukopla/react-select-filte
 
 Dropdown styles
 
-***
+---
 
 ### input?
 
@@ -40,7 +40,7 @@ Defined in: [theme/index.tsx:112](https://github.com/jyukopla/react-select-filte
 
 Input styles
 
-***
+---
 
 ### tokens?
 
@@ -50,7 +50,7 @@ Defined in: [theme/index.tsx:106](https://github.com/jyukopla/react-select-filte
 
 Token styles
 
-***
+---
 
 ### typography?
 

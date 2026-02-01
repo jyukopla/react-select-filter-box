@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / AutocompleteDropdownProps
 
@@ -18,7 +18,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:40](https:
 
 Additional CSS class
 
-***
+---
 
 ### emptyMessage?
 
@@ -28,7 +28,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:34](https:
 
 Message shown when no items
 
-***
+---
 
 ### highlightedIndex
 
@@ -38,7 +38,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:22](https:
 
 Currently highlighted index
 
-***
+---
 
 ### id?
 
@@ -48,7 +48,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:16](https:
 
 Unique ID for the dropdown
 
-***
+---
 
 ### isLoading?
 
@@ -58,7 +58,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:38](https:
 
 Whether items are loading
 
-***
+---
 
 ### isOpen
 
@@ -68,7 +68,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:18](https:
 
 Whether the dropdown is open
 
-***
+---
 
 ### itemHeight?
 
@@ -78,7 +78,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:47](https:
 
 Height of each item in pixels (for virtual scrolling)
 
-***
+---
 
 ### items
 
@@ -88,7 +88,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:20](https:
 
 Items to display
 
-***
+---
 
 ### loadingMessage?
 
@@ -98,7 +98,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:36](https:
 
 Message shown when loading
 
-***
+---
 
 ### maxHeight?
 
@@ -108,7 +108,7 @@ Defined in: [components/AutocompleteDropdown/AutocompleteDropdown.tsx:30](https:
 
 Maximum height of dropdown
 
-***
+---
 
 ### onHighlight()
 
@@ -128,7 +128,7 @@ Called when an item is highlighted
 
 `void`
 
-***
+---
 
 ### onSelect()
 
@@ -148,7 +148,7 @@ Called when an item is selected
 
 `void`
 
-***
+---
 
 ### position?
 
@@ -170,7 +170,7 @@ Dropdown position (for portal rendering)
 
 > **width**: `number`
 
-***
+---
 
 ### renderItem()?
 
@@ -194,7 +194,7 @@ Custom item renderer
 
 `ReactNode`
 
-***
+---
 
 ### virtualScrolling?
 

@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterCondition
 
@@ -20,7 +20,7 @@ Defined in: [types/Expression.ts:83](https://github.com/jyukopla/react-select-fi
 
 The field being filtered
 
-***
+---
 
 ### operator
 
@@ -30,7 +30,7 @@ Defined in: [types/Expression.ts:85](https://github.com/jyukopla/react-select-fi
 
 The operator to apply
 
-***
+---
 
 ### value
 

@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / TokenData
 
@@ -20,7 +20,7 @@ Defined in: [types/Expression.ts:122](https://github.com/jyukopla/react-select-f
 
 Which expression this belongs to (-1 for pending tokens)
 
-***
+---
 
 ### id
 
@@ -30,7 +30,7 @@ Defined in: [types/Expression.ts:114](https://github.com/jyukopla/react-select-f
 
 Unique identifier
 
-***
+---
 
 ### isPending?
 
@@ -40,7 +40,7 @@ Defined in: [types/Expression.ts:124](https://github.com/jyukopla/react-select-f
 
 Whether this token is part of an incomplete expression being built
 
-***
+---
 
 ### position
 
@@ -50,7 +50,7 @@ Defined in: [types/Expression.ts:120](https://github.com/jyukopla/react-select-f
 
 Position in token sequence
 
-***
+---
 
 ### type
 
@@ -60,7 +60,7 @@ Defined in: [types/Expression.ts:116](https://github.com/jyukopla/react-select-f
 
 Token type
 
-***
+---
 
 ### value
 

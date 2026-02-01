@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / ContainerStyles
 
@@ -20,7 +20,7 @@ Defined in: [theme/index.tsx:54](https://github.com/jyukopla/react-select-filter
 
 Background color
 
-***
+---
 
 ### border?
 
@@ -30,7 +30,7 @@ Defined in: [theme/index.tsx:56](https://github.com/jyukopla/react-select-filter
 
 Border color
 
-***
+---
 
 ### borderFocus?
 
@@ -40,7 +40,7 @@ Defined in: [theme/index.tsx:58](https://github.com/jyukopla/react-select-filter
 
 Border color when focused
 
-***
+---
 
 ### padding?
 
@@ -50,7 +50,7 @@ Defined in: [theme/index.tsx:62](https://github.com/jyukopla/react-select-filter
 
 Padding
 
-***
+---
 
 ### shadow?
 

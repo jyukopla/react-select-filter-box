@@ -68,7 +68,7 @@ function App() {
   return (
     <div className="app">
       <h1>User Filter</h1>
-      
+
       <FilterBox
         schema={schema}
         value={expressions}
@@ -105,13 +105,7 @@ const initialExpressions: FilterExpression[] = [
 function AppWithInitialValue() {
   const [expressions, setExpressions] = useState(initialExpressions)
 
-  return (
-    <FilterBox
-      schema={schema}
-      value={expressions}
-      onChange={setExpressions}
-    />
-  )
+  return <FilterBox schema={schema} value={expressions} onChange={setExpressions} />
 }
 ```
 
@@ -135,13 +129,8 @@ function AppWithRef() {
 
   return (
     <div>
-      <FilterBox
-        ref={filterRef}
-        schema={schema}
-        value={expressions}
-        onChange={setExpressions}
-      />
-      
+      <FilterBox ref={filterRef} schema={schema} value={expressions} onChange={setExpressions} />
+
       <div className="controls">
         <button onClick={handleFocus}>Focus Filter</button>
         <button onClick={handleClear}>Clear All</button>
@@ -159,10 +148,10 @@ import { serialize, serializeToQueryString } from 'react-select-filter-box'
 function useFilterAPI(expressions: FilterExpression[]) {
   // Serialize to JSON for POST body
   const jsonPayload = serialize(expressions)
-  
+
   // Serialize to query string for GET requests
   const queryString = serializeToQueryString(expressions)
-  
+
   const fetchData = async () => {
     // Option 1: POST request with JSON body
     const response = await fetch('/api/users', {
@@ -170,10 +159,10 @@ function useFilterAPI(expressions: FilterExpression[]) {
       headers: { 'Content-Type': 'application/json' },
       body: jsonPayload,
     })
-    
+
     // Option 2: GET request with query parameters
     // const response = await fetch(`/api/users?${queryString}`)
-    
+
     return response.json()
   }
 

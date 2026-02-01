@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / UseDropdownPositionResult
 
@@ -18,7 +18,7 @@ Defined in: [hooks/useDropdownPosition.ts:32](https://github.com/jyukopla/react-
 
 Maximum height available for the dropdown
 
-***
+---
 
 ### placement
 
@@ -28,7 +28,7 @@ Defined in: [hooks/useDropdownPosition.ts:30](https://github.com/jyukopla/react-
 
 Current placement (top or bottom)
 
-***
+---
 
 ### position
 
@@ -38,7 +38,7 @@ Defined in: [hooks/useDropdownPosition.ts:28](https://github.com/jyukopla/react-
 
 Calculated position for the dropdown
 
-***
+---
 
 ### updatePosition()
 

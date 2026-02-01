@@ -46,6 +46,7 @@ npm run chromatic
 ```
 
 This will:
+
 1. Build Storybook
 2. Upload snapshots to Chromatic
 3. Compare with the baseline
@@ -54,6 +55,7 @@ This will:
 ### CI/CD Integration
 
 The GitHub Actions workflow includes Chromatic visual testing. On every PR:
+
 1. Storybook is built
 2. Snapshots are uploaded to Chromatic
 3. Visual changes are flagged for review
@@ -63,6 +65,7 @@ The GitHub Actions workflow includes Chromatic visual testing. On every PR:
 The following states are captured for visual regression testing:
 
 ### FilterBox Component
+
 - Empty state
 - With placeholder
 - Single expression
@@ -75,6 +78,7 @@ The following states are captured for visual regression testing:
 - Token editing
 
 ### Token Component
+
 - Field token (different types)
 - Operator token
 - Value token
@@ -84,6 +88,7 @@ The following states are captured for visual regression testing:
 - Pending state
 
 ### AutocompleteDropdown
+
 - With items
 - With grouped items
 - With descriptions
@@ -92,6 +97,7 @@ The following states are captured for visual regression testing:
 - Loading state
 
 ### Themes
+
 - Light theme
 - Dark theme
 - Custom theme
@@ -173,6 +179,7 @@ export const parameters = {
 ### Build Failures
 
 If Chromatic build fails:
+
 1. Run `npm run build-storybook` locally
 2. Check for TypeScript/ESLint errors
 3. Verify all story files are valid
@@ -180,6 +187,7 @@ If Chromatic build fails:
 ### Flaky Tests
 
 If tests are inconsistent:
+
 1. Check for animations (use `pauseAnimationAtEnd`)
 2. Check for async content (use `delay`)
 3. Check for random/dynamic content
@@ -187,6 +195,7 @@ If tests are inconsistent:
 ### Large Diffs
 
 If there are many unexpected changes:
+
 1. Check for CSS changes affecting multiple components
 2. Check for theme/font changes
 3. Review component updates

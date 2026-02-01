@@ -17,7 +17,7 @@ Override CSS variables in your stylesheet:
   /* Change the primary accent color */
   --filter-container-border-focus: #9c27b0;
   --filter-focus-ring-color: rgba(156, 39, 176, 0.4);
-  
+
   /* Change token colors */
   --filter-token-field-bg: #f3e5f5;
   --filter-token-field-border: #9c27b0;
@@ -34,16 +34,18 @@ import { FilterBox, ThemeProvider } from 'react-select-filter-box'
 
 function App() {
   return (
-    <ThemeProvider theme={{
-      tokens: {
-        fieldBg: '#f3e5f5',
-        fieldBorder: '#9c27b0',
-        fieldText: '#6a1b9a',
-      },
-      container: {
-        borderFocus: '#9c27b0',
-      },
-    }}>
+    <ThemeProvider
+      theme={{
+        tokens: {
+          fieldBg: '#f3e5f5',
+          fieldBorder: '#9c27b0',
+          fieldText: '#6a1b9a',
+        },
+        container: {
+          borderFocus: '#9c27b0',
+        },
+      }}
+    >
       <FilterBox schema={schema} value={value} onChange={onChange} />
     </ThemeProvider>
   )
@@ -286,9 +288,9 @@ const purpleTheme: FilterBoxTheme = {
 
 function App() {
   const [isDark, setIsDark] = useState(false)
-  
+
   const theme = isDark ? darkTheme : lightTheme
-  
+
   return (
     <ThemeProvider theme={theme}>
       <FilterBox {...props} />
@@ -304,7 +306,6 @@ ThemeProvider supports nesting for different sections:
 ```tsx
 <ThemeProvider theme={globalTheme}>
   <FilterBox {...props} /> {/* Uses globalTheme */}
-  
   <ThemeProvider theme={specialTheme}>
     <FilterBox {...props} /> {/* Uses specialTheme */}
   </ThemeProvider>
@@ -383,7 +384,7 @@ The component respects `prefers-reduced-motion`:
     --filter-transition-fast: 0ms;
     --filter-transition-normal: 0ms;
   }
-  
+
   .token {
     animation: none;
   }
@@ -399,7 +400,7 @@ import { useTheme } from '@mui/material/styles'
 
 function ThemedFilterBox() {
   const muiTheme = useTheme()
-  
+
   const theme: FilterBoxTheme = {
     tokens: {
       fieldBg: muiTheme.palette.primary.light,
@@ -410,7 +411,7 @@ function ThemedFilterBox() {
       borderFocus: muiTheme.palette.primary.main,
     },
   }
-  
+
   return (
     <ThemeProvider theme={theme}>
       <FilterBox {...props} />

@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterBoxProps
 
@@ -27,7 +27,7 @@ Defined in: [components/FilterBox/FilterBox.tsx:35](https://github.com/jyukopla/
 
 Accessible label for the filter box
 
-***
+---
 
 ### autoFocus?
 
@@ -37,7 +37,7 @@ Defined in: [components/FilterBox/FilterBox.tsx:39](https://github.com/jyukopla/
 
 Auto-focus the input on mount
 
-***
+---
 
 ### className?
 
@@ -47,7 +47,7 @@ Defined in: [components/FilterBox/FilterBox.tsx:29](https://github.com/jyukopla/
 
 Additional CSS class names
 
-***
+---
 
 ### disabled?
 
@@ -57,7 +57,7 @@ Defined in: [components/FilterBox/FilterBox.tsx:33](https://github.com/jyukopla/
 
 Whether the filter box is disabled
 
-***
+---
 
 ### id?
 
@@ -67,7 +67,7 @@ Defined in: [components/FilterBox/FilterBox.tsx:31](https://github.com/jyukopla/
 
 ID for the component
 
-***
+---
 
 ### onChange()
 
@@ -91,7 +91,7 @@ Called when expressions change
 
 [`UseFilterStateProps`](UseFilterStateProps.md).[`onChange`](UseFilterStateProps.md#onchange)
 
-***
+---
 
 ### onError()?
 
@@ -111,7 +111,7 @@ Callback when validation errors occur
 
 `void`
 
-***
+---
 
 ### schema
 
@@ -125,7 +125,7 @@ Schema defining available fields and operators
 
 [`UseFilterStateProps`](UseFilterStateProps.md).[`schema`](UseFilterStateProps.md#schema)
 
-***
+---
 
 ### showClearButton?
 
@@ -135,7 +135,7 @@ Defined in: [components/FilterBox/FilterBox.tsx:41](https://github.com/jyukopla/
 
 Show a clear button when there are filters (default: true)
 
-***
+---
 
 ### usePortal?
 
@@ -145,7 +145,7 @@ Defined in: [components/FilterBox/FilterBox.tsx:37](https://github.com/jyukopla/
 
 Whether to render dropdown in a portal (default: true)
 
-***
+---
 
 ### value
 

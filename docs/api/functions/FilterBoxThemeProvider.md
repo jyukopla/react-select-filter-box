@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / FilterBoxThemeProvider
 
@@ -35,9 +35,9 @@ const customTheme = {
   container: {
     borderFocus: '#0078d4',
   },
-};
+}
 
-<FilterBoxThemeProvider theme={customTheme}>
+;<FilterBoxThemeProvider theme={customTheme}>
   <FilterBox schema={schema} value={value} onChange={onChange} />
 </FilterBoxThemeProvider>
 ```

@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / TokenInputProps
 
@@ -26,7 +26,7 @@ Whether to auto-focus on mount
 
 `Omit.autoFocus`
 
-***
+---
 
 ### className?
 
@@ -40,7 +40,7 @@ Additional CSS class
 
 `Omit.className`
 
-***
+---
 
 ### disabled?
 
@@ -54,7 +54,7 @@ Whether input is disabled
 
 `Omit.disabled`
 
-***
+---
 
 ### inputRef
 
@@ -64,7 +64,7 @@ Defined in: [components/TokenInput/TokenInput.tsx:27](https://github.com/jyukopl
 
 Ref to the input element
 
-***
+---
 
 ### minWidth?
 
@@ -74,7 +74,7 @@ Defined in: [components/TokenInput/TokenInput.tsx:33](https://github.com/jyukopl
 
 Minimum width of the input
 
-***
+---
 
 ### onBlur()?
 
@@ -88,7 +88,7 @@ Called when input loses focus
 
 `void`
 
-***
+---
 
 ### onChange()
 
@@ -108,7 +108,7 @@ Called when value changes
 
 `void`
 
-***
+---
 
 ### onFocus()?
 
@@ -122,7 +122,7 @@ Called when input gains focus
 
 `void`
 
-***
+---
 
 ### onKeyDown()
 
@@ -142,7 +142,7 @@ Called on keydown events
 
 `void`
 
-***
+---
 
 ### placeholder?
 
@@ -156,7 +156,7 @@ Placeholder text
 
 `Omit.placeholder`
 
-***
+---
 
 ### value
 

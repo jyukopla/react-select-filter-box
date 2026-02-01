@@ -27,7 +27,7 @@ const statusAutocompleter = createStaticAutocompleter([
 
 // With options
 const prefixMatcher = createStaticAutocompleter(values, {
-  matchMode: 'prefix',      // 'prefix' | 'substring' | 'fuzzy'
+  matchMode: 'prefix', // 'prefix' | 'substring' | 'fuzzy'
   caseSensitive: false,
   maxResults: 10,
 })
@@ -40,15 +40,18 @@ For strongly-typed enumerated values:
 ```typescript
 import { createEnumAutocompleter } from 'react-select-filter-box'
 
-const processStates = createEnumAutocompleter([
-  { key: 'ACTIVE', label: 'Active', description: 'Process is running' },
-  { key: 'SUSPENDED', label: 'Suspended', description: 'Process is paused' },
-  { key: 'COMPLETED', label: 'Completed' },
-  { key: 'TERMINATED', label: 'Terminated' },
-], {
-  searchable: true,     // Allow filtering by typing
-  allowMultiple: false, // For 'in' operator
-})
+const processStates = createEnumAutocompleter(
+  [
+    { key: 'ACTIVE', label: 'Active', description: 'Process is running' },
+    { key: 'SUSPENDED', label: 'Suspended', description: 'Process is paused' },
+    { key: 'COMPLETED', label: 'Completed' },
+    { key: 'TERMINATED', label: 'Terminated' },
+  ],
+  {
+    searchable: true, // Allow filtering by typing
+    allowMultiple: false, // For 'in' operator
+  }
+)
 ```
 
 ### Async Autocompleter
@@ -64,15 +67,15 @@ const userAutocompleter = createAsyncAutocompleter(
       signal, // Pass AbortSignal for cancellation
     })
     const users = await response.json()
-    return users.map(user => ({
+    return users.map((user) => ({
       key: user.id,
       label: user.name,
       description: user.email,
     }))
   },
   {
-    debounceMs: 300,    // Debounce API calls
-    minChars: 2,        // Minimum characters before searching
+    debounceMs: 300, // Debounce API calls
+    minChars: 2, // Minimum characters before searching
     cacheResults: true, // Cache API responses
   }
 )
@@ -142,22 +145,20 @@ import type { Autocompleter, AutocompleteContext, AutocompleteItem } from 'react
 
 interface Autocompleter {
   // Required: Return suggestions based on context
-  getSuggestions: (
-    context: AutocompleteContext
-  ) => Promise<AutocompleteItem[]> | AutocompleteItem[]
-  
+  getSuggestions: (context: AutocompleteContext) => Promise<AutocompleteItem[]> | AutocompleteItem[]
+
   // Optional: Custom rendering for suggestions
   renderItem?: (item: AutocompleteItem, isHighlighted: boolean) => ReactNode
-  
+
   // Optional: Custom input widget instead of dropdown
   customWidget?: CustomAutocompleteWidget
-  
+
   // Optional: Value validation
   validate?: (value: unknown, context: AutocompleteContext) => boolean
-  
+
   // Optional: Parse display string back to value
   parse?: (display: string, context: AutocompleteContext) => unknown
-  
+
   // Optional: Format value for display
   format?: (value: unknown, context: AutocompleteContext) => string
 }
@@ -169,11 +170,11 @@ The context provides information about the current filter state:
 
 ```typescript
 interface AutocompleteContext {
-  inputValue: string              // Current user input
-  field: FieldConfig              // Current field configuration
-  operator: OperatorConfig        // Current operator configuration
-  existingExpressions: FilterExpression[]  // Already added filters
-  schema: FilterSchema            // Full schema
+  inputValue: string // Current user input
+  field: FieldConfig // Current field configuration
+  operator: OperatorConfig // Current operator configuration
+  existingExpressions: FilterExpression[] // Already added filters
+  schema: FilterSchema // Full schema
 }
 ```
 
@@ -193,32 +194,32 @@ interface User {
 
 export function createUserAutocompleter(apiUrl: string): Autocompleter {
   const cache = new Map<string, User[]>()
-  
+
   return {
     getSuggestions: async (context: AutocompleteContext) => {
       const { inputValue } = context
-      
+
       if (inputValue.length < 2) {
         return []
       }
-      
+
       // Check cache
       if (cache.has(inputValue)) {
         return formatUsers(cache.get(inputValue)!)
       }
-      
+
       // Fetch from API
       const response = await fetch(
         `${apiUrl}/users/search?q=${encodeURIComponent(inputValue)}`
       )
       const users: User[] = await response.json()
-      
+
       // Cache results
       cache.set(inputValue, users)
-      
+
       return formatUsers(users)
     },
-    
+
     // Custom rendering with avatars
     renderItem: (item, isHighlighted) => (
       <div className={`user-item ${isHighlighted ? 'highlighted' : ''}`}>
@@ -229,7 +230,7 @@ export function createUserAutocompleter(apiUrl: string): Autocompleter {
         </div>
       </div>
     ),
-    
+
     validate: (value) => {
       return typeof value === 'string' && value.length > 0
     },
@@ -258,17 +259,15 @@ export function createCityAutocompleter(): Autocompleter {
   return {
     getSuggestions: async (context: AutocompleteContext) => {
       const { inputValue, existingExpressions } = context
-      
+
       // Find the country filter
-      const countryFilter = existingExpressions.find(
-        expr => expr.condition.field === 'country'
-      )
-      
+      const countryFilter = existingExpressions.find((expr) => expr.condition.field === 'country')
+
       if (!countryFilter) {
         // No country selected, show all cities
         return fetchCities(inputValue)
       }
-      
+
       // Filter cities by selected country
       const country = countryFilter.condition.value
       return fetchCities(inputValue, country)
@@ -277,14 +276,12 @@ export function createCityAutocompleter(): Autocompleter {
 }
 
 async function fetchCities(query: string, country?: string) {
-  const url = country
-    ? `/api/cities?q=${query}&country=${country}`
-    : `/api/cities?q=${query}`
-  
+  const url = country ? `/api/cities?q=${query}&country=${country}` : `/api/cities?q=${query}`
+
   const response = await fetch(url)
   const cities = await response.json()
-  
-  return cities.map(city => ({
+
+  return cities.map((city) => ({
     type: 'value',
     key: city.id,
     label: city.name,
@@ -298,15 +295,13 @@ async function fetchCities(query: string, country?: string) {
 Allow any text input while showing suggestions:
 
 ```typescript
-export function createSearchTermAutocompleter(
-  recentSearches: string[]
-): Autocompleter {
+export function createSearchTermAutocompleter(recentSearches: string[]): Autocompleter {
   return {
     getSuggestions: (context: AutocompleteContext) => {
       const { inputValue } = context
-      
+
       const suggestions: AutocompleteItem[] = []
-      
+
       // Always add the current input as the first option
       if (inputValue.trim()) {
         suggestions.push({
@@ -316,18 +311,18 @@ export function createSearchTermAutocompleter(
           description: 'Use this value',
         })
       }
-      
+
       // Add matching recent searches
       const matchingRecent = recentSearches
-        .filter(s => s.toLowerCase().includes(inputValue.toLowerCase()))
+        .filter((s) => s.toLowerCase().includes(inputValue.toLowerCase()))
         .slice(0, 5)
-        .map(s => ({
+        .map((s) => ({
           type: 'value' as const,
           key: s,
           label: s,
           description: 'Recent search',
         }))
-      
+
       return [...suggestions, ...matchingRecent]
     },
   }
@@ -373,18 +368,18 @@ const dateRangeWidget: CustomAutocompleteWidget = {
       onCancel={onCancel}
     />
   ),
-  
+
   validate: (value) => {
-    return Array.isArray(value) && 
-           value.length === 2 && 
+    return Array.isArray(value) &&
+           value.length === 2 &&
            value[0] < value[1]
   },
-  
+
   serialize: (value) => {
     const [start, end] = value as [Date, Date]
     return `${formatDate(start)}..${formatDate(end)}`
   },
-  
+
   parse: (serialized) => {
     const [start, end] = serialized.split('..')
     return [new Date(start), new Date(end)]
@@ -409,16 +404,19 @@ const dateRangeWidget: CustomAutocompleteWidget = {
 ### 1. Handle Loading States
 
 ```typescript
-createAsyncAutocompleter(async (query, context) => {
-  try {
-    return await fetchData(query)
-  } catch (error) {
-    console.error('Failed to fetch suggestions:', error)
-    return [] // Return empty array on error
+createAsyncAutocompleter(
+  async (query, context) => {
+    try {
+      return await fetchData(query)
+    } catch (error) {
+      console.error('Failed to fetch suggestions:', error)
+      return [] // Return empty array on error
+    }
+  },
+  {
+    loadingMessage: 'Searching...',
   }
-}, {
-  loadingMessage: 'Searching...',
-})
+)
 ```
 
 ### 2. Implement Cancellation
@@ -443,7 +441,7 @@ function getCacheKey(query: string, context: AutocompleteContext) {
 getSuggestions: async (context) => {
   const key = getCacheKey(context.inputValue, context)
   if (cache.has(key)) return cache.get(key)
-  
+
   const results = await fetchData(context.inputValue)
   cache.set(key, results)
   return results
@@ -454,9 +452,7 @@ getSuggestions: async (context) => {
 
 ```typescript
 getSuggestions: (context) => {
-  return allItems
-    .filter(item => matches(item, context.inputValue))
-    .slice(0, 50) // Limit to 50 results
+  return allItems.filter((item) => matches(item, context.inputValue)).slice(0, 50) // Limit to 50 results
 }
 ```
 

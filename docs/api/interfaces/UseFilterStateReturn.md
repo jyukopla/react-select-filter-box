@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / UseFilterStateReturn
 
@@ -18,7 +18,7 @@ Defined in: [hooks/useFilterState.ts:51](https://github.com/jyukopla/react-selec
 
 Whether all tokens are selected (via Ctrl+A)
 
-***
+---
 
 ### announcement
 
@@ -28,7 +28,7 @@ Defined in: [hooks/useFilterState.ts:45](https://github.com/jyukopla/react-selec
 
 Screen reader announcement
 
-***
+---
 
 ### editingOperatorIndex
 
@@ -38,7 +38,7 @@ Defined in: [hooks/useFilterState.ts:53](https://github.com/jyukopla/react-selec
 
 Index of expression whose operator is being edited (-1 if not editing)
 
-***
+---
 
 ### editingTokenIndex
 
@@ -48,7 +48,7 @@ Defined in: [hooks/useFilterState.ts:47](https://github.com/jyukopla/react-selec
 
 Index of token currently being edited (-1 if not editing)
 
-***
+---
 
 ### handleBlur()
 
@@ -62,7 +62,7 @@ Handle blur event
 
 `void`
 
-***
+---
 
 ### handleClear()
 
@@ -76,7 +76,7 @@ Clear all expressions
 
 `void`
 
-***
+---
 
 ### handleConfirmValue()
 
@@ -90,7 +90,7 @@ Confirm the current value
 
 `void`
 
-***
+---
 
 ### handleFocus()
 
@@ -104,7 +104,7 @@ Handle focus event
 
 `void`
 
-***
+---
 
 ### handleHighlight()
 
@@ -124,7 +124,7 @@ Handle highlighting a suggestion
 
 `void`
 
-***
+---
 
 ### handleInputChange()
 
@@ -144,7 +144,7 @@ Handle input change
 
 `void`
 
-***
+---
 
 ### handleKeyDown()
 
@@ -164,7 +164,7 @@ Handle key down
 
 `void`
 
-***
+---
 
 ### handleOperatorEdit()
 
@@ -184,7 +184,7 @@ Start editing an operator in an existing expression
 
 `void`
 
-***
+---
 
 ### handleOperatorEditCancel()
 
@@ -198,7 +198,7 @@ Cancel operator editing
 
 `void`
 
-***
+---
 
 ### handleSelect()
 
@@ -218,7 +218,7 @@ Handle suggestion selection
 
 `void`
 
-***
+---
 
 ### handleTokenEdit()
 
@@ -238,7 +238,7 @@ Start editing a token
 
 `void`
 
-***
+---
 
 ### handleTokenEditCancel()
 
@@ -252,7 +252,7 @@ Cancel editing a token
 
 `void`
 
-***
+---
 
 ### handleTokenEditComplete()
 
@@ -272,7 +272,7 @@ Complete editing a token
 
 `void`
 
-***
+---
 
 ### highlightedIndex
 
@@ -282,7 +282,7 @@ Defined in: [hooks/useFilterState.ts:39](https://github.com/jyukopla/react-selec
 
 Currently highlighted suggestion index
 
-***
+---
 
 ### inputValue
 
@@ -292,7 +292,7 @@ Defined in: [hooks/useFilterState.ts:41](https://github.com/jyukopla/react-selec
 
 Current input value
 
-***
+---
 
 ### isDropdownOpen
 
@@ -302,7 +302,7 @@ Defined in: [hooks/useFilterState.ts:35](https://github.com/jyukopla/react-selec
 
 Whether dropdown is open
 
-***
+---
 
 ### placeholder
 
@@ -312,7 +312,7 @@ Defined in: [hooks/useFilterState.ts:43](https://github.com/jyukopla/react-selec
 
 Placeholder text
 
-***
+---
 
 ### selectedTokenIndex
 
@@ -322,7 +322,7 @@ Defined in: [hooks/useFilterState.ts:49](https://github.com/jyukopla/react-selec
 
 Index of currently selected token (-1 if none)
 
-***
+---
 
 ### state
 
@@ -332,7 +332,7 @@ Defined in: [hooks/useFilterState.ts:31](https://github.com/jyukopla/react-selec
 
 Current state machine state
 
-***
+---
 
 ### suggestions
 
@@ -342,7 +342,7 @@ Defined in: [hooks/useFilterState.ts:37](https://github.com/jyukopla/react-selec
 
 Current suggestions
 
-***
+---
 
 ### tokens
 

@@ -56,12 +56,7 @@ function App() {
   const [value, setValue] = useState<FilterExpression[]>([])
 
   return (
-    <FilterBox
-      schema={schema}
-      value={value}
-      onChange={setValue}
-      placeholder="Add a filter..."
-    />
+    <FilterBox schema={schema} value={value} onChange={setValue} placeholder="Add a filter..." />
   )
 }
 ```
@@ -71,8 +66,8 @@ function App() {
 Define your filter schema with fields, operators, and optional autocompleters:
 
 ```tsx
-import { 
-  FilterSchema, 
+import {
+  FilterSchema,
   createEnumAutocompleter,
   createAsyncAutocompleter,
   createDateAutocompleter,
@@ -84,9 +79,7 @@ const schema: FilterSchema = {
       key: 'priority',
       label: 'Priority',
       type: 'enum',
-      operators: [
-        { key: 'eq', label: 'is', symbol: '=' },
-      ],
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
       valueAutocompleter: createEnumAutocompleter([
         { key: 'high', label: 'High', color: '#e74c3c' },
         { key: 'medium', label: 'Medium', color: '#f39c12' },
@@ -107,14 +100,12 @@ const schema: FilterSchema = {
       key: 'owner',
       label: 'Owner',
       type: 'string',
-      operators: [
-        { key: 'eq', label: 'is', symbol: '=' },
-      ],
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
       valueAutocompleter: createAsyncAutocompleter(
         async (query) => {
           const response = await fetch(`/api/users?q=${query}`)
           const users = await response.json()
-          return users.map(u => ({ type: 'value', key: u.id, label: u.name }))
+          return users.map((u) => ({ type: 'value', key: u.id, label: u.name }))
         },
         { debounceMs: 300, minChars: 2 }
       ),
@@ -125,24 +116,24 @@ const schema: FilterSchema = {
 
 ## Built-in Autocompleters
 
-| Autocompleter | Description |
-|---------------|-------------|
-| `createStaticAutocompleter` | Static list of suggestions |
-| `createEnumAutocompleter` | Enum values with colors and descriptions |
-| `createAsyncAutocompleter` | Async/API-backed suggestions with debouncing |
-| `createNumberAutocompleter` | Number input with min/max/step validation |
-| `createDateAutocompleter` | Date picker with presets (Today, Yesterday, etc.) |
-| `createDateTimeAutocompleter` | DateTime picker with time presets |
+| Autocompleter                 | Description                                       |
+| ----------------------------- | ------------------------------------------------- |
+| `createStaticAutocompleter`   | Static list of suggestions                        |
+| `createEnumAutocompleter`     | Enum values with colors and descriptions          |
+| `createAsyncAutocompleter`    | Async/API-backed suggestions with debouncing      |
+| `createNumberAutocompleter`   | Number input with min/max/step validation         |
+| `createDateAutocompleter`     | Date picker with presets (Today, Yesterday, etc.) |
+| `createDateTimeAutocompleter` | DateTime picker with time presets                 |
 
 ### Autocompleter Wrappers
 
-| Wrapper | Description |
-|---------|-------------|
-| `withCache(autocompleter, ttlMs)` | Add caching with TTL |
-| `withDebounce(autocompleter, ms)` | Add debouncing |
-| `withStaleWhileRevalidate(autocompleter, options)` | SWR caching pattern |
-| `combineAutocompleters(...autocompleters)` | Combine multiple autocompleters |
-| `mapAutocompleter(autocompleter, fn)` | Transform results |
+| Wrapper                                            | Description                     |
+| -------------------------------------------------- | ------------------------------- |
+| `withCache(autocompleter, ttlMs)`                  | Add caching with TTL            |
+| `withDebounce(autocompleter, ms)`                  | Add debouncing                  |
+| `withStaleWhileRevalidate(autocompleter, options)` | SWR caching pattern             |
+| `combineAutocompleters(...autocompleters)`         | Combine multiple autocompleters |
+| `mapAutocompleter(autocompleter, fn)`              | Transform results               |
 
 ## Theming
 
@@ -208,16 +199,16 @@ if (!result.valid) {
 
 ### FilterBox Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `schema` | `FilterSchema` | Field and operator definitions |
-| `value` | `FilterExpression[]` | Current filter expressions |
-| `onChange` | `(value: FilterExpression[]) => void` | Change handler |
-| `placeholder` | `string` | Input placeholder text |
-| `disabled` | `boolean` | Disable the component |
-| `maxExpressions` | `number` | Maximum number of expressions |
-| `onError` | `(errors: ValidationError[]) => void` | Error callback |
-| `className` | `string` | Additional CSS class |
+| Prop             | Type                                  | Description                    |
+| ---------------- | ------------------------------------- | ------------------------------ |
+| `schema`         | `FilterSchema`                        | Field and operator definitions |
+| `value`          | `FilterExpression[]`                  | Current filter expressions     |
+| `onChange`       | `(value: FilterExpression[]) => void` | Change handler                 |
+| `placeholder`    | `string`                              | Input placeholder text         |
+| `disabled`       | `boolean`                             | Disable the component          |
+| `maxExpressions` | `number`                              | Maximum number of expressions  |
+| `onError`        | `(errors: ValidationError[]) => void` | Error callback                 |
+| `className`      | `string`                              | Additional CSS class           |
 
 ## Development
 

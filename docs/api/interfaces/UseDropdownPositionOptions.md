@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / UseDropdownPositionOptions
 
@@ -18,7 +18,7 @@ Defined in: [hooks/useDropdownPosition.ts:13](https://github.com/jyukopla/react-
 
 Reference to the anchor element
 
-***
+---
 
 ### dropdownHeight?
 
@@ -28,7 +28,7 @@ Defined in: [hooks/useDropdownPosition.ts:17](https://github.com/jyukopla/react-
 
 Expected height of the dropdown (for flip calculation)
 
-***
+---
 
 ### isOpen
 
@@ -38,7 +38,7 @@ Defined in: [hooks/useDropdownPosition.ts:15](https://github.com/jyukopla/react-
 
 Whether the dropdown is currently open
 
-***
+---
 
 ### minWidth?
 
@@ -48,7 +48,7 @@ Defined in: [hooks/useDropdownPosition.ts:21](https://github.com/jyukopla/react-
 
 Minimum width for the dropdown
 
-***
+---
 
 ### offset?
 
@@ -58,7 +58,7 @@ Defined in: [hooks/useDropdownPosition.ts:19](https://github.com/jyukopla/react-
 
 Offset from anchor in pixels
 
-***
+---
 
 ### viewportPadding?
 

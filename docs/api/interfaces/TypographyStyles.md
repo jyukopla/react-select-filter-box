@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / TypographyStyles
 
@@ -20,7 +20,7 @@ Defined in: [theme/index.tsx:94](https://github.com/jyukopla/react-select-filter
 
 Font family
 
-***
+---
 
 ### fontSize?
 
@@ -30,7 +30,7 @@ Defined in: [theme/index.tsx:96](https://github.com/jyukopla/react-select-filter
 
 Font size
 
-***
+---
 
 ### tokenFontWeight?
 

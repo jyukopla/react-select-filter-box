@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / ValidationResult
 
@@ -20,7 +20,7 @@ Defined in: [types/Expression.ts:200](https://github.com/jyukopla/react-select-f
 
 Validation errors
 
-***
+---
 
 ### valid
 
@@ -30,7 +30,7 @@ Defined in: [types/Expression.ts:198](https://github.com/jyukopla/react-select-f
 
 Whether validation passed
 
-***
+---
 
 ### warnings?
 

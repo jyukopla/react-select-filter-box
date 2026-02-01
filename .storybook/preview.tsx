@@ -34,16 +34,18 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <div style={{ 
-        height: '100%', 
-        minHeight: '600px', 
-        width: '100%',
-        padding: '20px', 
-        boxSizing: 'border-box', 
-        overflow: 'auto',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
+      <div
+        style={{
+          height: '100%',
+          minHeight: '600px',
+          width: '100%',
+          padding: '20px',
+          boxSizing: 'border-box',
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <Story />
       </div>
     ),

@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / AutocompleteItem
 
@@ -20,7 +20,7 @@ Defined in: [types/Expression.ts:147](https://github.com/jyukopla/react-select-f
 
 Optional description
 
-***
+---
 
 ### disabled?
 
@@ -30,7 +30,7 @@ Defined in: [types/Expression.ts:151](https://github.com/jyukopla/react-select-f
 
 Whether this item is disabled
 
-***
+---
 
 ### group?
 
@@ -40,7 +40,7 @@ Defined in: [types/Expression.ts:153](https://github.com/jyukopla/react-select-f
 
 Optional group for grouped display
 
-***
+---
 
 ### icon?
 
@@ -50,7 +50,7 @@ Defined in: [types/Expression.ts:149](https://github.com/jyukopla/react-select-f
 
 Optional icon
 
-***
+---
 
 ### key
 
@@ -60,7 +60,7 @@ Defined in: [types/Expression.ts:143](https://github.com/jyukopla/react-select-f
 
 Unique key
 
-***
+---
 
 ### label
 
@@ -70,7 +70,7 @@ Defined in: [types/Expression.ts:145](https://github.com/jyukopla/react-select-f
 
 Display label
 
-***
+---
 
 ### metadata?
 
@@ -80,7 +80,7 @@ Defined in: [types/Expression.ts:155](https://github.com/jyukopla/react-select-f
 
 Custom metadata
 
-***
+---
 
 ### type
 

@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / TokenProps
 
@@ -18,7 +18,7 @@ Defined in: [components/Token/Token.tsx:42](https://github.com/jyukopla/react-se
 
 Additional CSS class
 
-***
+---
 
 ### data
 
@@ -28,7 +28,7 @@ Defined in: [components/Token/Token.tsx:20](https://github.com/jyukopla/react-se
 
 Token data
 
-***
+---
 
 ### errorMessage?
 
@@ -38,7 +38,7 @@ Defined in: [components/Token/Token.tsx:32](https://github.com/jyukopla/react-se
 
 Error message to display on hover
 
-***
+---
 
 ### hasError?
 
@@ -48,7 +48,7 @@ Defined in: [components/Token/Token.tsx:30](https://github.com/jyukopla/react-se
 
 Whether this token has a validation error
 
-***
+---
 
 ### isDeletable
 
@@ -58,7 +58,7 @@ Defined in: [components/Token/Token.tsx:28](https://github.com/jyukopla/react-se
 
 Whether this token can be deleted
 
-***
+---
 
 ### isEditable
 
@@ -68,7 +68,7 @@ Defined in: [components/Token/Token.tsx:22](https://github.com/jyukopla/react-se
 
 Whether this token can be edited
 
-***
+---
 
 ### isEditing
 
@@ -78,7 +78,7 @@ Defined in: [components/Token/Token.tsx:24](https://github.com/jyukopla/react-se
 
 Whether this token is currently being edited
 
-***
+---
 
 ### isSelected
 
@@ -88,7 +88,7 @@ Defined in: [components/Token/Token.tsx:26](https://github.com/jyukopla/react-se
 
 Whether this token is selected
 
-***
+---
 
 ### onDelete()
 
@@ -102,7 +102,7 @@ Called when delete is requested
 
 `void`
 
-***
+---
 
 ### onEdit()
 
@@ -116,7 +116,7 @@ Called when the token is clicked to edit
 
 `void`
 
-***
+---
 
 ### onEditCancel()
 
@@ -130,7 +130,7 @@ Called when editing is cancelled
 
 `void`
 
-***
+---
 
 ### onEditComplete()
 

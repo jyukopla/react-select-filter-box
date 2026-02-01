@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / EnumAutocompleterOptions
 
@@ -18,7 +18,7 @@ Defined in: [autocompleters/index.ts:93](https://github.com/jyukopla/react-selec
 
 Whether multiple values can be selected (for "in" operator)
 
-***
+---
 
 ### searchable?
 

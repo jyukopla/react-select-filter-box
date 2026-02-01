@@ -1,6 +1,6 @@
 [**React Select Filter Box v0.0.0**](../README.md)
 
-***
+---
 
 [React Select Filter Box](../README.md) / DropdownStyles
 
@@ -20,7 +20,7 @@ Defined in: [theme/index.tsx:70](https://github.com/jyukopla/react-select-filter
 
 Background color
 
-***
+---
 
 ### border?
 
@@ -30,7 +30,7 @@ Defined in: [theme/index.tsx:72](https://github.com/jyukopla/react-select-filter
 
 Border color
 
-***
+---
 
 ### itemHover?
 
@@ -40,7 +40,7 @@ Defined in: [theme/index.tsx:76](https://github.com/jyukopla/react-select-filter
 
 Item hover background
 
-***
+---
 
 ### itemSelected?
 
@@ -50,7 +50,7 @@ Defined in: [theme/index.tsx:78](https://github.com/jyukopla/react-select-filter
 
 Item selected/highlighted background
 
-***
+---
 
 ### shadow?
 
