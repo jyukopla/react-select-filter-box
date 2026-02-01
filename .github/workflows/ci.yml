@@ -138,5 +138,4 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           exitZeroOnChanges: true
           exitOnceUploaded: true
-        if: secrets.CHROMATIC_PROJECT_TOKEN != ''
         continue-on-error: true
