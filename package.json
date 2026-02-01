@@ -41,11 +41,9 @@
     "*.css"
   ],
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
     "build:lib": "vite build && tsc -p tsconfig.build.json",
     "lint": "eslint .",
-    "preview": "vite preview",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
     "test:all": "vitest run",
