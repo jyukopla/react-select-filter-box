@@ -569,9 +569,10 @@ export function useFilterState({
             setCurrentOperator(operatorValue)
             machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
             setState(machine.getState())
-            // Close dropdown for value entry (free text) unless there's a custom widget
+            // Keep dropdown open if there's a custom widget or value autocompleter
             const hasCustomWidget = opConfig.customInput !== undefined
-            setIsDropdownOpen(hasCustomWidget)
+            const hasValueAutocompleter = opConfig.valueAutocompleter !== undefined || fieldConfig.valueAutocompleter !== undefined
+            setIsDropdownOpen(hasCustomWidget || hasValueAutocompleter)
             setAnnouncement(
               `Selected ${fieldValue.label} with ${operatorValue.label}. Now enter a value.`
             )
@@ -592,8 +593,9 @@ export function useFilterState({
           machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
           setState(machine.getState())
           setInputValue('')
-          // Close dropdown for value entry (free text)
-          setIsDropdownOpen(false)
+          // Keep dropdown open if there's a value autocompleter
+          const hasValueAutocompleter = opConfig.valueAutocompleter !== undefined || fieldConfig?.valueAutocompleter !== undefined
+          setIsDropdownOpen(hasValueAutocompleter)
           setAnnouncement(`Selected ${operatorValue.label}. Now enter a value.`)
         }
       } else if (currentState === 'selecting-connector') {
@@ -603,6 +605,24 @@ export function useFilterState({
         setState(machine.getState())
         setInputValue('')
         setAnnouncement(`Added ${item.key} connector. Now select a field.`)
+      } else if (currentState === 'entering-value' && item.type === 'value') {
+        // Handle value selection from autocomplete dropdown
+        const conditionValue: ConditionValue = {
+          raw: item.key,
+          display: item.label,
+          serialized: String(item.key),
+        }
+        machine.transition({ type: 'CONFIRM_VALUE', payload: conditionValue })
+        const newExpressions = machine.getContext().completedExpressions
+        onChange([...newExpressions])
+        setState(machine.getState())
+        setInputValue('')
+        setCurrentField(undefined)
+        setCurrentOperator(undefined)
+        setIsDropdownOpen(true)
+        setAnnouncement(
+          `Filter added: value "${item.label}". Select AND, OR, or press Enter to finish.`
+        )
       }
     },
     [machine, schema, currentField, onChange, editingOperatorIndex, editingConnectorIndex, value]
