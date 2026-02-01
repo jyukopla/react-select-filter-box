@@ -28,8 +28,8 @@
       "require": "./dist/react-select-filter-box.cjs"
     },
     "./styles": {
-      "import": "./dist/styles/style.css",
-      "require": "./dist/styles/style.css"
+      "import": "./dist/styles/react-select-filter-box.css",
+      "require": "./dist/styles/react-select-filter-box.css"
     }
   },
   "files": [

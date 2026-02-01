@@ -86,11 +86,11 @@ export function createLazyAutocompleter(
       }
     },
 
-    validate: (value: unknown): boolean => {
+    validate: (value: unknown, context: AutocompleteContext): boolean => {
       if (!loadedAutocompleter?.validate) {
         return true // Allow any value while loading
       }
-      return loadedAutocompleter.validate(value)
+      return loadedAutocompleter.validate(value, context)
     },
 
     format: (value: unknown, context: AutocompleteContext): string | undefined => {
@@ -214,10 +214,10 @@ export function createDynamicAutocompleter(
       return result instanceof Promise ? await result : result
     },
 
-    validate: (value: unknown, context?: AutocompleteContext): boolean => {
+    validate: (value: unknown, context: AutocompleteContext): boolean => {
       const key = context?.field?.key || 'default'
       const autocompleter = cache.get(key)
-      return autocompleter?.validate?.(value) ?? true
+      return autocompleter?.validate?.(value, context) ?? true
     },
 
     format: (value: unknown, context: AutocompleteContext): string | undefined => {

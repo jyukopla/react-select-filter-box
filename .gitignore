@@ -27,6 +27,7 @@ dist-ssr
 storybook-static
 
 .direnv
+.envrc
 .devenv*
 devenv.local.nix
 .devcontainer.json
