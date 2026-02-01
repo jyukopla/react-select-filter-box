@@ -2,7 +2,7 @@
 
 A Sequential Filter Box component for React that provides a Select2-like single-line filter expression builder.
 
-[![CI](https://github.com/your-org/react-select-filter-box/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/react-select-filter-box/actions/workflows/ci.yml)
+[![CI](https://github.com/jyukopla/react-select-filter-box/actions/workflows/ci.yml/badge.svg)](https://github.com/jyukopla/react-select-filter-box/actions/workflows/ci.yml)
 [![License: EUPL-1.2](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](https://opensource.org/licenses/EUPL-1.2)
 
 > ⚠️ **Notice**: This project was developed with AI coding agents. While thoroughly tested, please review the code before using in production.
