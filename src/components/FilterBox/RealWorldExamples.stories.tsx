@@ -886,7 +886,7 @@ function InteractiveApiFilterComponent() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <FilterBox
         schema={processInstanceSchema}
-        expressions={expressions}
+        value={expressions}
         onChange={handleChange}
         placeholder="Build your API filter..."
       />

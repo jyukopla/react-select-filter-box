@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { FilterBox } from './FilterBox'
 import type {
   FilterSchema,
@@ -438,21 +438,24 @@ function ColorPickerComponent({ onConfirm, onCancel, initialValue }: CustomWidge
     typeof initialValue === 'string' ? initialValue : '#3b82f6'
   )
 
-  const predefinedColors = [
-    { value: '#ef4444', label: 'Red' },
-    { value: '#f97316', label: 'Orange' },
-    { value: '#eab308', label: 'Yellow' },
-    { value: '#22c55e', label: 'Green' },
-    { value: '#3b82f6', label: 'Blue' },
-    { value: '#8b5cf6', label: 'Purple' },
-    { value: '#ec4899', label: 'Pink' },
-    { value: '#6b7280', label: 'Gray' },
-  ]
+  const predefinedColors = useMemo(
+    () => [
+      { value: '#ef4444', label: 'Red' },
+      { value: '#f97316', label: 'Orange' },
+      { value: '#eab308', label: 'Yellow' },
+      { value: '#22c55e', label: 'Green' },
+      { value: '#3b82f6', label: 'Blue' },
+      { value: '#8b5cf6', label: 'Purple' },
+      { value: '#ec4899', label: 'Pink' },
+      { value: '#6b7280', label: 'Gray' },
+    ],
+    []
+  )
 
   const handleConfirm = useCallback(() => {
     const colorLabel = predefinedColors.find((c) => c.value === color)?.label ?? color
     onConfirm(color, colorLabel)
-  }, [color, onConfirm])
+  }, [color, onConfirm, predefinedColors])
 
   return (
     <div className="custom-widget-container" style={{ padding: '12px' }}>
@@ -863,17 +866,20 @@ function ThemedColorPickerComponent({ onConfirm, onCancel, initialValue }: Custo
   )
 
   // Use CSS custom properties for theming
-  const predefinedColors = [
-    { value: 'var(--filter-token-field-bg, #e0f2fe)', label: 'Field Color' },
-    { value: 'var(--filter-token-operator-bg, #fce7f3)', label: 'Operator Color' },
-    { value: 'var(--filter-token-value-bg, #d1fae5)', label: 'Value Color' },
-    { value: 'var(--filter-token-connector-bg, #fef3c7)', label: 'Connector Color' },
-  ]
+  const predefinedColors = useMemo(
+    () => [
+      { value: 'var(--filter-token-field-bg, #e0f2fe)', label: 'Field Color' },
+      { value: 'var(--filter-token-operator-bg, #fce7f3)', label: 'Operator Color' },
+      { value: 'var(--filter-token-value-bg, #d1fae5)', label: 'Value Color' },
+      { value: 'var(--filter-token-connector-bg, #fef3c7)', label: 'Connector Color' },
+    ],
+    []
+  )
 
   const handleConfirm = useCallback(() => {
     const colorLabel = predefinedColors.find((c) => c.value === color)?.label ?? color
     onConfirm(color, colorLabel)
-  }, [color, onConfirm])
+  }, [color, onConfirm, predefinedColors])
 
   return (
     <div

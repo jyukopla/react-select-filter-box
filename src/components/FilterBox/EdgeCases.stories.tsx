@@ -508,7 +508,7 @@ function InteractiveErrorHandlingComponent() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <FilterBox
         schema={schema}
-        expressions={expressions}
+        value={expressions}
         onChange={setExpressions}
         onError={(errors) => {
           if (errors.length > 0) {
@@ -601,7 +601,7 @@ function RapidStateChangesComponent() {
       </div>
       <FilterBox
         schema={schema}
-        expressions={expressions}
+        value={expressions}
         onChange={handleChange}
         placeholder="Add status filter..."
       />

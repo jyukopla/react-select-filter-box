@@ -151,7 +151,7 @@ function KeyboardOnlyComponent() {
       <div onFocus={() => logFocus('FilterBox')}>
         <FilterBox
           schema={accessibleSchema}
-          expressions={expressions}
+          value={expressions}
           onChange={(newExpressions) => {
             setExpressions(newExpressions)
             logFocus('FilterBox (changed)')
@@ -525,7 +525,7 @@ function FocusIndicatorsComponent() {
       <div className="focus-visible-demo">
         <FilterBox
           schema={accessibleSchema}
-          expressions={expressions}
+          value={expressions}
           onChange={setExpressions}
           placeholder="Tab to see focus indicators..."
         />
@@ -584,7 +584,7 @@ function AriaLiveComponent() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <FilterBox
         schema={accessibleSchema}
-        expressions={expressions}
+        value={expressions}
         onChange={handleChange}
         placeholder="Add filters to see announcements..."
       />
