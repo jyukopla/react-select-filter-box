@@ -43,6 +43,7 @@
   "scripts": {
     "build": "vite build",
     "build:lib": "vite build && tsc -p tsconfig.build.json",
+    "prepare": "test -d dist || npm run build:lib",
     "lint": "eslint .",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",

@@ -12,15 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Dev template files (not part of library)
-index.html
-src/main.tsx
-src/App.tsx
-src/App.css
-src/index.css
-src/assets/
-public/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
