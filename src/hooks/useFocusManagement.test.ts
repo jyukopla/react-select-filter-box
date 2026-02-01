@@ -206,6 +206,34 @@ describe('useFocusManagement', () => {
 
       expect(result.current.isFocusWithin()).toBe(false)
     })
+
+    it('should return true when focus is in a FilterBox portal with matching ID', () => {
+      const inputRef = { current: inputElement }
+      const containerRef = { current: containerElement }
+
+      // Create a portal element outside the container
+      const portalElement = document.createElement('div')
+      portalElement.setAttribute('data-filter-box-portal', 'test-portal')
+      const portalButton = document.createElement('button')
+      portalElement.appendChild(portalButton)
+      document.body.appendChild(portalElement)
+
+      portalButton.focus()
+
+      const { result } = renderHook(() =>
+        useFocusManagement({
+          isDropdownOpen: true,
+          isEditing: false,
+          inputRef,
+          containerRef,
+          portalId: 'test-portal',
+        })
+      )
+
+      expect(result.current.isFocusWithin()).toBe(true)
+
+      document.body.removeChild(portalElement)
+    })
   })
 
   describe('focus trap behavior', () => {
@@ -227,6 +255,44 @@ describe('useFocusManagement', () => {
 
       // Focus should remain on external element (not trapped)
       expect(document.activeElement).toBe(externalElement)
+    })
+
+    it('should allow focus to move to portal elements when dropdown is open', async () => {
+      const inputRef = { current: inputElement }
+      const containerRef = { current: containerElement }
+
+      // Create a portal element outside the container
+      const portalElement = document.createElement('div')
+      portalElement.setAttribute('data-filter-box-portal', 'test-portal')
+      const portalButton = document.createElement('button')
+      portalButton.textContent = 'Portal Button'
+      portalElement.appendChild(portalButton)
+      document.body.appendChild(portalElement)
+
+      renderHook(() =>
+        useFocusManagement({
+          isDropdownOpen: true,
+          isEditing: false,
+          inputRef,
+          containerRef,
+          portalId: 'test-portal',
+        })
+      )
+
+      inputElement.focus()
+      expect(document.activeElement).toBe(inputElement)
+
+      // Focus the portal button
+      portalButton.focus()
+      expect(document.activeElement).toBe(portalButton)
+
+      // Wait for any async focus handlers
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+
+      // Focus should remain on the portal button (not trapped back to input)
+      expect(document.activeElement).toBe(portalButton)
+
+      document.body.removeChild(portalElement)
     })
   })
 })

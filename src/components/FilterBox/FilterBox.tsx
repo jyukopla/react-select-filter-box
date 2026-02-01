@@ -141,12 +141,16 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     handleExpressionDelete,
   } = useFilterState({ schema, value, onChange })
 
+  // Use a unique portal ID based on the generated component ID
+  const portalId = `${generatedId}-portal`
+
   // Focus management for trap and restoration
   const { focusInput } = useFocusManagement({
     isDropdownOpen,
     isEditing: editingTokenIndex >= 0,
     inputRef,
     containerRef,
+    portalId,
   })
 
   // Expose imperative handle
@@ -274,7 +278,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
         )}
       </div>
       {usePortal ? (
-        <DropdownPortal>
+        <DropdownPortal portalId={portalId}>
           {showDropdownPortal && (
             <div
               className="filter-box-dropdown-portal"

@@ -6,6 +6,7 @@
  */
 
 import { useRef, useCallback, useEffect } from 'react'
+import { FILTER_BOX_PORTAL_ATTR } from '@/components/DropdownPortal/DropdownPortal'
 
 export interface UseFocusManagementProps {
   /** Whether the dropdown is currently open */
@@ -18,6 +19,8 @@ export interface UseFocusManagementProps {
   containerRef: React.RefObject<HTMLDivElement | null>
   /** Callback when focus should be trapped */
   onFocusTrap?: () => void
+  /** Unique portal ID used to identify associated portal elements */
+  portalId?: string
 }
 
 export interface UseFocusManagementReturn {
@@ -39,12 +42,32 @@ export function useFocusManagement({
   isEditing,
   inputRef,
   containerRef,
+  portalId,
 }: UseFocusManagementProps): UseFocusManagementReturn {
   // Store the element that had focus before the component was activated
   const focusOriginRef = useRef<HTMLElement | null>(null)
 
   // Store the last known focus position within the component
   const lastInternalFocusRef = useRef<HTMLElement | null>(null)
+
+  /**
+   * Check if an element is inside a FilterBox portal
+   */
+  const isInFilterBoxPortal = useCallback((element: Node | null): boolean => {
+    if (!element || !(element instanceof HTMLElement)) return false
+    
+    // Check if the element is inside a portal with matching ID or any FilterBox portal
+    const portalContainer = element.closest(`[${FILTER_BOX_PORTAL_ATTR}]`)
+    if (!portalContainer) return false
+    
+    // If we have a specific portal ID, check for exact match
+    if (portalId) {
+      return portalContainer.getAttribute(FILTER_BOX_PORTAL_ATTR) === portalId
+    }
+    
+    // Otherwise, consider any FilterBox portal as valid
+    return true
+  }, [portalId])
 
   /**
    * Store the element that currently has focus (before component activation)
@@ -79,12 +102,16 @@ export function useFocusManagement({
   }, [inputRef])
 
   /**
-   * Check if focus is currently within the component
+   * Check if focus is currently within the component (including portal)
    */
   const isFocusWithin = useCallback((): boolean => {
     const activeElement = document.activeElement
-    return containerRef.current?.contains(activeElement) ?? false
-  }, [containerRef])
+    const container = containerRef.current
+    if (!container) return false
+    
+    // Check if focus is in the main container or in the associated portal
+    return container.contains(activeElement) || isInFilterBoxPortal(activeElement)
+  }, [containerRef, isInFilterBoxPortal])
 
   /**
    * Handle focus trap - keep focus within the component when dropdown is open
@@ -102,6 +129,12 @@ export function useFocusManagement({
 
       // If focus is leaving the container
       if (relatedTarget && !container.contains(relatedTarget)) {
+        // Check if focus is moving to a FilterBox portal (e.g., custom widget)
+        // If so, don't trap focus - allow interaction with the portal content
+        if (isInFilterBoxPortal(relatedTarget)) {
+          return
+        }
+        
         // Store last internal focus position
         if (e.target instanceof HTMLElement) {
           lastInternalFocusRef.current = e.target
@@ -111,8 +144,9 @@ export function useFocusManagement({
         if (isDropdownOpen && inputRef.current) {
           // Use requestAnimationFrame to avoid conflicts with other focus handlers
           requestAnimationFrame(() => {
-            // Only refocus if still open and focus went outside
-            if (!container.contains(document.activeElement)) {
+            // Only refocus if still open and focus went outside (and not in portal)
+            const activeElement = document.activeElement
+            if (!container.contains(activeElement) && !isInFilterBoxPortal(activeElement)) {
               inputRef.current?.focus()
             }
           })
@@ -125,7 +159,7 @@ export function useFocusManagement({
     return () => {
       container.removeEventListener('focusout', handleFocusOut)
     }
-  }, [isDropdownOpen, isEditing, containerRef, inputRef])
+  }, [isDropdownOpen, isEditing, containerRef, inputRef, isInFilterBoxPortal])
 
   /**
    * Handle focus restoration after dropdown closes
