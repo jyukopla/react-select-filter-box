@@ -34,16 +34,19 @@
   animation: token-fade-in 0.2s ease-out;
 }
 
-.token--editable {
+.token--editable,
+.token--selectable {
   cursor: pointer;
 }
 
-.token--editable:hover {
+.token--editable:hover,
+.token--selectable:hover {
   filter: brightness(0.95);
   transform: scale(1.02);
 }
 
-.token--editable:active {
+.token--editable:active,
+.token--selectable:active {
   transform: scale(0.98);
 }
 
@@ -125,7 +128,7 @@
 
 /* Delete button */
 .token--deletable {
-  padding-right: 20px;
+  padding-right: 24px;
   position: relative;
 }
 
@@ -134,28 +137,33 @@
   right: 2px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   padding: 0;
   border: none;
   background: transparent;
   color: inherit;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.7;
+  opacity: 0;
   transition:
-    opacity 0.15s ease,
+    opacity 0.2s ease,
     background-color 0.15s ease;
 }
 
+.token--deletable:hover .token__delete-button,
+.token--selected .token__delete-button {
+  opacity: 0.6;
+}
+
 .token__delete-button:hover {
-  opacity: 1;
-  background-color: rgba(0, 0, 0, 0.1);
+  opacity: 1 !important;
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
 .token__delete-button:focus-visible {

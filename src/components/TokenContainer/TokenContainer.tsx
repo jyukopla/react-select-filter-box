@@ -139,10 +139,12 @@ export function TokenContainer({
               (token.type === 'value' || token.type === 'operator' || token.type === 'connector') &&
               !token.isPending
             }
+            isSelectable={!token.isPending && token.expressionIndex >= 0}
             isEditing={index === editingTokenIndex}
             isSelected={isSelected}
             isDeletable={isDeletable}
             onEdit={() => handleTokenClick(token, index)}
+            onSelect={() => handleTokenClick(token, index)}
             onDelete={() => {
               if (token.expressionIndex >= 0 && onExpressionDelete) {
                 onExpressionDelete(token.expressionIndex)

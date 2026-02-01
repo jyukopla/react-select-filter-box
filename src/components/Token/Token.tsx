@@ -14,6 +14,8 @@ export interface TokenProps {
   data: TokenData
   /** Whether this token can be edited */
   isEditable: boolean
+  /** Whether this token can be selected (for deletion) */
+  isSelectable?: boolean
   /** Whether this token is currently being edited */
   isEditing: boolean
   /** Whether this token is selected */
@@ -26,6 +28,8 @@ export interface TokenProps {
   errorMessage?: string
   /** Called when the token is clicked to edit */
   onEdit: () => void
+  /** Called when the token is clicked to select */
+  onSelect?: () => void
   /** Called when delete is requested */
   onDelete: () => void
   /** Called when editing is completed with new value */
@@ -78,12 +82,14 @@ function getTokenAriaLabel(data: TokenData): string {
 export const Token = memo(function Token({
   data,
   isEditable,
+  isSelectable = false,
   isEditing,
   isSelected,
   isDeletable,
   hasError = false,
   errorMessage,
   onEdit,
+  onSelect,
   onDelete,
   onEditComplete,
   onEditCancel,
@@ -112,6 +118,8 @@ export const Token = memo(function Token({
   const handleClick = () => {
     if (isEditable && !isEditing) {
       onEdit()
+    } else if (isSelectable && onSelect) {
+      onSelect()
     }
   }
 
@@ -169,17 +177,18 @@ export const Token = memo(function Token({
         `token--${data.type}`,
         {
           'token--editable': isEditable,
+          'token--selectable': isSelectable,
           'token--selected': isSelected,
           'token--error': hasError,
           'token--pending': data.isPending,
-          'token--deletable': isDeletable && isSelected,
+          'token--deletable': isDeletable,
         },
         className
       )}
       onClick={handleClick}
     >
       {display}
-      {isDeletable && isSelected && (
+      {isDeletable && (
         <button
           type="button"
           className="token__delete-button"

@@ -5,7 +5,7 @@
  * with React state management.
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { FilterStateMachine, type FilterStep } from '@/core'
 import type {
   FilterSchema,
@@ -18,6 +18,8 @@ import type {
   OperatorConfig,
   FieldConfig,
   CustomAutocompleteWidget,
+  AutocompleteContext,
+  Autocompleter,
 } from '@/types'
 
 export interface UseFilterStateProps {
@@ -256,6 +258,21 @@ function getSuggestions(
 }
 
 /**
+ * Get value autocompleter for the current field/operator
+ */
+function getValueAutocompleter(
+  fieldConfig?: FieldConfig,
+  operatorConfig?: OperatorConfig
+): Autocompleter | undefined {
+  // Operator-specific autocompleter takes precedence
+  if (operatorConfig?.valueAutocompleter) {
+    return operatorConfig.valueAutocompleter
+  }
+  // Fall back to field-level autocompleter
+  return fieldConfig?.valueAutocompleter
+}
+
+/**
  * Get placeholder text based on current state
  */
 function getPlaceholder(state: FilterStep): string {
@@ -297,6 +314,7 @@ export function useFilterState({
   const [announcement, setAnnouncement] = useState('')
   const [editingOperatorIndex, setEditingOperatorIndex] = useState(-1)
   const [editingConnectorIndex, setEditingConnectorIndex] = useState(-1)
+  const [valueSuggestions, setValueSuggestions] = useState<AutocompleteItem[]>([])
 
   // Sync machine with external value on mount
   useEffect(() => {
@@ -339,8 +357,21 @@ export function useFilterState({
       }
       return []
     }
+    // If in entering-value state, return value suggestions
+    if (state === 'entering-value') {
+      return valueSuggestions
+    }
     return getSuggestions(state, schema, currentField, inputValue)
-  }, [state, schema, currentField, inputValue, editingOperatorIndex, editingConnectorIndex, value])
+  }, [
+    state,
+    schema,
+    currentField,
+    inputValue,
+    editingOperatorIndex,
+    editingConnectorIndex,
+    value,
+    valueSuggestions,
+  ])
 
   const placeholder = useMemo(() => getPlaceholder(state), [state])
 
@@ -361,6 +392,55 @@ export function useFilterState({
     if (state !== 'entering-value') return undefined
     return currentOperatorConfig?.customInput
   }, [state, currentOperatorConfig])
+
+  // Fetch value suggestions when in entering-value state
+  useEffect(() => {
+    if (state !== 'entering-value') {
+      setValueSuggestions([])
+      return
+    }
+
+    const autocompleter = getValueAutocompleter(currentFieldConfig, currentOperatorConfig)
+    if (!autocompleter) {
+      setValueSuggestions([])
+      return
+    }
+
+    // Build autocomplete context
+    const context: AutocompleteContext = {
+      inputValue,
+      field: currentFieldConfig!,
+      operator: currentOperatorConfig!,
+      existingExpressions: value,
+      schema,
+    }
+
+    // Handle both sync and async autocompleters
+    const result = autocompleter.getSuggestions(context)
+
+    if (result instanceof Promise) {
+      let cancelled = false
+      result
+        .then((suggestions) => {
+          if (!cancelled) {
+            setValueSuggestions(suggestions)
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setValueSuggestions([])
+          }
+        })
+      return () => {
+        cancelled = true
+      }
+    } else {
+      setValueSuggestions(result)
+    }
+    // Note: value and schema are intentionally not in deps to avoid unnecessary re-fetches
+    // The autocompleter receives them in context but doesn't need to re-run when they change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, inputValue, currentFieldConfig, currentOperatorConfig])
 
   // Reset highlighted index when state changes (new suggestions context)
   useEffect(() => {
@@ -663,6 +743,16 @@ export function useFilterState({
             setCurrentOperator(undefined)
             setIsDropdownOpen(true)
             setAnnouncement('Operator removed. Select operator.')
+          } else if (
+            inputValue === '' &&
+            (state === 'idle' || state === 'selecting-field') &&
+            value.length > 0
+          ) {
+            // Delete the last completed expression
+            e.preventDefault()
+            const newExpressions = value.slice(0, -1)
+            onChange(newExpressions)
+            setAnnouncement(`Last filter expression deleted. ${newExpressions.length} remaining.`)
           }
           break
         case 'Delete':

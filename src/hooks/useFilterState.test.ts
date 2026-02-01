@@ -1286,4 +1286,195 @@ describe('useFilterState', () => {
       expect(result.current.editingConnectorIndex).toBe(-1)
     })
   })
+
+  describe('Value Autocompleter', () => {
+    it('should provide value suggestions from field autocompleter', async () => {
+      const schemaWithAutocompleter: FilterSchema = {
+        fields: [
+          {
+            key: 'status',
+            label: 'Status',
+            type: 'enum',
+            operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+            valueAutocompleter: {
+              getSuggestions: () => [
+                { type: 'value', key: 'active', label: 'Active' },
+                { type: 'value', key: 'inactive', label: 'Inactive' },
+              ],
+            },
+          },
+        ],
+      }
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: schemaWithAutocompleter, value: [], onChange: vi.fn() })
+      )
+
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      // Wait for value suggestions to be fetched
+      await vi.waitFor(() => {
+        expect(result.current.state).toBe('entering-value')
+        expect(result.current.suggestions).toHaveLength(2)
+        expect(result.current.suggestions[0]?.label).toBe('Active')
+        expect(result.current.suggestions[1]?.label).toBe('Inactive')
+      })
+    })
+
+    it('should provide value suggestions from operator autocompleter', async () => {
+      const schemaWithOperatorAutocompleter: FilterSchema = {
+        fields: [
+          {
+            key: 'priority',
+            label: 'Priority',
+            type: 'enum',
+            operators: [
+              {
+                key: 'eq',
+                label: 'equals',
+                symbol: '=',
+                valueAutocompleter: {
+                  getSuggestions: () => [
+                    { type: 'value', key: 'high', label: 'High' },
+                    { type: 'value', key: 'low', label: 'Low' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      }
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: schemaWithOperatorAutocompleter, value: [], onChange: vi.fn() })
+      )
+
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      // Wait for value suggestions to be fetched
+      await vi.waitFor(() => {
+        expect(result.current.state).toBe('entering-value')
+        expect(result.current.suggestions).toHaveLength(2)
+        expect(result.current.suggestions[0]?.label).toBe('High')
+        expect(result.current.suggestions[1]?.label).toBe('Low')
+      })
+    })
+
+    it('should handle async value autocompleters', async () => {
+      const schemaWithAsyncAutocompleter: FilterSchema = {
+        fields: [
+          {
+            key: 'user',
+            label: 'User',
+            type: 'string',
+            operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+            valueAutocompleter: {
+              getSuggestions: async () =>
+                Promise.resolve([
+                  { type: 'value', key: 'alice', label: 'Alice' },
+                  { type: 'value', key: 'bob', label: 'Bob' },
+                ]),
+            },
+          },
+        ],
+      }
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: schemaWithAsyncAutocompleter, value: [], onChange: vi.fn() })
+      )
+
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      // Wait for async suggestions to be fetched
+      await vi.waitFor(() => {
+        expect(result.current.state).toBe('entering-value')
+        expect(result.current.suggestions).toHaveLength(2)
+        expect(result.current.suggestions[0]?.label).toBe('Alice')
+        expect(result.current.suggestions[1]?.label).toBe('Bob')
+      })
+    })
+
+    it('should filter value suggestions based on input', async () => {
+      const schemaWithAutocompleter: FilterSchema = {
+        fields: [
+          {
+            key: 'status',
+            label: 'Status',
+            type: 'enum',
+            operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+            valueAutocompleter: {
+              getSuggestions: (context) => {
+                const items = [
+                  { type: 'value' as const, key: 'active', label: 'Active' },
+                  { type: 'value' as const, key: 'inactive', label: 'Inactive' },
+                  { type: 'value' as const, key: 'pending', label: 'Pending' },
+                ]
+                const query = context.inputValue.toLowerCase()
+                return query
+                  ? items.filter((item) => item.label.toLowerCase().includes(query))
+                  : items
+              },
+            },
+          },
+        ],
+      }
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: schemaWithAutocompleter, value: [], onChange: vi.fn() })
+      )
+
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      act(() => {
+        result.current.handleSelect(result.current.suggestions[0]!)
+      })
+
+      // Type to filter
+      act(() => {
+        result.current.handleInputChange('act')
+      })
+
+      // Wait for filtered suggestions
+      await vi.waitFor(() => {
+        expect(result.current.suggestions).toHaveLength(2)
+        expect(result.current.suggestions.map((s) => s.label)).toEqual(['Active', 'Inactive'])
+      })
+    })
+  })
 })

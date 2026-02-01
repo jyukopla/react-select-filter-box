@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Autocomplete Feature</title>
+  </head>
+  <body>
+    <h1>Test Value Autocompleter</h1>
+    <p>Instructions:</p>
+    <ol>
+      <li>
+        Navigate to Storybook at
+        <a href="http://localhost:6008" target="_blank">http://localhost:6008</a>
+      </li>
+      <li>Go to: <strong>Components > FilterBox > Autocomplete > Static String List</strong></li>
+      <li>Click the filter input box</li>
+      <li>Select "Status" field</li>
+      <li>Select "is" operator</li>
+      <li>
+        <strong
+          >You should now see value suggestions: Active, Pending, Completed, Failed,
+          Cancelled</strong
+        >
+      </li>
+      <li>Type "act" and you should see filtered results showing only "Active"</li>
+    </ol>
+
+    <h2>Expected Behavior:</h2>
+    <ul>
+      <li>After selecting an operator, a dropdown with value suggestions should appear</li>
+      <li>Typing in the input should filter the suggestions</li>
+      <li>Clicking on a suggestion should add it as a value token</li>
+    </ul>
+
+    <h2>What was the bug?</h2>
+    <p>
+      The <code>getSuggestions</code> function in <code>useFilterState.ts</code> did not handle the
+      <code>entering-value</code> state, so it always returned an empty array for value suggestions,
+      even though the schema had <code>valueAutocompleter</code> configured.
+    </p>
+
+    <h2>The Fix:</h2>
+    <ol>
+      <li>
+        Added a new helper function <code>getValueAutocompleter()</code> that checks both operator
+        and field configs for autocompleters
+      </li>
+      <li>Added state to store value suggestions: <code>valueSuggestions</code></li>
+      <li>
+        Added a <code>useEffect</code> hook that:
+        <ul>
+          <li>Runs when state is <code>entering-value</code></li>
+          <li>Gets the appropriate autocompleter</li>
+          <li>
+            Builds the <code>AutocompleteContext</code> with current field, operator, and input
+          </li>
+          <li>Calls <code>autocompleter.getSuggestions(context)</code></li>
+          <li>Handles both sync and async results</li>
+        </ul>
+      </li>
+      <li>
+        Updated the <code>suggestions</code> memo to return <code>valueSuggestions</code> when in
+        <code>entering-value</code> state
+      </li>
+    </ol>
+  </body>
+</html>
