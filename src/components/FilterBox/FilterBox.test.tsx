@@ -241,10 +241,10 @@ describe('FilterBox', () => {
     it('should have aria-expanded on combobox', async () => {
       const user = userEvent.setup()
       render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
-      
+
       const combobox = screen.getByRole('combobox')
       expect(combobox).toHaveAttribute('aria-expanded', 'false')
-      
+
       await user.click(combobox)
       expect(combobox).toHaveAttribute('aria-expanded', 'true')
     })
@@ -281,14 +281,14 @@ describe('FilterBox', () => {
         },
       ]
       render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
-      
+
       const group = screen.getByRole('group')
       expect(group).toHaveAttribute('aria-describedby')
     })
 
     it('should have live region for announcements', () => {
       render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
-      
+
       const liveRegion = document.querySelector('[role="status"][aria-live="polite"]')
       expect(liveRegion).toBeInTheDocument()
     })
@@ -302,7 +302,7 @@ describe('FilterBox', () => {
           skipToId="main-content"
         />
       )
-      
+
       const skipLink = screen.getByRole('link', { name: 'Skip to content' })
       expect(skipLink).toBeInTheDocument()
       expect(skipLink).toHaveAttribute('href', '#main-content')
@@ -318,14 +318,14 @@ describe('FilterBox', () => {
           skipLinkText="Skip to results"
         />
       )
-      
+
       const skipLink = screen.getByRole('link', { name: 'Skip to results' })
       expect(skipLink).toBeInTheDocument()
     })
 
     it('should not render skip link when skipToId is not provided', () => {
       render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
-      
+
       const skipLink = screen.queryByRole('link', { name: /skip/i })
       expect(skipLink).not.toBeInTheDocument()
     })
@@ -350,12 +350,7 @@ describe('FilterBox', () => {
     it('should render dropdown inline when usePortal is false', async () => {
       const user = userEvent.setup()
       const { container } = render(
-        <FilterBox
-          schema={createTestSchema()}
-          value={[]}
-          onChange={vi.fn()}
-          usePortal={false}
-        />
+        <FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} usePortal={false} />
       )
 
       const input = screen.getByPlaceholderText('Add filter...')
@@ -399,10 +394,10 @@ describe('FilterBox', () => {
 
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
-      
+
       // First clear the initial announcement by waiting
       const liveRegion = screen.getByRole('status')
-      
+
       await user.click(screen.getByText('Status'))
 
       // After field selection, it announces operators are available
@@ -420,7 +415,9 @@ describe('FilterBox', () => {
     })
 
     it('should not auto-focus when disabled', () => {
-      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} autoFocus disabled />)
+      render(
+        <FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} autoFocus disabled />
+      )
 
       // Disabled input still shows 'Add filter...' since it never got focus
       const input = screen.getByPlaceholderText('Add filter...')
@@ -469,7 +466,14 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(<FilterBox ref={ref} schema={createTestSchema()} value={existingValue} onChange={onChange} />)
+      render(
+        <FilterBox
+          ref={ref}
+          schema={createTestSchema()}
+          value={existingValue}
+          onChange={onChange}
+        />
+      )
 
       act(() => {
         ref.current?.clear()
@@ -553,11 +557,11 @@ describe('FilterBox', () => {
       // Get the edit input that appears in the token
       const editInput = screen.getByRole('textbox', { name: /edit value/i })
       expect(editInput).toHaveValue('test')
-      
+
       // Change the value
       fireEvent.change(editInput, { target: { value: 'changed' } })
       expect(editInput).toHaveValue('changed')
-      
+
       // Press Escape
       fireEvent.keyDown(editInput, { key: 'Escape' })
 
@@ -640,7 +644,14 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} showClearButton={false} />)
+      render(
+        <FilterBox
+          schema={createTestSchema()}
+          value={value}
+          onChange={vi.fn()}
+          showClearButton={false}
+        />
+      )
 
       expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
     })
@@ -708,7 +719,7 @@ describe('FilterBox', () => {
       // When tokens exist, click on the combobox to focus it
       const container = screen.getByRole('combobox')
       await user.click(container)
-      
+
       // Find the input (it may not have placeholder when tokens exist)
       const input = container.querySelector('input')
       if (input) {
@@ -722,14 +733,7 @@ describe('FilterBox', () => {
   describe('Disabled State', () => {
     it('should not open dropdown when disabled', async () => {
       const user = userEvent.setup()
-      render(
-        <FilterBox
-          schema={createTestSchema()}
-          value={[]}
-          onChange={vi.fn()}
-          disabled
-        />
-      )
+      render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} disabled />)
 
       const container = screen.getByRole('combobox')
       await user.click(container)
@@ -750,14 +754,7 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(
-        <FilterBox
-          schema={createTestSchema()}
-          value={value}
-          onChange={onChange}
-          disabled
-        />
-      )
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} disabled />)
 
       // Try clicking a value token
       const valueToken = screen.getByText('active')
@@ -776,20 +773,20 @@ describe('FilterBox', () => {
 
       // Tab to focus the filter box
       await user.tab()
-      
+
       // Should be focused on input - use combobox role since input has combobox role
       const input = screen.getByRole('combobox')
       expect(document.activeElement).toBe(input)
-      
+
       // Arrow down to navigate, Enter to select field
       await user.keyboard('{Enter}')
-      
+
       // Select operator with Enter
       await user.keyboard('{Enter}')
-      
+
       // Type value and confirm
       await user.type(input, 'test{Enter}')
-      
+
       // Should have called onChange with complete expression
       expect(onChange).toHaveBeenCalled()
     })
@@ -817,10 +814,12 @@ describe('FilterBox', () => {
 
     it('should have focus styling on container when input is focused', async () => {
       const user = userEvent.setup()
-      const { container } = render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />)
+      const { container } = render(
+        <FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} />
+      )
 
       await user.tab()
-      
+
       // The combobox container should have data-focused attribute or similar
       const filterBox = container.querySelector('.filter-box')
       expect(filterBox).toBeInTheDocument()
@@ -833,7 +832,7 @@ describe('FilterBox', () => {
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
       await user.keyboard('{Enter}') // Select first field
-      
+
       // Focus should remain on input
       expect(document.activeElement).toBe(input)
     })
@@ -870,16 +869,18 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} showClearButton />)
+      render(
+        <FilterBox schema={createTestSchema()} value={value} onChange={onChange} showClearButton />
+      )
 
       // Get the clear button directly and verify it's in the DOM
       const clearButton = screen.getByRole('button', { name: /clear/i })
       expect(clearButton).toBeInTheDocument()
-      
+
       // Focus and click the clear button
       clearButton.focus()
       await user.click(clearButton)
-      
+
       expect(onChange).toHaveBeenCalledWith([])
     })
 
@@ -894,14 +895,14 @@ describe('FilterBox', () => {
 
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
-      
+
       // Dropdown is open
       expect(screen.getByRole('listbox')).toBeInTheDocument()
-      
+
       // Press Escape and Tab
       await user.keyboard('{Escape}')
       await user.tab()
-      
+
       // Should move to next element
       expect(screen.getByRole('button', { name: 'Next Element' })).toHaveFocus()
     })
@@ -982,12 +983,7 @@ describe('FilterBox', () => {
       const onError = vi.fn()
 
       render(
-        <FilterBox
-          schema={createTestSchema()}
-          value={[]}
-          onChange={vi.fn()}
-          onError={onError}
-        />
+        <FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} onError={onError} />
       )
 
       expect(onError).not.toHaveBeenCalled()
@@ -1038,13 +1034,7 @@ describe('FilterBox', () => {
         },
       ]
 
-      render(
-        <FilterBox
-          schema={createTestSchema()}
-          value={invalidValue}
-          onChange={vi.fn()}
-        />
-      )
+      render(<FilterBox schema={createTestSchema()} value={invalidValue} onChange={vi.fn()} />)
 
       // Live region with role="alert" should announce validation errors (assertive)
       const alertRegion = document.querySelector('[role="alert"]')

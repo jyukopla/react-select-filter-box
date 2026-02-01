@@ -4,11 +4,7 @@
  * Provides built-in autocompleter implementations and composition utilities.
  */
 
-import type {
-  Autocompleter,
-  AutocompleteContext,
-  AutocompleteItem,
-} from '@/types'
+import type { Autocompleter, AutocompleteContext, AutocompleteItem } from '@/types'
 
 // =============================================================================
 // Static Autocompleter
@@ -34,9 +30,7 @@ export function createStaticAutocompleter(
 
   // Normalize values to AutocompleteItem[]
   const items: AutocompleteItem[] = values.map((v) =>
-    typeof v === 'string'
-      ? { type: 'value' as const, key: v, label: v }
-      : v
+    typeof v === 'string' ? { type: 'value' as const, key: v, label: v } : v
   )
 
   return {
@@ -155,11 +149,7 @@ export function createAsyncAutocompleter(
   ) => Promise<AutocompleteItem[]>,
   options: AsyncAutocompleterOptions = {}
 ): Autocompleter {
-  const {
-    debounceMs = 300,
-    minChars = 1,
-    cacheResults = true,
-  } = options
+  const { debounceMs = 300, minChars = 1, cacheResults = true } = options
 
   const cache = new Map<string, AutocompleteItem[]>()
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -167,9 +157,7 @@ export function createAsyncAutocompleter(
   let lastQuery = ''
 
   return {
-    getSuggestions: async (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
+    getSuggestions: async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
       const { inputValue } = context
 
       // Clear pending debounce
@@ -262,9 +250,7 @@ export interface NumberAutocompleterOptions {
 /**
  * Create an autocompleter for number input
  */
-export function createNumberAutocompleter(
-  options: NumberAutocompleterOptions = {}
-): Autocompleter {
+export function createNumberAutocompleter(options: NumberAutocompleterOptions = {}): Autocompleter {
   const {
     min = Number.MIN_SAFE_INTEGER,
     max = Number.MAX_SAFE_INTEGER,
@@ -372,9 +358,7 @@ function parseDateISO(str: string): Date | null {
 /**
  * Create an autocompleter for date input
  */
-export function createDateAutocompleter(
-  options: DateAutocompleterOptions = {}
-): Autocompleter {
+export function createDateAutocompleter(options: DateAutocompleterOptions = {}): Autocompleter {
   const { presets = getDefaultDatePresets() } = options
 
   return {
@@ -624,16 +608,10 @@ function getDefaultDateTimePresets(): DateTimePreset[] {
 /**
  * Combine multiple autocompleters
  */
-export function combineAutocompleters(
-  ...autocompleters: Autocompleter[]
-): Autocompleter {
+export function combineAutocompleters(...autocompleters: Autocompleter[]): Autocompleter {
   return {
-    getSuggestions: async (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
-      const results = await Promise.all(
-        autocompleters.map((ac) => ac.getSuggestions(context))
-      )
+    getSuggestions: async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
+      const results = await Promise.all(autocompleters.map((ac) => ac.getSuggestions(context)))
       return results.flat()
     },
   }
@@ -647,9 +625,7 @@ export function mapAutocompleter(
   transform: (items: AutocompleteItem[]) => AutocompleteItem[]
 ): Autocompleter {
   return {
-    getSuggestions: async (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
+    getSuggestions: async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
       const items = await autocompleter.getSuggestions(context)
       return transform(items)
     },
@@ -659,16 +635,11 @@ export function mapAutocompleter(
 /**
  * Add caching to any autocompleter
  */
-export function withCache(
-  autocompleter: Autocompleter,
-  ttlMs: number = 60000
-): Autocompleter {
+export function withCache(autocompleter: Autocompleter, ttlMs: number = 60000): Autocompleter {
   const cache = new Map<string, { items: AutocompleteItem[]; timestamp: number }>()
 
   return {
-    getSuggestions: async (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
+    getSuggestions: async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
       const key = context.inputValue
       const cached = cache.get(key)
 
@@ -686,16 +657,11 @@ export function withCache(
 /**
  * Add debouncing to any autocompleter
  */
-export function withDebounce(
-  autocompleter: Autocompleter,
-  ms: number
-): Autocompleter {
+export function withDebounce(autocompleter: Autocompleter, ms: number): Autocompleter {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
   return {
-    getSuggestions: (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
+    getSuggestions: (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
       return new Promise((resolve) => {
         if (debounceTimer) {
           clearTimeout(debounceTimer)
@@ -758,14 +724,14 @@ export interface PaginatedAutocompleterOptions {
 
 /**
  * Create an autocompleter that loads suggestions lazily with pagination support.
- * 
+ *
  * This is useful for large datasets where you don't want to load all items at once.
  * The autocompleter supports:
  * - Cursor-based or page-based pagination
  * - Lazy loading triggered by scroll/load more
  * - Per-query caching with page limits
  * - Request cancellation for new queries
- * 
+ *
  * @example
  * ```ts
  * const autocompleter = createPaginatedAutocompleter(
@@ -809,12 +775,15 @@ export function createPaginatedAutocompleter(
   } = options
 
   // Cache structure: query -> { pages: Map<number, items[]>, hasMore, total, cursor }
-  const cache = new Map<string, {
-    pages: Map<number, AutocompleteItem[]>
-    hasMore: boolean
-    total?: number
-    cursor?: string
-  }>()
+  const cache = new Map<
+    string,
+    {
+      pages: Map<number, AutocompleteItem[]>
+      hasMore: boolean
+      total?: number
+      cursor?: string
+    }
+  >()
 
   let currentQuery = ''
   let currentPage = 0
@@ -836,7 +805,7 @@ export function createPaginatedAutocompleter(
   const getAllCachedItems = (query: string): AutocompleteItem[] => {
     const cached = cache.get(query)
     if (!cached) return []
-    
+
     const items: AutocompleteItem[] = []
     const sortedPages = Array.from(cached.pages.entries()).sort((a, b) => a[0] - b[0])
     for (const [, pageItems] of sortedPages) {
@@ -852,15 +821,15 @@ export function createPaginatedAutocompleter(
     signal?: AbortSignal
   ): Promise<AutocompleteItem[]> => {
     isLoading = true
-    
+
     try {
       const result = await fetchFn(query, page, pageSize, cursor, signal)
-      
+
       // Update state
       hasMore = result.hasMore
       total = result.total
       currentCursor = result.nextCursor
-      
+
       // Cache results
       if (cacheResults) {
         let queryCache = cache.get(query)
@@ -868,20 +837,20 @@ export function createPaginatedAutocompleter(
           queryCache = { pages: new Map(), hasMore: true }
           cache.set(query, queryCache)
         }
-        
+
         // Add new page to cache
         queryCache.pages.set(page, result.items)
         queryCache.hasMore = result.hasMore
         queryCache.total = result.total
         queryCache.cursor = result.nextCursor
-        
+
         // Limit cached pages
         if (queryCache.pages.size > maxCachedPages) {
           const oldestPage = Math.min(...queryCache.pages.keys())
           queryCache.pages.delete(oldestPage)
         }
       }
-      
+
       isLoading = false
       return result.items
     } catch (error) {
@@ -890,9 +859,7 @@ export function createPaginatedAutocompleter(
     }
   }
 
-  const getSuggestions = async (
-    context: AutocompleteContext
-  ): Promise<AutocompleteItem[]> => {
+  const getSuggestions = async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
     const { inputValue } = context
 
     // Clear pending debounce
@@ -969,7 +936,7 @@ export function createPaginatedAutocompleter(
     }
 
     const nextPage = currentPage + 1
-    
+
     // Check if next page is cached
     const queryCache = cache.get(currentQuery)
     if (queryCache?.pages.has(nextPage)) {
@@ -980,7 +947,7 @@ export function createPaginatedAutocompleter(
     // Fetch next page
     currentPage = nextPage
     await fetchPage(currentQuery, nextPage, currentCursor)
-    
+
     return getAllCachedItems(currentQuery)
   }
 
@@ -1024,34 +991,34 @@ export function withStaleWhileRevalidate(
   const cache = new Map<string, { items: AutocompleteItem[]; timestamp: number }>()
 
   return {
-    getSuggestions: async (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
+    getSuggestions: async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
       const key = context.inputValue
       const cached = cache.get(key)
       const now = Date.now()
 
       if (cached) {
         const age = now - cached.timestamp
-        
+
         // Fresh data - return directly
         if (age < maxAge) {
           return cached.items
         }
-        
+
         // Stale but not expired - return stale, fetch in background
         if (age < staleAge) {
           // Fire and forget background revalidation
-          Promise.resolve(autocompleter.getSuggestions(context)).then((items) => {
-            cache.set(key, { items, timestamp: Date.now() })
-            onUpdate?.(items)
-          }).catch(() => {
-            // Ignore errors during background revalidation
-          })
-          
+          Promise.resolve(autocompleter.getSuggestions(context))
+            .then((items) => {
+              cache.set(key, { items, timestamp: Date.now() })
+              onUpdate?.(items)
+            })
+            .catch(() => {
+              // Ignore errors during background revalidation
+            })
+
           return cached.items
         }
-        
+
         // Completely expired - fall through to fresh fetch
       }
 

@@ -80,7 +80,9 @@ describe('TokenContainer', () => {
 
     it('should call onTokenClick when a token is clicked', () => {
       const onTokenClick = vi.fn()
-      render(<TokenContainer {...defaultProps} tokens={createTokens()} onTokenClick={onTokenClick} />)
+      render(
+        <TokenContainer {...defaultProps} tokens={createTokens()} onTokenClick={onTokenClick} />
+      )
       fireEvent.click(screen.getByText('Active'))
       expect(onTokenClick).toHaveBeenCalledWith(2) // position of value token
     })

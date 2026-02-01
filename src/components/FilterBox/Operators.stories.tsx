@@ -21,7 +21,13 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Helper component for stories
-function FilterBoxWithState({ schema, description }: { schema: FilterSchema; description?: string }) {
+function FilterBoxWithState({
+  schema,
+  description,
+}: {
+  schema: FilterSchema
+  description?: string
+}) {
   const [value, setValue] = useState<FilterExpression[]>([])
   return (
     <div style={{ maxWidth: '650px' }}>
@@ -29,7 +35,16 @@ function FilterBoxWithState({ schema, description }: { schema: FilterSchema; des
         <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>{description}</p>
       )}
       <FilterBox schema={schema} value={value} onChange={setValue} />
-      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
+      <pre
+        style={{
+          marginTop: '1rem',
+          fontSize: '12px',
+          background: '#f5f5f5',
+          padding: '1rem',
+          borderRadius: '4px',
+          overflow: 'auto',
+        }}
+      >
         {JSON.stringify(value, null, 2) || '[]'}
       </pre>
     </div>
@@ -272,7 +287,8 @@ export const DateOperators: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Date operators: on, before, after, between, and relative date ranges like "in the last N days".',
+        story:
+          'Date operators: on, before, after, between, and relative date ranges like "in the last N days".',
       },
     },
   },
@@ -356,18 +372,14 @@ const betweenOperatorSchema: FilterSchema = {
       label: 'Date',
       type: 'date',
       description: 'Date range filter',
-      operators: [
-        { key: 'between', label: 'between' },
-      ],
+      operators: [{ key: 'between', label: 'between' }],
     },
     {
       key: 'age',
       label: 'Age',
       type: 'number',
       description: 'Age range',
-      operators: [
-        { key: 'between', label: 'from...to' },
-      ],
+      operators: [{ key: 'between', label: 'from...to' }],
     },
   ],
 }
@@ -440,7 +452,8 @@ export const NullOperators: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Null/empty operators for checking missing values: isNull, isNotNull, isEmpty, isNotEmpty.',
+        story:
+          'Null/empty operators for checking missing values: isNull, isNotNull, isEmpty, isNotEmpty.',
       },
     },
   },
@@ -479,9 +492,7 @@ const customSymbolsSchema: FilterSchema = {
       label: 'Direction',
       type: 'enum',
       description: 'Movement direction',
-      operators: [
-        { key: 'eq', label: 'is', symbol: '→' },
-      ],
+      operators: [{ key: 'eq', label: 'is', symbol: '→' }],
     },
   ],
 }
@@ -575,7 +586,8 @@ export const AllOperatorTypes: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Comprehensive example with all operator types: equality, comparison, text, date, list, and null.',
+        story:
+          'Comprehensive example with all operator types: equality, comparison, text, date, list, and null.',
       },
     },
   },

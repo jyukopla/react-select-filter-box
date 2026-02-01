@@ -252,7 +252,11 @@ export class FilterStateMachine {
   }
 
   private handleConfirmValue(value: ConditionValue): void {
-    if (this.state === 'entering-value' && this.context.currentField && this.context.currentOperator) {
+    if (
+      this.state === 'entering-value' &&
+      this.context.currentField &&
+      this.context.currentOperator
+    ) {
       const condition: FilterCondition = {
         field: this.context.currentField,
         operator: this.context.currentOperator,
@@ -311,8 +315,9 @@ export class FilterStateMachine {
       case 'selecting-connector': {
         // Remove the last completed expression and go back to entering-value
         const expressions = this.context.completedExpressions.slice(0, -1)
-        const deletedExpression = this.context.completedExpressions[this.context.completedExpressions.length - 1]
-        
+        const deletedExpression =
+          this.context.completedExpressions[this.context.completedExpressions.length - 1]
+
         if (deletedExpression) {
           // Restore the field and operator from the deleted expression
           this.context = {

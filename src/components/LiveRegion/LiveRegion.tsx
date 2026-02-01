@@ -88,12 +88,9 @@ export function useLiveAnnounce({
     setMessage('')
   }, [])
 
-  const announce = useCallback(
-    (newMessage: string) => {
-      setMessage(newMessage)
-    },
-    []
-  )
+  const announce = useCallback((newMessage: string) => {
+    setMessage(newMessage)
+  }, [])
 
   // Clear message after timeout
   useEffect(() => {

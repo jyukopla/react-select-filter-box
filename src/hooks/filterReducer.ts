@@ -147,10 +147,7 @@ export type FilterAction =
  * @param action - Action to apply
  * @returns New filter state
  */
-export function filterReducer(
-  state: FilterState,
-  action: FilterAction
-): FilterState {
+export function filterReducer(state: FilterState, action: FilterAction): FilterState {
   switch (action.type) {
     case 'FOCUS':
       return {
@@ -579,10 +576,7 @@ export function selectPlaceholder(step: FilterStep): string {
 /**
  * Check if a token can be edited (only value tokens)
  */
-export function selectIsTokenEditable(
-  tokens: TokenData[],
-  tokenIndex: number
-): boolean {
+export function selectIsTokenEditable(tokens: TokenData[], tokenIndex: number): boolean {
   const token = tokens[tokenIndex]
   return token?.type === 'value' && !token.isPending
 }
@@ -590,10 +584,7 @@ export function selectIsTokenEditable(
 /**
  * Get the expression index for a token
  */
-export function selectTokenExpressionIndex(
-  tokens: TokenData[],
-  tokenIndex: number
-): number {
+export function selectTokenExpressionIndex(tokens: TokenData[], tokenIndex: number): number {
   const token = tokens[tokenIndex]
   return token?.expressionIndex ?? -1
 }

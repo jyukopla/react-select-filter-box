@@ -16,28 +16,28 @@ export interface TokenStyles {
   fieldBorder?: string
   /** Text color for field tokens */
   fieldText?: string
-  
+
   /** Background color for operator tokens */
   operatorBg?: string
   /** Border color for operator tokens */
   operatorBorder?: string
   /** Text color for operator tokens */
   operatorText?: string
-  
+
   /** Background color for value tokens */
   valueBg?: string
   /** Border color for value tokens */
   valueBorder?: string
   /** Text color for value tokens */
   valueText?: string
-  
+
   /** Background color for connector tokens */
   connectorBg?: string
   /** Border color for connector tokens */
   connectorBorder?: string
   /** Text color for connector tokens */
   connectorText?: string
-  
+
   /** Gap between tokens */
   gap?: string
   /** Padding inside tokens */
@@ -129,7 +129,7 @@ const FilterBoxThemeContext = createContext<FilterBoxThemeContextValue | undefin
  */
 function themeToCssVariables(theme: FilterBoxTheme): Record<string, string> {
   const variables: Record<string, string> = {}
-  
+
   // Token styles
   if (theme.tokens) {
     const t = theme.tokens
@@ -149,7 +149,7 @@ function themeToCssVariables(theme: FilterBoxTheme): Record<string, string> {
     if (t.padding) variables['--filter-token-padding'] = t.padding
     if (t.borderRadius) variables['--filter-token-radius'] = t.borderRadius
   }
-  
+
   // Container styles
   if (theme.container) {
     const c = theme.container
@@ -159,7 +159,7 @@ function themeToCssVariables(theme: FilterBoxTheme): Record<string, string> {
     if (c.shadow) variables['--filter-container-shadow'] = c.shadow
     if (c.padding) variables['--filter-container-padding'] = c.padding
   }
-  
+
   // Dropdown styles
   if (theme.dropdown) {
     const d = theme.dropdown
@@ -169,13 +169,13 @@ function themeToCssVariables(theme: FilterBoxTheme): Record<string, string> {
     if (d.itemHover) variables['--filter-dropdown-item-hover'] = d.itemHover
     if (d.itemSelected) variables['--filter-dropdown-item-selected'] = d.itemSelected
   }
-  
+
   // Input styles
   if (theme.input) {
     const i = theme.input
     if (i.placeholder) variables['--filter-input-placeholder'] = i.placeholder
   }
-  
+
   // Typography styles
   if (theme.typography) {
     const ty = theme.typography
@@ -183,7 +183,7 @@ function themeToCssVariables(theme: FilterBoxTheme): Record<string, string> {
     if (ty.fontSize) variables['--filter-font-size'] = ty.fontSize
     if (ty.tokenFontWeight) variables['--filter-token-font-weight'] = ty.tokenFontWeight
   }
-  
+
   return variables
 }
 
@@ -220,15 +220,19 @@ export interface FilterBoxThemeProviderProps {
  * ```
  */
 export function FilterBoxThemeProvider({ theme, children }: FilterBoxThemeProviderProps) {
-  const contextValue = useMemo(() => ({
-    theme,
-    cssVariables: themeToCssVariables(theme),
-  }), [theme])
-  
-  const style = useMemo(() => 
-    contextValue.cssVariables as React.CSSProperties,
-  [contextValue.cssVariables])
-  
+  const contextValue = useMemo(
+    () => ({
+      theme,
+      cssVariables: themeToCssVariables(theme),
+    }),
+    [theme]
+  )
+
+  const style = useMemo(
+    () => contextValue.cssVariables as React.CSSProperties,
+    [contextValue.cssVariables]
+  )
+
   return (
     <FilterBoxThemeContext.Provider value={contextValue}>
       <div className="filter-box-theme-root" style={style}>
@@ -289,7 +293,7 @@ export const themes = {
       placeholder: '#9e9e9e',
     },
   } satisfies FilterBoxTheme,
-  
+
   /** Dark theme */
   dark: {
     tokens: {
@@ -321,7 +325,7 @@ export const themes = {
       placeholder: '#808080',
     },
   } satisfies FilterBoxTheme,
-  
+
   /** High contrast theme */
   highContrast: {
     tokens: {
@@ -360,10 +364,10 @@ export const themes = {
  */
 export function mergeThemes(...themesToMerge: (FilterBoxTheme | undefined)[]): FilterBoxTheme {
   const result: FilterBoxTheme = {}
-  
+
   for (const theme of themesToMerge) {
     if (!theme) continue
-    
+
     if (theme.tokens) {
       result.tokens = { ...result.tokens, ...theme.tokens }
     }
@@ -380,7 +384,7 @@ export function mergeThemes(...themesToMerge: (FilterBoxTheme | undefined)[]): F
       result.typography = { ...result.typography, ...theme.typography }
     }
   }
-  
+
   return result
 }
 

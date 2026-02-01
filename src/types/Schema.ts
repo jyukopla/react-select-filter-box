@@ -66,9 +66,7 @@ export interface CustomWidgetProps {
  */
 export interface Autocompleter {
   /** Get suggestions based on current context */
-  getSuggestions: (
-    context: AutocompleteContext
-  ) => Promise<AutocompleteItem[]> | AutocompleteItem[]
+  getSuggestions: (context: AutocompleteContext) => Promise<AutocompleteItem[]> | AutocompleteItem[]
   /** Optional custom rendering for suggestions */
   renderItem?: (item: AutocompleteItem, isHighlighted: boolean) => ReactNode
   /** Optional custom input widget instead of dropdown */

@@ -136,9 +136,9 @@ const specialCharExpressions: FilterExpression[] = [
       field: { key: 'query', label: 'Search Query', type: 'string' },
       operator: { key: 'like', label: 'like' },
       value: {
-        raw: "O'Brien & Co. \"Partners\"",
-        display: "O'Brien & Co. \"Partners\"",
-        serialized: "O'Brien & Co. \"Partners\"",
+        raw: 'O\'Brien & Co. "Partners"',
+        display: 'O\'Brien & Co. "Partners"',
+        serialized: 'O\'Brien & Co. "Partners"',
       },
     },
   },
@@ -605,9 +605,7 @@ function RapidStateChangesComponent() {
         onChange={handleChange}
         placeholder="Add status filter..."
       />
-      <div style={{ fontSize: '12px', color: '#666' }}>
-        State update count: {updateCount}
-      </div>
+      <div style={{ fontSize: '12px', color: '#666' }}>State update count: {updateCount}</div>
     </div>
   )
 }

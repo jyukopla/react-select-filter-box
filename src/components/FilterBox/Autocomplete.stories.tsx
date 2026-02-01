@@ -30,11 +30,11 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Helper component for stories
-function FilterBoxWithState({ 
-  schema, 
+function FilterBoxWithState({
+  schema,
   description,
   note,
-}: { 
+}: {
   schema: FilterSchema
   description?: string
   note?: string
@@ -46,12 +46,31 @@ function FilterBoxWithState({
         <p style={{ marginBottom: '0.5rem', color: '#666', fontSize: '14px' }}>{description}</p>
       )}
       {note && (
-        <div style={{ marginBottom: '1rem', padding: '0.5rem', background: '#fffde7', border: '1px solid #fff9c4', borderRadius: '4px', fontSize: '13px', color: '#f57f17' }}>
+        <div
+          style={{
+            marginBottom: '1rem',
+            padding: '0.5rem',
+            background: '#fffde7',
+            border: '1px solid #fff9c4',
+            borderRadius: '4px',
+            fontSize: '13px',
+            color: '#f57f17',
+          }}
+        >
           💡 {note}
         </div>
       )}
       <FilterBox schema={schema} value={value} onChange={setValue} />
-      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
+      <pre
+        style={{
+          marginTop: '1rem',
+          fontSize: '12px',
+          background: '#f5f5f5',
+          padding: '1rem',
+          borderRadius: '4px',
+          overflow: 'auto',
+        }}
+      >
         {JSON.stringify(value, null, 2) || '[]'}
       </pre>
     </div>
@@ -294,8 +313,8 @@ export const MatchModes: Story = {
 // Simulated API response
 const simulateApiCall = async (query: string): Promise<AutocompleteItem[]> => {
   // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
   const allUsers = [
     { key: 'user1', label: 'John Smith', description: 'john.smith@example.com' },
     { key: 'user2', label: 'Jane Doe', description: 'jane.doe@example.com' },
@@ -303,12 +322,12 @@ const simulateApiCall = async (query: string): Promise<AutocompleteItem[]> => {
     { key: 'user4', label: 'Alice Williams', description: 'alice.w@example.com' },
     { key: 'user5', label: 'Charlie Brown', description: 'charlie.b@example.com' },
   ]
-  
+
   if (!query) return allUsers.slice(0, 3)
-  
+
   return allUsers
-    .filter(u => u.label.toLowerCase().includes(query.toLowerCase()))
-    .map(u => ({ ...u, type: 'value' as const }))
+    .filter((u) => u.label.toLowerCase().includes(query.toLowerCase()))
+    .map((u) => ({ ...u, type: 'value' as const }))
 }
 
 const asyncSchema: FilterSchema = {
@@ -391,9 +410,7 @@ const numberSchema: FilterSchema = {
       label: 'Rating',
       type: 'number',
       description: 'Star rating (1-5)',
-      operators: [
-        { key: 'gte', label: 'at least', symbol: '★≥' },
-      ],
+      operators: [{ key: 'gte', label: 'at least', symbol: '★≥' }],
       valueAutocompleter: createNumberAutocompleter({
         min: 1,
         max: 5,
@@ -498,8 +515,20 @@ export const DateAutocomplete: Story = {
 // =============================================================================
 
 const recentSearches = [
-  { type: 'value' as const, key: 'recent1', label: 'John', description: 'Recent search', group: 'Recent' },
-  { type: 'value' as const, key: 'recent2', label: 'Jane', description: 'Recent search', group: 'Recent' },
+  {
+    type: 'value' as const,
+    key: 'recent1',
+    label: 'John',
+    description: 'Recent search',
+    group: 'Recent',
+  },
+  {
+    type: 'value' as const,
+    key: 'recent2',
+    label: 'Jane',
+    description: 'Recent search',
+    group: 'Recent',
+  },
 ]
 
 const suggestions = [
@@ -591,20 +620,24 @@ let apiCallCount = 0
 
 const cachedApiCall = async (query: string): Promise<AutocompleteItem[]> => {
   apiCallCount++
-  await new Promise(resolve => setTimeout(resolve, 300))
-  
+  await new Promise((resolve) => setTimeout(resolve, 300))
+
   return [
-    { type: 'value', key: `result-${apiCallCount}`, label: `Result for "${query}" (API call #${apiCallCount})` },
+    {
+      type: 'value',
+      key: `result-${apiCallCount}`,
+      label: `Result for "${query}" (API call #${apiCallCount})`,
+    },
   ]
 }
 
 function CachedAutocompleterStory() {
   const [value, setValue] = useState<FilterExpression[]>([])
-  
+
   useEffect(() => {
     apiCallCount = 0
   }, [])
-  
+
   const schema: FilterSchema = {
     fields: [
       {
@@ -620,17 +653,34 @@ function CachedAutocompleterStory() {
       },
     ],
   }
-  
+
   return (
     <div style={{ maxWidth: '650px' }}>
       <p style={{ marginBottom: '0.5rem', color: '#666', fontSize: '14px' }}>
         Async autocompleter with result caching. Same queries return cached results.
       </p>
-      <div style={{ marginBottom: '1rem', padding: '0.5rem', background: '#e3f2fd', border: '1px solid #bbdefb', borderRadius: '4px', fontSize: '13px' }}>
+      <div
+        style={{
+          marginBottom: '1rem',
+          padding: '0.5rem',
+          background: '#e3f2fd',
+          border: '1px solid #bbdefb',
+          borderRadius: '4px',
+          fontSize: '13px',
+        }}
+      >
         💡 Type the same query multiple times - subsequent requests use cached results.
       </div>
       <FilterBox schema={schema} value={value} onChange={setValue} />
-      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem', borderRadius: '4px' }}>
+      <pre
+        style={{
+          marginTop: '1rem',
+          fontSize: '12px',
+          background: '#f5f5f5',
+          padding: '1rem',
+          borderRadius: '4px',
+        }}
+      >
         {JSON.stringify(value, null, 2) || '[]'}
       </pre>
     </div>

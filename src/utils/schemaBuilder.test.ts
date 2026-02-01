@@ -16,11 +16,7 @@ import type { FilterSchema } from '@/types'
 describe('schemaBuilder', () => {
   describe('createSchema', () => {
     it('should create a simple schema with fluent API', () => {
-      const schema = createSchema()
-        .field('name', 'Name')
-        .type('string')
-        .done()
-        .build()
+      const schema = createSchema().field('name', 'Name').type('string').done().build()
 
       expect(schema.fields).toHaveLength(1)
       expect(schema.fields[0].key).toBe('name')
@@ -80,16 +76,11 @@ describe('schemaBuilder', () => {
         .build()
 
       expect(schema.fields[0].operators).toHaveLength(2)
-      expect(schema.fields[0].operators.map((op) => op.key)).toEqual([
-        'eq',
-        'contains',
-      ])
+      expect(schema.fields[0].operators.map((op) => op.key)).toEqual(['eq', 'contains'])
     })
 
     it('should support custom operator config', () => {
-      const customOperators = [
-        { key: 'custom', label: 'Custom Op', symbol: '~' },
-      ]
+      const customOperators = [{ key: 'custom', label: 'Custom Op', symbol: '~' }]
       const schema = createSchema()
         .field('data', 'Data')
         .type('string')
@@ -149,12 +140,7 @@ describe('schemaBuilder', () => {
     })
 
     it('should support max expressions', () => {
-      const schema = createSchema()
-        .field('name', 'Name')
-        .type('string')
-        .done()
-        .max(5)
-        .build()
+      const schema = createSchema().field('name', 'Name').type('string').done().max(5).build()
 
       expect(schema.maxExpressions).toBe(5)
     })
@@ -175,10 +161,7 @@ describe('schemaBuilder', () => {
     })
 
     it('should default to string type if not specified', () => {
-      const schema = createSchema()
-        .field('name', 'Name')
-        .done()
-        .build()
+      const schema = createSchema().field('name', 'Name').done().build()
 
       expect(schema.fields[0].type).toBe('string')
     })

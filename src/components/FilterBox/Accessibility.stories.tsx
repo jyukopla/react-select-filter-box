@@ -132,8 +132,8 @@ function KeyboardOnlyComponent() {
       <div>
         <h3 style={{ margin: '0 0 8px' }}>Keyboard Navigation Demo</h3>
         <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
-          Use Tab, Arrow keys, Enter, and Escape to navigate. Focus log below
-          shows your navigation path.
+          Use Tab, Arrow keys, Enter, and Escape to navigate. Focus log below shows your navigation
+          path.
         </p>
       </div>
 
@@ -224,8 +224,7 @@ export const KeyboardOnlyNavigation: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Demonstrates that the FilterBox is fully navigable using only the keyboard.',
+        story: 'Demonstrates that the FilterBox is fully navigable using only the keyboard.',
       },
     },
   },
@@ -253,7 +252,9 @@ function HighContrastComponent() {
       },
     },
   ])
-  const [theme, setTheme] = useState<'default' | 'high-contrast' | 'high-contrast-dark'>('high-contrast')
+  const [theme, setTheme] = useState<'default' | 'high-contrast' | 'high-contrast-dark'>(
+    'high-contrast'
+  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -302,11 +303,16 @@ function HighContrastComponent() {
         </button>
       </div>
 
-      <div 
+      <div
         data-theme={theme !== 'default' ? theme : undefined}
-        style={{ 
+        style={{
           padding: '20px',
-          backgroundColor: theme === 'high-contrast-dark' ? '#000000' : theme === 'high-contrast' ? '#ffffff' : 'transparent',
+          backgroundColor:
+            theme === 'high-contrast-dark'
+              ? '#000000'
+              : theme === 'high-contrast'
+                ? '#ffffff'
+                : 'transparent',
           borderRadius: '8px',
           border: theme !== 'default' ? '2px solid currentColor' : 'none',
         }}
@@ -334,7 +340,9 @@ function HighContrastComponent() {
           <li>Thicker borders for better visibility</li>
           <li>Larger text size for improved readability</li>
           <li>Distinct focus indicators</li>
-          <li>Respects <code>prefers-contrast: more</code> media query</li>
+          <li>
+            Respects <code>prefers-contrast: more</code> media query
+          </li>
         </ul>
       </div>
     </div>
@@ -396,9 +404,9 @@ export const ReducedMotion: Story = {
             fontSize: '14px',
           }}
         >
-          <strong>Reduced Motion Mode:</strong> All animations and transitions
-          are disabled for users who prefer reduced motion. The component
-          respects the <code>prefers-reduced-motion</code> media query.
+          <strong>Reduced Motion Mode:</strong> All animations and transitions are disabled for
+          users who prefer reduced motion. The component respects the{' '}
+          <code>prefers-reduced-motion</code> media query.
         </div>
       </div>
     ),
@@ -456,9 +464,9 @@ export const LargeTextZoom: Story = {
             fontSize: '14px',
           }}
         >
-          <strong>Large Text Mode:</strong> The component scales properly when
-          browser zoom is increased or when users have configured larger system
-          fonts. All text remains readable and layout adapts accordingly.
+          <strong>Large Text Mode:</strong> The component scales properly when browser zoom is
+          increased or when users have configured larger system fonts. All text remains readable and
+          layout adapts accordingly.
         </div>
       </div>
     ),
@@ -466,8 +474,7 @@ export const LargeTextZoom: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Shows that the FilterBox scales properly with increased font sizes (200% zoom).',
+        story: 'Shows that the FilterBox scales properly with increased font sizes (200% zoom).',
       },
     },
   },
@@ -532,9 +539,9 @@ function FocusIndicatorsComponent() {
           fontSize: '14px',
         }}
       >
-        <strong>Focus Indicators:</strong> Visible focus rings appear on all
-        interactive elements when navigating with the keyboard. Focus indicators
-        are hidden for mouse users (using <code>:focus-visible</code>).
+        <strong>Focus Indicators:</strong> Visible focus rings appear on all interactive elements
+        when navigating with the keyboard. Focus indicators are hidden for mouse users (using{' '}
+        <code>:focus-visible</code>).
       </div>
     </div>
   )
@@ -614,9 +621,9 @@ function AriaLiveComponent() {
           fontSize: '14px',
         }}
       >
-        <strong>ARIA Live Regions:</strong> Changes to the filter expressions
-        are announced to screen readers via ARIA live regions. This ensures
-        users are informed of dynamic content changes.
+        <strong>ARIA Live Regions:</strong> Changes to the filter expressions are announced to
+        screen readers via ARIA live regions. This ensures users are informed of dynamic content
+        changes.
       </div>
     </div>
   )
@@ -627,8 +634,7 @@ export const AriaLiveAnnouncements: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Demonstrates ARIA live region announcements when filters are added or removed.',
+        story: 'Demonstrates ARIA live region announcements when filters are added or removed.',
       },
     },
   },

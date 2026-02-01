@@ -86,7 +86,7 @@ describe('Complete Filter Building Flow', () => {
   it('builds multiple expressions with AND', async () => {
     const _user = userEvent.setup()
     const onChange = vi.fn()
-    
+
     // Start with one existing expression
     const existingValue: FilterExpression[] = [
       {
@@ -111,7 +111,7 @@ describe('Complete Filter Building Flow', () => {
   it('builds multiple expressions with OR', async () => {
     const _user = userEvent.setup()
     const onChange = vi.fn()
-    
+
     const existingValue: FilterExpression[] = [
       {
         condition: {
@@ -197,7 +197,7 @@ describe('Complete Filter Building Flow', () => {
     // Find the edit input and change the value
     const editInput = screen.getByRole('textbox', { name: /edit value/i })
     expect(editInput).toHaveValue('original')
-    
+
     // Change value and press Enter
     fireEvent.change(editInput, { target: { value: 'updated' } })
     fireEvent.keyDown(editInput, { key: 'Enter' })
@@ -261,13 +261,7 @@ describe('Complete Filter Building Flow', () => {
       },
     ]
 
-    render(
-      <FilterBox
-        schema={createFullSchema()}
-        value={existingValue}
-        onChange={onChange}
-      />
-    )
+    render(<FilterBox schema={createFullSchema()} value={existingValue} onChange={onChange} />)
 
     // Click the clear button
     const clearButton = screen.getByRole('button', { name: /clear/i })
@@ -361,14 +355,7 @@ describe('Schema Integration', () => {
       },
     ]
 
-    render(
-      <FilterBox
-        schema={schema}
-        value={invalidValue}
-        onChange={vi.fn()}
-        onError={onError}
-      />
-    )
+    render(<FilterBox schema={schema} value={invalidValue} onChange={vi.fn()} onError={onError} />)
 
     // onError should be called with validation errors
     expect(onError).toHaveBeenCalledWith(
@@ -389,7 +376,7 @@ describe('Keyboard-Only Navigation Flow', () => {
 
     // Tab to focus
     await user.tab()
-    
+
     // Dropdown should open
     expect(screen.getByRole('listbox')).toBeInTheDocument()
 

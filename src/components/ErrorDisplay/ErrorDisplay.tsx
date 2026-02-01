@@ -164,13 +164,11 @@ export function ErrorSummary({
   }
 
   return (
-    <div
-      role="alert"
-      aria-live="polite"
-      className={clsx('error-summary', className)}
-    >
+    <div role="alert" aria-live="polite" className={clsx('error-summary', className)}>
       <div className="error-summary__header">
-        <span className="error-summary__icon" aria-hidden="true">⚠</span>
+        <span className="error-summary__icon" aria-hidden="true">
+          ⚠
+        </span>
         <span className="error-summary__title">{title}</span>
         {dismissible && (
           <button
@@ -187,13 +185,9 @@ export function ErrorSummary({
         {errors.map((error, index) => (
           <li key={index} className="error-summary__item">
             {error.expressionIndex !== undefined && (
-              <span className="error-summary__index">
-                Expression {error.expressionIndex + 1}:
-              </span>
+              <span className="error-summary__index">Expression {error.expressionIndex + 1}:</span>
             )}
-            {error.field && (
-              <span className="error-summary__field">{error.field}:</span>
-            )}
+            {error.field && <span className="error-summary__field">{error.field}:</span>}
             <span className="error-summary__message">{error.message}</span>
           </li>
         ))}
@@ -232,11 +226,7 @@ export function ErrorIndicator({
 
   return (
     <span
-      className={clsx(
-        'error-indicator',
-        `error-indicator--${size}`,
-        className
-      )}
+      className={clsx('error-indicator', `error-indicator--${size}`, className)}
       aria-label={`${errorCount ?? 1} error${(errorCount ?? 1) > 1 ? 's' : ''}`}
     >
       {errorCount !== undefined && errorCount > 1 ? errorCount : '!'}
@@ -276,32 +266,41 @@ export function useValidationErrors({
 }: UseValidationErrorsOptions = {}): UseValidationErrorsReturn {
   const [errors, setErrors] = useState<ValidationError[]>([])
 
-  const addError = useCallback((error: ValidationError) => {
-    setErrors(prev => {
-      const newErrors = [...prev, error]
-      onError?.(newErrors)
-      return newErrors
-    })
-  }, [onError])
-
-  const removeErrorsByExpression = useCallback((expressionIndex: number) => {
-    setErrors(prev => {
-      const newErrors = prev.filter(e => e.expressionIndex !== expressionIndex)
-      if (newErrors.length !== prev.length) {
+  const addError = useCallback(
+    (error: ValidationError) => {
+      setErrors((prev) => {
+        const newErrors = [...prev, error]
         onError?.(newErrors)
-      }
-      return newErrors
-    })
-  }, [onError])
+        return newErrors
+      })
+    },
+    [onError]
+  )
+
+  const removeErrorsByExpression = useCallback(
+    (expressionIndex: number) => {
+      setErrors((prev) => {
+        const newErrors = prev.filter((e) => e.expressionIndex !== expressionIndex)
+        if (newErrors.length !== prev.length) {
+          onError?.(newErrors)
+        }
+        return newErrors
+      })
+    },
+    [onError]
+  )
 
   const clearErrors = useCallback(() => {
     setErrors([])
     onError?.([])
   }, [onError])
 
-  const getErrorsForExpression = useCallback((expressionIndex: number) => {
-    return errors.filter(e => e.expressionIndex === expressionIndex)
-  }, [errors])
+  const getErrorsForExpression = useCallback(
+    (expressionIndex: number) => {
+      return errors.filter((e) => e.expressionIndex === expressionIndex)
+    },
+    [errors]
+  )
 
   return {
     errors,

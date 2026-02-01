@@ -38,7 +38,7 @@ export interface AutocompleteDropdownProps {
   isLoading?: boolean
   /** Additional CSS class */
   className?: string
-  /** 
+  /**
    * Enable virtual scrolling for large lists.
    * When true (or 'auto' with >100 items), only visible items are rendered.
    */
@@ -99,15 +99,15 @@ export function AutocompleteDropdown({
   itemHeight = 40,
 }: AutocompleteDropdownProps) {
   const scrollContainerRef = useRef<HTMLUListElement>(null)
-  
+
   // Determine if we should use virtual scrolling
-  const shouldVirtualize = virtualScrolling === true || 
-    (virtualScrolling === 'auto' && items.length > 100)
-  
+  const shouldVirtualize =
+    virtualScrolling === true || (virtualScrolling === 'auto' && items.length > 100)
+
   // Check if any items have groups (virtual scrolling doesn't support groups)
-  const hasGroups = items.some(item => item.group !== undefined)
+  const hasGroups = items.some((item) => item.group !== undefined)
   const useVirtual = shouldVirtualize && !hasGroups
-  
+
   // Virtual list hook
   const virtualList = useVirtualList({
     itemCount: items.length,
@@ -116,12 +116,15 @@ export function AutocompleteDropdown({
     overscan: 3,
     highlightedIndex,
   })
-  
-  const handleScroll = useCallback((e: React.UIEvent<HTMLUListElement>) => {
-    if (useVirtual) {
-      virtualList.onScroll(e.currentTarget.scrollTop)
-    }
-  }, [useVirtual, virtualList])
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLUListElement>) => {
+      if (useVirtual) {
+        virtualList.onScroll(e.currentTarget.scrollTop)
+      }
+    },
+    [useVirtual, virtualList]
+  )
 
   if (!isOpen) {
     return null
@@ -189,7 +192,7 @@ export function AutocompleteDropdown({
         ref={(node) => {
           virtualList.scrollContainerRef(node)
           if (scrollContainerRef.current !== node) {
-            (scrollContainerRef as React.MutableRefObject<HTMLUListElement | null>).current = node
+            ;(scrollContainerRef as React.MutableRefObject<HTMLUListElement | null>).current = node
           }
         }}
         role="listbox"
@@ -236,7 +239,11 @@ export function AutocompleteDropdown({
                   {renderItem ? (
                     renderItem(item, isHighlighted)
                   ) : (
-                    <DefaultItem item={item} isHighlighted={isHighlighted} isDisabled={isDisabled} />
+                    <DefaultItem
+                      item={item}
+                      isHighlighted={isHighlighted}
+                      isDisabled={isDisabled}
+                    />
                   )}
                 </li>
               )
@@ -249,19 +256,18 @@ export function AutocompleteDropdown({
 
   // Standard mode with groups support
   // Group items by their group property
-  const groupedItems = items.reduce<{ group: string | undefined; items: { item: AutocompleteItem; originalIndex: number }[] }[]>(
-    (acc, item, originalIndex) => {
-      const group = item.group
-      const existingGroup = acc.find((g) => g.group === group)
-      if (existingGroup) {
-        existingGroup.items.push({ item, originalIndex })
-      } else {
-        acc.push({ group, items: [{ item, originalIndex }] })
-      }
-      return acc
-    },
-    []
-  )
+  const groupedItems = items.reduce<
+    { group: string | undefined; items: { item: AutocompleteItem; originalIndex: number }[] }[]
+  >((acc, item, originalIndex) => {
+    const group = item.group
+    const existingGroup = acc.find((g) => g.group === group)
+    if (existingGroup) {
+      existingGroup.items.push({ item, originalIndex })
+    } else {
+      acc.push({ group, items: [{ item, originalIndex }] })
+    }
+    return acc
+  }, [])
 
   // Move ungrouped items (group === undefined) to the end
   const sortedGroups = [
@@ -306,7 +312,11 @@ export function AutocompleteDropdown({
                   {renderItem ? (
                     renderItem(item, isHighlighted)
                   ) : (
-                    <DefaultItem item={item} isHighlighted={isHighlighted} isDisabled={isDisabled} />
+                    <DefaultItem
+                      item={item}
+                      isHighlighted={isHighlighted}
+                      isDisabled={isDisabled}
+                    />
                   )}
                 </li>
               )

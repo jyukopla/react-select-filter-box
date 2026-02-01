@@ -138,17 +138,23 @@ function DateRangeComponent({
     return null
   }, [])
 
-  const handleFromChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = parseDateFromInput(e.target.value)
-    setFromDate(date)
-    setError(validateRange(date, toDate))
-  }, [toDate, validateRange])
+  const handleFromChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const date = parseDateFromInput(e.target.value)
+      setFromDate(date)
+      setError(validateRange(date, toDate))
+    },
+    [toDate, validateRange]
+  )
 
-  const handleToChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = parseDateFromInput(e.target.value)
-    setToDate(date)
-    setError(validateRange(fromDate, date))
-  }, [fromDate, validateRange])
+  const handleToChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const date = parseDateFromInput(e.target.value)
+      setToDate(date)
+      setError(validateRange(fromDate, date))
+    },
+    [fromDate, validateRange]
+  )
 
   const handleConfirm = useCallback(() => {
     if (!fromDate || !toDate) return
@@ -161,26 +167,33 @@ function DateRangeComponent({
     onConfirm(range, formatRangeForDisplay(range, locale))
   }, [fromDate, toDate, validateRange, onConfirm, locale])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && fromDate && toDate && !error) {
-      e.preventDefault()
-      handleConfirm()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      onCancel()
-    }
-  }, [fromDate, toDate, error, handleConfirm, onCancel])
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && fromDate && toDate && !error) {
+        e.preventDefault()
+        handleConfirm()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        onCancel()
+      }
+    },
+    [fromDate, toDate, error, handleConfirm, onCancel]
+  )
 
-  const handlePresetClick = useCallback((preset: { label: string; getDates: () => { from: Date; to: Date } }) => {
-    const { from, to } = preset.getDates()
-    const range: DateRange = { from, to }
-    onConfirm(range, preset.label)
-  }, [onConfirm])
+  const handlePresetClick = useCallback(
+    (preset: { label: string; getDates: () => { from: Date; to: Date } }) => {
+      const { from, to } = preset.getDates()
+      const range: DateRange = { from, to }
+      onConfirm(range, preset.label)
+    },
+    [onConfirm]
+  )
 
-  const displayPresets = presets?.map(p => ({
-    label: p.label,
-    getDates: () => ({ from: p.from, to: p.to }),
-  })) ?? DEFAULT_RANGE_PRESETS
+  const displayPresets =
+    presets?.map((p) => ({
+      label: p.label,
+      getDates: () => ({ from: p.from, to: p.to }),
+    })) ?? DEFAULT_RANGE_PRESETS
 
   const isValid = fromDate !== null && toDate !== null && !error
 
@@ -189,7 +202,7 @@ function DateRangeComponent({
       <div className="custom-widget__header">
         <span className="custom-widget__title">Select Date Range</span>
       </div>
-      
+
       <div className="custom-widget__content">
         <div className="custom-widget__date-range-fields">
           <div className="custom-widget__field">
@@ -201,7 +214,13 @@ function DateRangeComponent({
               value={fromDate ? formatDateForInput(fromDate) : ''}
               onChange={handleFromChange}
               min={minDate ? formatDateForInput(minDate) : undefined}
-              max={toDate ? formatDateForInput(toDate) : maxDate ? formatDateForInput(maxDate) : undefined}
+              max={
+                toDate
+                  ? formatDateForInput(toDate)
+                  : maxDate
+                    ? formatDateForInput(maxDate)
+                    : undefined
+              }
             />
           </div>
           <div className="custom-widget__field">
@@ -211,14 +230,20 @@ function DateRangeComponent({
               className="custom-widget__date-input"
               value={toDate ? formatDateForInput(toDate) : ''}
               onChange={handleToChange}
-              min={fromDate ? formatDateForInput(fromDate) : minDate ? formatDateForInput(minDate) : undefined}
+              min={
+                fromDate
+                  ? formatDateForInput(fromDate)
+                  : minDate
+                    ? formatDateForInput(minDate)
+                    : undefined
+              }
               max={maxDate ? formatDateForInput(maxDate) : undefined}
             />
           </div>
         </div>
-        
+
         {error && <div className="custom-widget__error">{error}</div>}
-        
+
         {showPresets && (
           <div className="custom-widget__presets custom-widget__presets--range">
             {displayPresets.map((preset) => (
@@ -234,7 +259,7 @@ function DateRangeComponent({
           </div>
         )}
       </div>
-      
+
       <div className="custom-widget__footer">
         <button
           type="button"
@@ -259,11 +284,11 @@ function DateRangeComponent({
 /**
  * Create a DateRange widget for use with autocomplete
  */
-export function createDateRangeWidget(options: DateRangeWidgetOptions = {}): CustomAutocompleteWidget {
+export function createDateRangeWidget(
+  options: DateRangeWidgetOptions = {}
+): CustomAutocompleteWidget {
   return {
-    render: (props: CustomWidgetProps) => (
-      <DateRangeComponent {...props} options={options} />
-    ),
+    render: (props: CustomWidgetProps) => <DateRangeComponent {...props} options={options} />,
     validate: (value: unknown) => {
       if (!value || typeof value !== 'object') return false
       const range = value as DateRange

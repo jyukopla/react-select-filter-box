@@ -6,13 +6,7 @@
 
 import { memo, useState, useEffect, useRef, type KeyboardEvent } from 'react'
 import { clsx } from 'clsx'
-import type {
-  TokenData,
-  FieldValue,
-  OperatorValue,
-  ConditionValue,
-  ConnectorValue,
-} from '@/types'
+import type { TokenData, FieldValue, OperatorValue, ConditionValue, ConnectorValue } from '@/types'
 import './Token.css'
 
 export interface TokenProps {
@@ -78,7 +72,7 @@ function getTokenAriaLabel(data: TokenData): string {
 
 /**
  * Token component that displays a single token in the filter expression
- * 
+ *
  * Memoized to prevent unnecessary re-renders when parent updates.
  */
 export const Token = memo(function Token({
@@ -143,14 +137,7 @@ export const Token = memo(function Token({
   // Render inline input when editing
   if (isEditing) {
     return (
-      <span
-        className={clsx(
-          'token',
-          `token--${data.type}`,
-          'token--editing',
-          className
-        )}
-      >
+      <span className={clsx('token', `token--${data.type}`, 'token--editing', className)}>
         <input
           ref={inputRef}
           type="text"

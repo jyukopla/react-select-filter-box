@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState, useCallback } from 'react'
 import { FilterBox } from './FilterBox'
-import type { FilterSchema, FilterExpression, CustomAutocompleteWidget, CustomWidgetProps } from '@/types'
+import type {
+  FilterSchema,
+  FilterExpression,
+  CustomAutocompleteWidget,
+  CustomWidgetProps,
+} from '@/types'
 import {
   createDatePickerWidget,
   createNumberInputWidget,
@@ -524,15 +529,16 @@ const colorPickerWidget: CustomAutocompleteWidget = {
  * Example: Rating Widget (1-5 stars)
  */
 function RatingComponent({ onConfirm, onCancel, initialValue }: CustomWidgetProps) {
-  const [rating, setRating] = useState<number>(
-    typeof initialValue === 'number' ? initialValue : 0
-  )
+  const [rating, setRating] = useState<number>(typeof initialValue === 'number' ? initialValue : 0)
   const [hoverRating, setHoverRating] = useState<number>(0)
 
-  const handleClick = useCallback((value: number) => {
-    setRating(value)
-    onConfirm(value, `${'★'.repeat(value)}${'☆'.repeat(5 - value)}`)
-  }, [onConfirm])
+  const handleClick = useCallback(
+    (value: number) => {
+      setRating(value)
+      onConfirm(value, `${'★'.repeat(value)}${'☆'.repeat(5 - value)}`)
+    },
+    [onConfirm]
+  )
 
   return (
     <div className="custom-widget-container" style={{ padding: '12px' }}>
@@ -591,9 +597,7 @@ const ratingWidget: CustomAutocompleteWidget = {
  * Example: Slider Widget
  */
 function SliderComponent({ onConfirm, onCancel, initialValue }: CustomWidgetProps) {
-  const [value, setValue] = useState<number>(
-    typeof initialValue === 'number' ? initialValue : 50
-  )
+  const [value, setValue] = useState<number>(typeof initialValue === 'number' ? initialValue : 50)
 
   const handleConfirm = useCallback(() => {
     onConfirm(value, `${value}%`)
@@ -612,7 +616,14 @@ function SliderComponent({ onConfirm, onCancel, initialValue }: CustomWidgetProp
         onChange={(e) => setValue(Number(e.target.value))}
         style={{ width: '100%', marginBottom: '12px' }}
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#999' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: '10px',
+          color: '#999',
+        }}
+      >
         <span>0%</span>
         <span>50%</span>
         <span>100%</span>

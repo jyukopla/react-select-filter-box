@@ -2,7 +2,13 @@
  * Serialization utilities for filter expressions
  */
 
-import type { FilterExpression, FilterSchema, ConditionValue, FieldValue, OperatorValue } from '@/types'
+import type {
+  FilterExpression,
+  FilterSchema,
+  ConditionValue,
+  FieldValue,
+  OperatorValue,
+} from '@/types'
 
 /**
  * Serialized expression format (for JSON/API)
@@ -191,11 +197,7 @@ export function toDisplayString(
       // Otherwise use individual formatters
       const field = formatField(expr.condition.field)
       const operator = formatOperator(expr.condition.operator)
-      const value = formatValue(
-        expr.condition.value,
-        expr.condition.field,
-        expr.condition.operator
-      )
+      const value = formatValue(expr.condition.value, expr.condition.field, expr.condition.operator)
 
       let part = `${field} ${operator} ${value}`
 
@@ -228,10 +230,7 @@ export function toQueryString(expressions: FilterExpression[]): string {
  * Parse URL query string to filter expressions
  * Uses the first valid operator for each field
  */
-export function fromQueryString(
-  queryString: string,
-  schema: FilterSchema
-): FilterExpression[] {
+export function fromQueryString(queryString: string, schema: FilterSchema): FilterExpression[] {
   const params = new URLSearchParams(queryString)
   const expressions: FilterExpression[] = []
   const entries = Array.from(params.entries())

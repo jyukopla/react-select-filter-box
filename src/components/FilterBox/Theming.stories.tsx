@@ -74,11 +74,11 @@ const sampleExpressions: FilterExpression[] = [
 // Built-in Themes
 // =============================================================================
 
-function ThemeShowcase({ 
-  themeName, 
+function ThemeShowcase({
+  themeName,
   bgColor,
   textColor = '#333',
-}: { 
+}: {
   themeName: 'light' | 'dark' | 'highContrast'
   bgColor: string
   textColor?: string
@@ -87,7 +87,9 @@ function ThemeShowcase({
   const theme = themes[themeName]
 
   return (
-    <div style={{ padding: '1.5rem', backgroundColor: bgColor, borderRadius: '8px', color: textColor }}>
+    <div
+      style={{ padding: '1.5rem', backgroundColor: bgColor, borderRadius: '8px', color: textColor }}
+    >
       <h4 style={{ margin: '0 0 1rem 0', fontSize: '16px' }}>
         {themeName.charAt(0).toUpperCase() + themeName.slice(1)} Theme
       </h4>
@@ -198,8 +200,17 @@ function CustomThemeExample() {
       <FilterBoxThemeProvider theme={corporateTheme}>
         <FilterBox schema={sampleSchema} value={value} onChange={setValue} />
       </FilterBoxThemeProvider>
-      <pre style={{ marginTop: '1rem', fontSize: '11px', background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-{`const corporateTheme = createTheme(themes.light, {
+      <pre
+        style={{
+          marginTop: '1rem',
+          fontSize: '11px',
+          background: '#f5f5f5',
+          padding: '1rem',
+          borderRadius: '4px',
+          overflow: 'auto',
+        }}
+      >
+        {`const corporateTheme = createTheme(themes.light, {
   tokens: {
     fieldBg: '#e8f4f8',
     fieldBorder: '#0078d4',
@@ -370,10 +381,18 @@ function TokenColorCustomization() {
         Each token type uses a highly distinct color for clear visual differentiation:
       </p>
       <ul style={{ marginBottom: '1rem', fontSize: '14px', color: '#666', lineHeight: 1.8 }}>
-        <li><span style={{ color: '#7c3aed', fontWeight: 500 }}>■ Fields</span> – Purple</li>
-        <li><span style={{ color: '#0891b2', fontWeight: 500 }}>■ Operators</span> – Cyan</li>
-        <li><span style={{ color: '#b45309', fontWeight: 500 }}>■ Values</span> – Amber</li>
-        <li><span style={{ color: '#dc2626', fontWeight: 500 }}>■ Connectors</span> – Red</li>
+        <li>
+          <span style={{ color: '#7c3aed', fontWeight: 500 }}>■ Fields</span> – Purple
+        </li>
+        <li>
+          <span style={{ color: '#0891b2', fontWeight: 500 }}>■ Operators</span> – Cyan
+        </li>
+        <li>
+          <span style={{ color: '#b45309', fontWeight: 500 }}>■ Values</span> – Amber
+        </li>
+        <li>
+          <span style={{ color: '#dc2626', fontWeight: 500 }}>■ Connectors</span> – Red
+        </li>
       </ul>
       <FilterBoxThemeProvider theme={distinctTokensTheme}>
         <FilterBox schema={sampleSchema} value={value} onChange={setValue} />
@@ -407,20 +426,31 @@ function CSSVariablesExample() {
         You can override theme variables directly via CSS custom properties on a container.
       </p>
       <div
-        style={{
-          // Using inline style to demonstrate CSS variable overrides
-          // In real usage, this would be in a CSS file
-          '--filter-token-field-bg': '#fef9c3',
-          '--filter-token-field-border': '#ca8a04',
-          '--filter-token-field-text': '#854d0e',
-          '--filter-token-radius': '0px',
-          '--filter-container-border-focus': '#ca8a04',
-        } as React.CSSProperties}
+        style={
+          {
+            // Using inline style to demonstrate CSS variable overrides
+            // In real usage, this would be in a CSS file
+            '--filter-token-field-bg': '#fef9c3',
+            '--filter-token-field-border': '#ca8a04',
+            '--filter-token-field-text': '#854d0e',
+            '--filter-token-radius': '0px',
+            '--filter-container-border-focus': '#ca8a04',
+          } as React.CSSProperties
+        }
       >
         <FilterBox schema={sampleSchema} value={value} onChange={setValue} />
       </div>
-      <pre style={{ marginTop: '1rem', fontSize: '11px', background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-{`.my-container {
+      <pre
+        style={{
+          marginTop: '1rem',
+          fontSize: '11px',
+          background: '#f5f5f5',
+          padding: '1rem',
+          borderRadius: '4px',
+          overflow: 'auto',
+        }}
+      >
+        {`.my-container {
   --filter-token-field-bg: #fef9c3;
   --filter-token-field-border: #ca8a04;
   --filter-token-field-text: #854d0e;
@@ -510,13 +540,15 @@ function ThemeSwitcher() {
           High Contrast
         </button>
       </div>
-      <div style={{ 
-        padding: '1.5rem', 
-        backgroundColor: bgColors[themeName], 
-        borderRadius: '8px',
-        color: textColors[themeName],
-        transition: 'background-color 0.3s, color 0.3s',
-      }}>
+      <div
+        style={{
+          padding: '1.5rem',
+          backgroundColor: bgColors[themeName],
+          borderRadius: '8px',
+          color: textColors[themeName],
+          transition: 'background-color 0.3s, color 0.3s',
+        }}
+      >
         <FilterBoxThemeProvider theme={themes[themeName]}>
           <FilterBox schema={sampleSchema} value={value} onChange={setValue} />
         </FilterBoxThemeProvider>
@@ -569,8 +601,17 @@ function MergedThemeExample() {
       <FilterBoxThemeProvider theme={mergedTheme}>
         <FilterBox schema={sampleSchema} value={value} onChange={setValue} />
       </FilterBoxThemeProvider>
-      <pre style={{ marginTop: '1rem', fontSize: '11px', background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-{`const mergedTheme = mergeThemes(
+      <pre
+        style={{
+          marginTop: '1rem',
+          fontSize: '11px',
+          background: '#f5f5f5',
+          padding: '1rem',
+          borderRadius: '4px',
+          overflow: 'auto',
+        }}
+      >
+        {`const mergedTheme = mergeThemes(
   themes.light,
   { tokens: { borderRadius: '12px' } },
   { tokens: { fieldBg: '#e0f2fe', fieldBorder: '#0284c7' } }

@@ -17,7 +17,7 @@ describe('useFocusManagement', () => {
     inputElement = document.createElement('input')
     externalElement = document.createElement('button')
     externalElement.textContent = 'External'
-    
+
     containerElement.appendChild(inputElement)
     document.body.appendChild(containerElement)
     document.body.appendChild(externalElement)
@@ -104,7 +104,7 @@ describe('useFocusManagement', () => {
 
       // Wait for requestAnimationFrame
       await new Promise((resolve) => requestAnimationFrame(resolve))
-      
+
       expect(document.activeElement).toBe(externalElement)
     })
   })

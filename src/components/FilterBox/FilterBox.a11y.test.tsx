@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FilterBox } from './FilterBox'
 import type { FilterSchema, FilterExpression } from '@/types'
@@ -162,9 +162,7 @@ describe('Screen Reader Tests', () => {
 
     describe('Token Accessibility', () => {
       it('should have accessible tokens with proper structure', () => {
-        const value = [
-          createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test'),
-        ]
+        const value = [createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test')]
         render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
 
         // Tokens should be findable and have descriptive content
@@ -174,9 +172,7 @@ describe('Screen Reader Tests', () => {
       })
 
       it('should expose editable tokens as clickable elements', () => {
-        const value = [
-          createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test'),
-        ]
+        const value = [createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test')]
         render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
 
         const valueToken = screen.getByText('test')
@@ -240,9 +236,7 @@ describe('Screen Reader Tests', () => {
       })
 
       it('should indicate disabled state via aria-disabled', () => {
-        render(
-          <FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} disabled />
-        )
+        render(<FilterBox schema={createTestSchema()} value={[]} onChange={vi.fn()} disabled />)
 
         const input = screen.getByRole('combobox')
         expect(input).toBeDisabled()
@@ -303,16 +297,8 @@ describe('Screen Reader Tests', () => {
 
     it('should announce filter clear', async () => {
       const onChange = vi.fn()
-      const value = [
-        createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test'),
-      ]
-      render(
-        <FilterBox
-          schema={createTestSchema()}
-          value={value}
-          onChange={onChange}
-        />
-      )
+      const value = [createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test')]
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
 
       const clearButton = screen.getByRole('button', { name: /clear/i })
       await userEvent.click(clearButton)
@@ -362,9 +348,7 @@ describe('Screen Reader Tests', () => {
 
       // Should wrap or stay at last option
       const options = screen.getAllByRole('option')
-      const lastSelectedOption = options.find(
-        (opt) => opt.getAttribute('aria-selected') === 'true'
-      )
+      const lastSelectedOption = options.find((opt) => opt.getAttribute('aria-selected') === 'true')
       expect(lastSelectedOption).toBeTruthy()
     })
 
@@ -384,9 +368,7 @@ describe('Screen Reader Tests', () => {
 
     it('should support arrow key navigation between tokens', async () => {
       const user = userEvent.setup()
-      const value = [
-        createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test'),
-      ]
+      const value = [createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test')]
       render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
 
       const input = screen.getByRole('combobox')
@@ -447,11 +429,7 @@ describe('Screen Reader Tests', () => {
       ]
 
       render(
-        <FilterBox
-          schema={createTestSchema()}
-          value={invalidExpressions}
-          onChange={vi.fn()}
-        />
+        <FilterBox schema={createTestSchema()} value={invalidExpressions} onChange={vi.fn()} />
       )
 
       // There should be an assertive live region for validation errors
@@ -478,9 +456,7 @@ describe('Screen Reader Tests', () => {
 
     it('should maintain visible focus when navigating tokens', async () => {
       const user = userEvent.setup()
-      const value = [
-        createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test'),
-      ]
+      const value = [createExpressionWithValue('name', 'Name', 'contains', 'contains', 'test')]
       render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
 
       const input = screen.getByRole('combobox')

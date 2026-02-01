@@ -346,7 +346,11 @@ function TokenEditingFilterBox(props: { schema: FilterSchema }) {
       condition: {
         field: { key: 'name', label: 'Name', type: 'string' },
         operator: { key: 'contains', label: 'contains' },
-        value: { raw: 'Click me to edit', display: 'Click me to edit', serialized: 'Click me to edit' },
+        value: {
+          raw: 'Click me to edit',
+          display: 'Click me to edit',
+          serialized: 'Click me to edit',
+        },
       },
     },
     {
@@ -361,8 +365,8 @@ function TokenEditingFilterBox(props: { schema: FilterSchema }) {
   return (
     <div style={{ maxWidth: '600px' }}>
       <p style={{ marginBottom: '0.5rem', color: '#666', fontSize: '14px' }}>
-        <strong>Click on any value token</strong> (green chips) to edit it inline. 
-        Press <kbd>Enter</kbd> to confirm or <kbd>Escape</kbd> to cancel.
+        <strong>Click on any value token</strong> (green chips) to edit it inline. Press{' '}
+        <kbd>Enter</kbd> to confirm or <kbd>Escape</kbd> to cancel.
       </p>
       <FilterBox schema={props.schema} value={value} onChange={setValue} />
       <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
@@ -400,14 +404,30 @@ function KeyboardNavigationFilterBox(props: { schema: FilterSchema }) {
       <h4 style={{ marginBottom: '1rem' }}>Keyboard Shortcuts</h4>
       <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
         <ul style={{ margin: 0, paddingLeft: '1.2rem', lineHeight: 1.8 }}>
-          <li><kbd>↑</kbd> / <kbd>↓</kbd> - Navigate dropdown items</li>
-          <li><kbd>Enter</kbd> - Select highlighted item or confirm value</li>
-          <li><kbd>Tab</kbd> - Select highlighted item (when dropdown open)</li>
-          <li><kbd>Escape</kbd> - Close dropdown</li>
-          <li><kbd>←</kbd> / <kbd>→</kbd> - Navigate between tokens (when input is empty)</li>
-          <li><kbd>Delete</kbd> - Delete selected token</li>
-          <li><kbd>Ctrl+A</kbd> - Select all tokens</li>
-          <li><kbd>Ctrl+Backspace</kbd> - Delete all expressions</li>
+          <li>
+            <kbd>↑</kbd> / <kbd>↓</kbd> - Navigate dropdown items
+          </li>
+          <li>
+            <kbd>Enter</kbd> - Select highlighted item or confirm value
+          </li>
+          <li>
+            <kbd>Tab</kbd> - Select highlighted item (when dropdown open)
+          </li>
+          <li>
+            <kbd>Escape</kbd> - Close dropdown
+          </li>
+          <li>
+            <kbd>←</kbd> / <kbd>→</kbd> - Navigate between tokens (when input is empty)
+          </li>
+          <li>
+            <kbd>Delete</kbd> - Delete selected token
+          </li>
+          <li>
+            <kbd>Ctrl+A</kbd> - Select all tokens
+          </li>
+          <li>
+            <kbd>Ctrl+Backspace</kbd> - Delete all expressions
+          </li>
         </ul>
       </div>
       <FilterBox schema={props.schema} value={value} onChange={setValue} autoFocus />
@@ -547,7 +567,9 @@ function ProcessEngineInstanceFilterBox() {
         <summary style={{ cursor: 'pointer', color: '#666', fontSize: '14px' }}>
           Show filter expressions JSON
         </summary>
-        <pre style={{ marginTop: '0.5rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
+        <pre
+          style={{ marginTop: '0.5rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}
+        >
           {JSON.stringify(value, null, 2)}
         </pre>
       </details>
@@ -560,7 +582,8 @@ export const ProcessEngineInstance: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'A comprehensive example showing how to configure the FilterBox for process engine instance queries, with grouped fields and various data types.',
+        story:
+          'A comprehensive example showing how to configure the FilterBox for process engine instance queries, with grouped fields and various data types.',
       },
     },
   },
@@ -589,8 +612,8 @@ function ClearButtonFilterBox(props: { schema: FilterSchema }) {
   return (
     <div style={{ maxWidth: '600px' }}>
       <p style={{ marginBottom: '0.5rem', color: '#666', fontSize: '14px' }}>
-        <strong>Click the × button</strong> to clear all filters at once.
-        The button only appears when there are filters and the component is not disabled.
+        <strong>Click the × button</strong> to clear all filters at once. The button only appears
+        when there are filters and the component is not disabled.
       </p>
       <FilterBox schema={props.schema} value={value} onChange={setValue} showClearButton />
       <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem' }}>
@@ -643,8 +666,8 @@ function ExternalValueUpdatesFilterBox(props: { schema: FilterSchema }) {
   return (
     <div style={{ maxWidth: '600px' }}>
       <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>
-        Click the buttons below to add filters programmatically, demonstrating 
-        that the FilterBox is a controlled component.
+        Click the buttons below to add filters programmatically, demonstrating that the FilterBox is
+        a controlled component.
       </p>
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
         <button onClick={addStatusFilter} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
@@ -670,7 +693,8 @@ export const ExternalValueUpdates: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Demonstrates how FilterBox responds to external value updates, confirming it works as a controlled component.',
+        story:
+          'Demonstrates how FilterBox responds to external value updates, confirming it works as a controlled component.',
       },
     },
   },
@@ -710,10 +734,22 @@ function AllTokenTypesFilterBox(props: { schema: FilterSchema }) {
       <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
         <p>This example shows all four token types with their distinct colors:</p>
         <ul style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
-          <li><span style={{ color: '#1565c0' }}>■ Field tokens</span> (blue) - the field being filtered</li>
-          <li><span style={{ color: '#c2185b' }}>■ Operator tokens</span> (pink) - the comparison operator</li>
-          <li><span style={{ color: '#2e7d32' }}>■ Value tokens</span> (green) - the filter value (editable!)</li>
-          <li><span style={{ color: '#e65100' }}>■ Connector tokens</span> (orange) - AND/OR connectors</li>
+          <li>
+            <span style={{ color: '#1565c0' }}>■ Field tokens</span> (blue) - the field being
+            filtered
+          </li>
+          <li>
+            <span style={{ color: '#c2185b' }}>■ Operator tokens</span> (pink) - the comparison
+            operator
+          </li>
+          <li>
+            <span style={{ color: '#2e7d32' }}>■ Value tokens</span> (green) - the filter value
+            (editable!)
+          </li>
+          <li>
+            <span style={{ color: '#e65100' }}>■ Connector tokens</span> (orange) - AND/OR
+            connectors
+          </li>
         </ul>
       </div>
       <FilterBox schema={props.schema} value={value} onChange={setValue} />
@@ -726,7 +762,8 @@ export const AllTokenTypes: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Shows all four token types (field, operator, value, connector) with their distinct color coding.',
+        story:
+          'Shows all four token types (field, operator, value, connector) with their distinct color coding.',
       },
     },
   },
@@ -740,14 +777,18 @@ function PendingTokenPreviewFilterBox() {
     <div style={{ maxWidth: '700px' }}>
       <h4 style={{ marginBottom: '0.5rem' }}>Incomplete Expression Preview</h4>
       <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
-        <p>As you build a filter expression, pending tokens are shown with a dashed border and subtle pulsing animation:</p>
+        <p>
+          As you build a filter expression, pending tokens are shown with a dashed border and subtle
+          pulsing animation:
+        </p>
         <ol style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
           <li>Click the filter box and select a field - see the pending field token appear</li>
           <li>Select an operator - both field and operator show as pending</li>
           <li>Enter a value and press Enter - tokens become solid (completed)</li>
         </ol>
         <p style={{ fontStyle: 'italic', marginTop: '8px' }}>
-          This preview helps users understand what they&apos;re building before committing the expression.
+          This preview helps users understand what they&apos;re building before committing the
+          expression.
         </p>
       </div>
       <FilterBox schema={basicSchema} value={value} onChange={setValue} />
@@ -802,7 +843,10 @@ function OperatorEditingFilterBox() {
       <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
         <p>Operators can now be changed by clicking directly on them:</p>
         <ol style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
-          <li>Click on the <span style={{ color: '#c2185b', fontWeight: 'bold' }}>=</span> or <span style={{ color: '#c2185b', fontWeight: 'bold' }}>contains</span> operator</li>
+          <li>
+            Click on the <span style={{ color: '#c2185b', fontWeight: 'bold' }}>=</span> or{' '}
+            <span style={{ color: '#c2185b', fontWeight: 'bold' }}>contains</span> operator
+          </li>
           <li>A dropdown appears with available operators for that field</li>
           <li>Select a new operator to update the expression</li>
         </ol>

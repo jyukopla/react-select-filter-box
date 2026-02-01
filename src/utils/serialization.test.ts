@@ -55,9 +55,7 @@ describe('Serialization', () => {
 
       const result = serialize(expressions)
 
-      expect(result).toEqual([
-        { field: 'status', operator: 'eq', value: 'active' },
-      ])
+      expect(result).toEqual([{ field: 'status', operator: 'eq', value: 'active' }])
     })
 
     it('should serialize multiple expressions with connectors', () => {
@@ -217,7 +215,11 @@ describe('Serialization', () => {
           condition: {
             field: { key: 'startDate', label: 'Started', type: 'date' },
             operator: { key: 'before', label: 'before' },
-            value: { raw: '2024-01-15T00:00:00.000Z', display: '2024-01-15', serialized: '2024-01-15T00:00:00.000Z' },
+            value: {
+              raw: '2024-01-15T00:00:00.000Z',
+              display: '2024-01-15',
+              serialized: '2024-01-15T00:00:00.000Z',
+            },
           },
         },
       ]
@@ -449,7 +451,8 @@ describe('Serialization', () => {
           ],
           // Custom serializer: convert to cents for API
           serialize: (value) => {
-            const dollars = typeof value.raw === 'number' ? value.raw : parseFloat(String(value.raw))
+            const dollars =
+              typeof value.raw === 'number' ? value.raw : parseFloat(String(value.raw))
             return Math.round(dollars * 100) // cents
           },
           // Custom deserializer: convert cents back to dollars
@@ -533,9 +536,7 @@ describe('Serialization', () => {
     })
 
     it('should use custom field deserializer when deserializing', () => {
-      const serialized = [
-        { field: 'date', operator: 'eq', value: '2024-06-15T00:00:00.000Z' },
-      ]
+      const serialized = [{ field: 'date', operator: 'eq', value: '2024-06-15T00:00:00.000Z' }]
 
       const result = deserialize(serialized, schemaWithCustomSerializers)
 
@@ -545,9 +546,7 @@ describe('Serialization', () => {
     })
 
     it('should use custom field deserializer for price (cents to dollars)', () => {
-      const serialized = [
-        { field: 'price', operator: 'gt', value: 1999 },
-      ]
+      const serialized = [{ field: 'price', operator: 'gt', value: 1999 }]
 
       const result = deserialize(serialized, schemaWithCustomSerializers)
 
@@ -563,7 +562,7 @@ describe('Serialization', () => {
             field: { key: 'price', label: 'Price', type: 'number' },
             operator: { key: 'eq', label: 'is', symbol: '=' },
             value: {
-              raw: 10.00,
+              raw: 10.0,
               display: '$10.00',
               serialized: '10.00',
             },
@@ -571,17 +570,19 @@ describe('Serialization', () => {
         },
       ]
 
-      const result = serialize(expressions, schemaWithCustomSerializers, { useFieldSerializers: false })
+      const result = serialize(expressions, schemaWithCustomSerializers, {
+        useFieldSerializers: false,
+      })
 
       expect(result[0]?.value).toBe('10.00') // Not converted to cents
     })
 
     it('should allow disabling custom deserializers via options', () => {
-      const serialized = [
-        { field: 'price', operator: 'gt', value: 500 },
-      ]
+      const serialized = [{ field: 'price', operator: 'gt', value: 500 }]
 
-      const result = deserialize(serialized, schemaWithCustomSerializers, { useFieldDeserializers: false })
+      const result = deserialize(serialized, schemaWithCustomSerializers, {
+        useFieldDeserializers: false,
+      })
 
       expect(result[0]?.condition.value.raw).toBe(500) // Not converted from cents
       expect(result[0]?.condition.value.display).toBe('500')
@@ -667,7 +668,9 @@ describe('Serialization', () => {
       ]
 
       // Without schema serializer, should return standard format
-      const result = serialize(expressions, schemaWithSchemaSerializer, { useSchemaSerializer: false })
+      const result = serialize(expressions, schemaWithSchemaSerializer, {
+        useSchemaSerializer: false,
+      })
 
       expect(result).toHaveLength(1)
       expect(result[0]).toEqual({ field: 'status', operator: 'eq', value: 'active' })

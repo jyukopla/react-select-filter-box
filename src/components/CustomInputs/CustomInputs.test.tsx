@@ -51,9 +51,9 @@ describe('DatePickerWidget', () => {
   it('should call onConfirm when preset is clicked', () => {
     const onConfirm = vi.fn()
     render(DatePickerWidget.render({ ...defaultProps, onConfirm }))
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Today' }))
-    
+
     expect(onConfirm).toHaveBeenCalled()
     expect(onConfirm.mock.calls[0][0]).toBeInstanceOf(Date)
     expect(onConfirm.mock.calls[0][1]).toBe('Today')
@@ -62,9 +62,9 @@ describe('DatePickerWidget', () => {
   it('should call onCancel when cancel is clicked', () => {
     const onCancel = vi.fn()
     render(DatePickerWidget.render({ ...defaultProps, onCancel }))
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
-    
+
     expect(onCancel).toHaveBeenCalled()
   })
 
@@ -84,7 +84,7 @@ describe('DatePickerWidget', () => {
     const date = new Date('2024-01-15T00:00:00.000Z')
     const serialized = DatePickerWidget.serialize?.(date)
     expect(serialized).toBe('2024-01-15T00:00:00.000Z')
-    
+
     const parsed = DatePickerWidget.parse?.(serialized!)
     expect(parsed).toEqual(date)
   })
@@ -120,28 +120,28 @@ describe('NumberInputWidget', () => {
     const onConfirm = vi.fn()
     const user = userEvent.setup()
     render(NumberInputWidget.render({ ...defaultProps, onConfirm }))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, '42')
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
-    
+
     expect(onConfirm).toHaveBeenCalledWith(42, '42')
   })
 
   it('should show error for invalid number', async () => {
     const user = userEvent.setup()
     render(NumberInputWidget.render(defaultProps))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, 'abc')
-    
+
     expect(screen.getByText('Please enter a valid number')).toBeInTheDocument()
   })
 
   it('should validate min/max constraints', () => {
     const widget = createNumberInputWidget({ min: 0, max: 100 })
-    
+
     expect(widget.validate?.(50)).toBe(true)
     expect(widget.validate?.(-1)).toBe(false)
     expect(widget.validate?.(101)).toBe(false)
@@ -149,7 +149,7 @@ describe('NumberInputWidget', () => {
 
   it('should validate integer constraint', () => {
     const widget = createNumberInputWidget({ integer: true })
-    
+
     expect(widget.validate?.(42)).toBe(true)
     expect(widget.validate?.(3.14)).toBe(false)
   })
@@ -157,12 +157,12 @@ describe('NumberInputWidget', () => {
   it('should increment/decrement value', async () => {
     const user = userEvent.setup()
     render(NumberInputWidget.render(defaultProps))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, '10')
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Increase' }))
-    
+
     expect(input).toHaveValue('11')
   })
 
@@ -203,9 +203,9 @@ describe('DateRangeWidget', () => {
   it('should call onConfirm when preset is clicked', () => {
     const onConfirm = vi.fn()
     render(DateRangeWidget.render({ ...defaultProps, onConfirm }))
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Last 7 days' }))
-    
+
     expect(onConfirm).toHaveBeenCalled()
     const value = onConfirm.mock.calls[0][0]
     expect(value).toHaveProperty('from')
@@ -233,11 +233,11 @@ describe('DateRangeWidget', () => {
       from: new Date('2024-01-01T00:00:00.000Z'),
       to: new Date('2024-01-31T00:00:00.000Z'),
     }
-    
+
     const serialized = DateRangeWidget.serialize?.(range)
     expect(serialized).toContain('2024-01-01')
     expect(serialized).toContain('2024-01-31')
-    
+
     const parsed = DateRangeWidget.parse?.(serialized!)
     expect(parsed?.from.toISOString()).toBe(range.from.toISOString())
     expect(parsed?.to.toISOString()).toBe(range.to.toISOString())
@@ -295,12 +295,12 @@ describe('DatePickerWidget advanced interactions', () => {
   it('should allow selecting a date via input and confirming', async () => {
     const onConfirm = vi.fn()
     render(DatePickerWidget.render({ ...defaultProps, onConfirm }))
-    
+
     const input = document.querySelector('input[type="date"]') as HTMLInputElement
     fireEvent.change(input, { target: { value: '2024-06-15' } })
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
-    
+
     expect(onConfirm).toHaveBeenCalled()
     const confirmedDate = onConfirm.mock.calls[0][0]
     expect(confirmedDate).toBeInstanceOf(Date)
@@ -309,23 +309,23 @@ describe('DatePickerWidget advanced interactions', () => {
   it('should handle escape key to cancel', () => {
     const onCancel = vi.fn()
     render(DatePickerWidget.render({ ...defaultProps, onCancel }))
-    
+
     const widget = screen.getByText('Select Date').closest('.custom-widget')
     fireEvent.keyDown(widget!, { key: 'Escape' })
-    
+
     expect(onCancel).toHaveBeenCalled()
   })
 
   it('should handle enter key to confirm when date is selected', () => {
     const onConfirm = vi.fn()
     render(DatePickerWidget.render({ ...defaultProps, onConfirm }))
-    
+
     const input = document.querySelector('input[type="date"]') as HTMLInputElement
     fireEvent.change(input, { target: { value: '2024-06-15' } })
-    
+
     const widget = screen.getByText('Select Date').closest('.custom-widget')
     fireEvent.keyDown(widget!, { key: 'Enter' })
-    
+
     expect(onConfirm).toHaveBeenCalled()
   })
 
@@ -335,7 +335,7 @@ describe('DatePickerWidget advanced interactions', () => {
       maxDate: new Date('2024-12-31'),
     })
     render(widget.render(defaultProps))
-    
+
     const input = document.querySelector('input[type="date"]') as HTMLInputElement
     expect(input).toHaveAttribute('min', '2024-01-01')
     expect(input).toHaveAttribute('max', '2024-12-31')
@@ -344,18 +344,16 @@ describe('DatePickerWidget advanced interactions', () => {
   it('should render with initial value', () => {
     const initialValue = new Date('2024-06-15')
     render(DatePickerWidget.render({ ...defaultProps, initialValue }))
-    
+
     const input = document.querySelector('input[type="date"]') as HTMLInputElement
     expect(input.value).toBe('2024-06-15')
   })
 
   it('should use custom presets', () => {
-    const customPresets = [
-      { label: 'Custom Day', value: new Date('2024-07-04') },
-    ]
+    const customPresets = [{ label: 'Custom Day', value: new Date('2024-07-04') }]
     const widget = createDatePickerWidget({ presets: customPresets })
     render(widget.render(defaultProps))
-    
+
     expect(screen.getByRole('button', { name: 'Custom Day' })).toBeInTheDocument()
   })
 
@@ -384,10 +382,10 @@ describe('NumberInputWidget advanced interactions', () => {
   it('should handle escape key to cancel', () => {
     const onCancel = vi.fn()
     render(NumberInputWidget.render({ ...defaultProps, onCancel }))
-    
+
     const widget = screen.getByText('Enter Number').closest('.custom-widget')
     fireEvent.keyDown(widget!, { key: 'Escape' })
-    
+
     expect(onCancel).toHaveBeenCalled()
   })
 
@@ -395,25 +393,25 @@ describe('NumberInputWidget advanced interactions', () => {
     const onConfirm = vi.fn()
     const user = userEvent.setup()
     render(NumberInputWidget.render({ ...defaultProps, onConfirm }))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, '42')
-    
+
     const widget = screen.getByText('Enter Number').closest('.custom-widget')
     fireEvent.keyDown(widget!, { key: 'Enter' })
-    
+
     expect(onConfirm).toHaveBeenCalledWith(42, '42')
   })
 
   it('should decrement value', async () => {
     const user = userEvent.setup()
     render(NumberInputWidget.render(defaultProps))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, '10')
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Decrease' }))
-    
+
     expect(input).toHaveValue('9')
   })
 
@@ -421,12 +419,12 @@ describe('NumberInputWidget advanced interactions', () => {
     const widget = createNumberInputWidget({ step: 5 })
     const user = userEvent.setup()
     render(widget.render(defaultProps))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, '10')
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Increase' }))
-    
+
     expect(input).toHaveValue('15')
   })
 
@@ -434,12 +432,12 @@ describe('NumberInputWidget advanced interactions', () => {
     const widget = createNumberInputWidget({ min: 0 })
     const user = userEvent.setup()
     render(widget.render(defaultProps))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, '0')
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Decrease' }))
-    
+
     expect(input).toHaveValue('0')
   })
 
@@ -447,18 +445,18 @@ describe('NumberInputWidget advanced interactions', () => {
     const widget = createNumberInputWidget({ max: 100 })
     const user = userEvent.setup()
     render(widget.render(defaultProps))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     await user.type(input, '100')
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Increase' }))
-    
+
     expect(input).toHaveValue('100')
   })
 
   it('should render with initial value', () => {
     render(NumberInputWidget.render({ ...defaultProps, initialValue: 42 }))
-    
+
     const input = screen.getByPlaceholderText('Enter number...')
     expect(input).toHaveValue('42')
   })
@@ -492,24 +490,24 @@ describe('DateRangeWidget advanced interactions', () => {
 
   it('should show error when from date is after to date', () => {
     render(DateRangeWidget.render(defaultProps))
-    
+
     const inputs = document.querySelectorAll('input[type="date"]') as NodeListOf<HTMLInputElement>
     fireEvent.change(inputs[0], { target: { value: '2024-06-30' } })
     fireEvent.change(inputs[1], { target: { value: '2024-06-01' } })
-    
+
     expect(screen.getByText('Start date must be before end date')).toBeInTheDocument()
   })
 
   it('should allow confirming valid date range', () => {
     const onConfirm = vi.fn()
     render(DateRangeWidget.render({ ...defaultProps, onConfirm }))
-    
+
     const inputs = document.querySelectorAll('input[type="date"]') as NodeListOf<HTMLInputElement>
     fireEvent.change(inputs[0], { target: { value: '2024-06-01' } })
     fireEvent.change(inputs[1], { target: { value: '2024-06-30' } })
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
-    
+
     expect(onConfirm).toHaveBeenCalled()
     const range = onConfirm.mock.calls[0][0]
     expect(range.from).toBeInstanceOf(Date)
@@ -519,38 +517,38 @@ describe('DateRangeWidget advanced interactions', () => {
   it('should handle escape key to cancel', () => {
     const onCancel = vi.fn()
     render(DateRangeWidget.render({ ...defaultProps, onCancel }))
-    
+
     const widget = screen.getByText('Select Date Range').closest('.custom-widget')
     fireEvent.keyDown(widget!, { key: 'Escape' })
-    
+
     expect(onCancel).toHaveBeenCalled()
   })
 
   it('should handle enter key to confirm valid range', () => {
     const onConfirm = vi.fn()
     render(DateRangeWidget.render({ ...defaultProps, onConfirm }))
-    
+
     const inputs = document.querySelectorAll('input[type="date"]') as NodeListOf<HTMLInputElement>
     fireEvent.change(inputs[0], { target: { value: '2024-06-01' } })
     fireEvent.change(inputs[1], { target: { value: '2024-06-30' } })
-    
+
     const widget = screen.getByText('Select Date Range').closest('.custom-widget')
     fireEvent.keyDown(widget!, { key: 'Enter' })
-    
+
     expect(onConfirm).toHaveBeenCalled()
   })
 
   it('should not confirm on enter when range is invalid', () => {
     const onConfirm = vi.fn()
     render(DateRangeWidget.render({ ...defaultProps, onConfirm }))
-    
+
     const inputs = document.querySelectorAll('input[type="date"]') as NodeListOf<HTMLInputElement>
     fireEvent.change(inputs[0], { target: { value: '2024-06-30' } })
     fireEvent.change(inputs[1], { target: { value: '2024-06-01' } })
-    
+
     const widget = screen.getByText('Select Date Range').closest('.custom-widget')
     fireEvent.keyDown(widget!, { key: 'Enter' })
-    
+
     expect(onConfirm).not.toHaveBeenCalled()
   })
 
@@ -566,7 +564,7 @@ describe('DateRangeWidget advanced interactions', () => {
       to: new Date('2024-06-30'),
     }
     render(DateRangeWidget.render({ ...defaultProps, initialValue }))
-    
+
     const inputs = document.querySelectorAll('input[type="date"]') as NodeListOf<HTMLInputElement>
     expect(inputs[0].value).toBe('2024-06-01')
     expect(inputs[1].value).toBe('2024-06-30')
@@ -583,7 +581,7 @@ describe('DateRangeWidget advanced interactions', () => {
       maxDate: new Date('2024-12-31'),
     })
     render(widget.render(defaultProps))
-    
+
     const inputs = document.querySelectorAll('input[type="date"]') as NodeListOf<HTMLInputElement>
     expect(inputs[0]).toHaveAttribute('min', '2024-01-01')
     expect(inputs[1]).toHaveAttribute('max', '2024-12-31')
@@ -595,16 +593,16 @@ describe('DateRangeWidget advanced interactions', () => {
     ]
     const widget = createDateRangeWidget({ presets: customPresets })
     render(widget.render(defaultProps))
-    
+
     expect(screen.getByRole('button', { name: 'Custom Range' })).toBeInTheDocument()
   })
 
   it('should call onCancel when cancel button is clicked', () => {
     const onCancel = vi.fn()
     render(DateRangeWidget.render({ ...defaultProps, onCancel }))
-    
+
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
-    
+
     expect(onCancel).toHaveBeenCalled()
   })
 })

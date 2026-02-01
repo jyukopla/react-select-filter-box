@@ -339,7 +339,10 @@ const fieldGroupsSchema: FilterSchema = {
       label: 'Order Status',
       type: 'enum',
       group: 'Order Details',
-      operators: [{ key: 'eq', label: 'is' }, { key: 'neq', label: 'is not' }],
+      operators: [
+        { key: 'eq', label: 'is' },
+        { key: 'neq', label: 'is not' },
+      ],
       valueAutocompleter: {
         getSuggestions: () => [
           { value: 'pending', label: 'Pending' },
@@ -479,7 +482,10 @@ function generateLargeSchema(): FilterSchema {
     {
       suffix: 'status',
       type: 'enum',
-      operators: [{ key: 'eq', label: 'is' }, { key: 'neq', label: 'is not' }],
+      operators: [
+        { key: 'eq', label: 'is' },
+        { key: 'neq', label: 'is not' },
+      ],
     },
     {
       suffix: 'enabled',
@@ -675,7 +681,10 @@ const restrictedFieldsSchema: FilterSchema = {
       label: 'Email',
       type: 'string',
       description: 'Can only be used once',
-      operators: [{ key: 'eq', label: 'equals' }, { key: 'contains', label: 'contains' }],
+      operators: [
+        { key: 'eq', label: 'equals' },
+        { key: 'contains', label: 'contains' },
+      ],
       allowMultiple: false,
     },
     {
@@ -886,7 +895,10 @@ function DynamicSchemaDemo() {
           i % 3 === 0
             ? getDefaultOperators('number')
             : i % 2 === 0
-              ? [{ key: 'eq', label: 'is' }, { key: 'neq', label: 'is not' }]
+              ? [
+                  { key: 'eq', label: 'is' },
+                  { key: 'neq', label: 'is not' },
+                ]
               : getDefaultOperators('string'),
         ...(i % 2 === 0 && {
           valueAutocompleter: {
@@ -967,7 +979,10 @@ const schemaWithIcons: FilterSchema = {
       label: 'Email',
       type: 'string',
       icon: '📧',
-      operators: [{ key: 'eq', label: 'equals' }, { key: 'contains', label: 'contains' }],
+      operators: [
+        { key: 'eq', label: 'equals' },
+        { key: 'contains', label: 'contains' },
+      ],
     },
     {
       key: 'phone',
@@ -981,7 +996,10 @@ const schemaWithIcons: FilterSchema = {
       label: 'Location',
       type: 'string',
       icon: '📍',
-      operators: [{ key: 'eq', label: 'is' }, { key: 'contains', label: 'contains' }],
+      operators: [
+        { key: 'eq', label: 'is' },
+        { key: 'contains', label: 'contains' },
+      ],
     },
     {
       key: 'date',

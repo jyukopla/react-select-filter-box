@@ -319,10 +319,17 @@ export function useFilterState({
   useEffect(() => {
     if (isDropdownOpen && suggestions.length > 0) {
       const count = suggestions.length
-      const itemType = suggestions[0]?.type === 'field' ? 'field' :
-                       suggestions[0]?.type === 'operator' ? 'operator' :
-                       suggestions[0]?.type === 'connector' ? 'connector' : 'suggestion'
-      setAnnouncement(`${count} ${itemType}${count !== 1 ? 's' : ''} available. Use arrow keys to navigate.`)
+      const itemType =
+        suggestions[0]?.type === 'field'
+          ? 'field'
+          : suggestions[0]?.type === 'operator'
+            ? 'operator'
+            : suggestions[0]?.type === 'connector'
+              ? 'connector'
+              : 'suggestion'
+      setAnnouncement(
+        `${count} ${itemType}${count !== 1 ? 's' : ''} available. Use arrow keys to navigate.`
+      )
     } else if (isDropdownOpen && suggestions.length === 0) {
       setAnnouncement('No suggestions available.')
     }
@@ -447,7 +454,9 @@ export function useFilterState({
       setCurrentField(undefined)
       setCurrentOperator(undefined)
       setIsDropdownOpen(true)
-      setAnnouncement(`Filter added: value "${inputValue.trim()}". Select AND, OR, or press Enter to finish.`)
+      setAnnouncement(
+        `Filter added: value "${inputValue.trim()}". Select AND, OR, or press Enter to finish.`
+      )
     }
   }, [machine, inputValue, onChange])
 
@@ -580,55 +589,64 @@ export function useFilterState({
   }, [machine, onChange])
 
   // Token editing handlers
-  const handleTokenEdit = useCallback((tokenIndex: number) => {
-    // Only value tokens are editable
-    const token = tokens[tokenIndex]
-    if (token?.type === 'value') {
-      setEditingTokenIndex(tokenIndex)
-      setIsDropdownOpen(false)
-    }
-  }, [tokens])
-
-  const handleTokenEditComplete = useCallback((newValue: ConditionValue) => {
-    if (editingTokenIndex < 0) return
-
-    // Find which expression this token belongs to
-    const token = tokens[editingTokenIndex]
-    if (!token || token.type !== 'value') return
-
-    const expressionIndex = token.expressionIndex
-    if (expressionIndex < 0 || expressionIndex >= value.length) return
-
-    // Create updated expressions
-    const newExpressions = value.map((expr, idx) => {
-      if (idx === expressionIndex) {
-        return {
-          ...expr,
-          condition: {
-            ...expr.condition,
-            value: newValue,
-          },
-        }
+  const handleTokenEdit = useCallback(
+    (tokenIndex: number) => {
+      // Only value tokens are editable
+      const token = tokens[tokenIndex]
+      if (token?.type === 'value') {
+        setEditingTokenIndex(tokenIndex)
+        setIsDropdownOpen(false)
       }
-      return expr
-    })
+    },
+    [tokens]
+  )
 
-    setEditingTokenIndex(-1)
-    onChange(newExpressions)
-  }, [editingTokenIndex, tokens, value, onChange])
+  const handleTokenEditComplete = useCallback(
+    (newValue: ConditionValue) => {
+      if (editingTokenIndex < 0) return
+
+      // Find which expression this token belongs to
+      const token = tokens[editingTokenIndex]
+      if (!token || token.type !== 'value') return
+
+      const expressionIndex = token.expressionIndex
+      if (expressionIndex < 0 || expressionIndex >= value.length) return
+
+      // Create updated expressions
+      const newExpressions = value.map((expr, idx) => {
+        if (idx === expressionIndex) {
+          return {
+            ...expr,
+            condition: {
+              ...expr.condition,
+              value: newValue,
+            },
+          }
+        }
+        return expr
+      })
+
+      setEditingTokenIndex(-1)
+      onChange(newExpressions)
+    },
+    [editingTokenIndex, tokens, value, onChange]
+  )
 
   const handleTokenEditCancel = useCallback(() => {
     setEditingTokenIndex(-1)
   }, [])
 
   // Operator editing handlers
-  const handleOperatorEdit = useCallback((expressionIndex: number) => {
-    if (expressionIndex < 0 || expressionIndex >= value.length) return
-    setEditingOperatorIndex(expressionIndex)
-    setIsDropdownOpen(true)
-    setHighlightedIndex(0)
-    setAnnouncement('Select a new operator')
-  }, [value.length])
+  const handleOperatorEdit = useCallback(
+    (expressionIndex: number) => {
+      if (expressionIndex < 0 || expressionIndex >= value.length) return
+      setEditingOperatorIndex(expressionIndex)
+      setIsDropdownOpen(true)
+      setHighlightedIndex(0)
+      setAnnouncement('Select a new operator')
+    },
+    [value.length]
+  )
 
   const handleOperatorEditCancel = useCallback(() => {
     setEditingOperatorIndex(-1)

@@ -39,12 +39,7 @@ export type {
 } from './CustomInputs'
 
 // Error Display Components
-export {
-  ErrorTooltip,
-  ErrorSummary,
-  ErrorIndicator,
-  useValidationErrors,
-} from './ErrorDisplay'
+export { ErrorTooltip, ErrorSummary, ErrorIndicator, useValidationErrors } from './ErrorDisplay'
 export type {
   ErrorTooltipProps,
   ErrorSummaryProps,

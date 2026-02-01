@@ -55,11 +55,31 @@ const processInstanceSchema: FilterSchema = {
         { key: 'in', label: 'in', multiValue: { count: -1, separator: ',', labels: [] } },
       ],
       valueAutocompleter: createEnumAutocompleter([
-        { key: 'order-processing', label: 'Order Processing', description: 'E-commerce order workflow' },
-        { key: 'customer-onboarding', label: 'Customer Onboarding', description: 'New customer registration' },
-        { key: 'invoice-approval', label: 'Invoice Approval', description: 'Finance approval workflow' },
-        { key: 'support-ticket', label: 'Support Ticket', description: 'Customer support handling' },
-        { key: 'employee-offboarding', label: 'Employee Offboarding', description: 'HR offboarding process' },
+        {
+          key: 'order-processing',
+          label: 'Order Processing',
+          description: 'E-commerce order workflow',
+        },
+        {
+          key: 'customer-onboarding',
+          label: 'Customer Onboarding',
+          description: 'New customer registration',
+        },
+        {
+          key: 'invoice-approval',
+          label: 'Invoice Approval',
+          description: 'Finance approval workflow',
+        },
+        {
+          key: 'support-ticket',
+          label: 'Support Ticket',
+          description: 'Customer support handling',
+        },
+        {
+          key: 'employee-offboarding',
+          label: 'Employee Offboarding',
+          description: 'HR offboarding process',
+        },
       ]),
     },
     {
@@ -97,8 +117,16 @@ const processInstanceSchema: FilterSchema = {
         { key: 'ACTIVE', label: 'Active', description: 'Running process instances' },
         { key: 'SUSPENDED', label: 'Suspended', description: 'Paused process instances' },
         { key: 'COMPLETED', label: 'Completed', description: 'Finished through normal end event' },
-        { key: 'EXTERNALLY_TERMINATED', label: 'Externally Terminated', description: 'Cancelled via API' },
-        { key: 'INTERNALLY_TERMINATED', label: 'Internally Terminated', description: 'Terminated by error event' },
+        {
+          key: 'EXTERNALLY_TERMINATED',
+          label: 'Externally Terminated',
+          description: 'Cancelled via API',
+        },
+        {
+          key: 'INTERNALLY_TERMINATED',
+          label: 'Internally Terminated',
+          description: 'Terminated by error event',
+        },
       ]),
     },
     {
@@ -210,7 +238,11 @@ const taskSchema: FilterSchema = {
         { key: 'eq', label: 'equals', symbol: '=' },
         { key: 'gt', label: 'greater than', symbol: '>' },
         { key: 'lt', label: 'less than', symbol: '<' },
-        { key: 'between', label: 'between', multiValue: { count: 2, separator: 'and', labels: ['min', 'max'] } },
+        {
+          key: 'between',
+          label: 'between',
+          multiValue: { count: 2, separator: 'and', labels: ['min', 'max'] },
+        },
       ],
     },
     {
@@ -307,7 +339,11 @@ const productSchema: FilterSchema = {
         { key: 'eq', label: 'equals', symbol: '=' },
         { key: 'lt', label: 'less than', symbol: '<' },
         { key: 'gt', label: 'greater than', symbol: '>' },
-        { key: 'between', label: 'between', multiValue: { count: 2, separator: 'and', labels: ['min', 'max'] } },
+        {
+          key: 'between',
+          label: 'between',
+          multiValue: { count: 2, separator: 'and', labels: ['min', 'max'] },
+        },
       ],
       serialize: (value) => Math.round(Number(value.raw) * 100), // dollars to cents
       deserialize: (serialized) => ({
@@ -360,7 +396,11 @@ const productSchema: FilterSchema = {
       operators: [
         { key: 'before', label: 'before' },
         { key: 'after', label: 'after' },
-        { key: 'between', label: 'between', multiValue: { count: 2, separator: 'and', labels: ['from', 'to'] } },
+        {
+          key: 'between',
+          label: 'between',
+          multiValue: { count: 2, separator: 'and', labels: ['from', 'to'] },
+        },
       ],
     },
     {
@@ -741,7 +781,11 @@ const logSchema: FilterSchema = {
       operators: [
         { key: 'before', label: 'before' },
         { key: 'after', label: 'after' },
-        { key: 'between', label: 'between', multiValue: { count: 2, separator: 'and', labels: ['from', 'to'] } },
+        {
+          key: 'between',
+          label: 'between',
+          multiValue: { count: 2, separator: 'and', labels: ['from', 'to'] },
+        },
       ],
     },
     {
@@ -753,7 +797,11 @@ const logSchema: FilterSchema = {
         { key: 'gt', label: 'greater than', symbol: '>' },
         { key: 'lt', label: 'less than', symbol: '<' },
         { key: 'gte', label: 'at least', symbol: '≥' },
-        { key: 'between', label: 'between', multiValue: { count: 2, separator: 'and', labels: ['min', 'max'] } },
+        {
+          key: 'between',
+          label: 'between',
+          multiValue: { count: 2, separator: 'and', labels: ['min', 'max'] },
+        },
       ],
     },
     {
@@ -823,7 +871,7 @@ function InteractiveApiFilterComponent() {
 
   const handleChange = useCallback((newExpressions: FilterExpression[]) => {
     setExpressions(newExpressions)
-    
+
     // Build a simplified API query representation
     const params = newExpressions.map((expr) => {
       const field = expr.condition.field.key
@@ -842,7 +890,7 @@ function InteractiveApiFilterComponent() {
         onChange={handleChange}
         placeholder="Build your API filter..."
       />
-      
+
       <div
         style={{
           padding: '16px',
@@ -881,8 +929,8 @@ function InteractiveApiFilterComponent() {
           color: '#065f46',
         }}
       >
-        💡 <strong>Tip:</strong> Try adding filters to see the generated API
-        query string update in real-time.
+        💡 <strong>Tip:</strong> Try adding filters to see the generated API query string update in
+        real-time.
       </div>
     </div>
   )
@@ -893,8 +941,7 @@ export const InteractiveApiFilterBuilder: Story = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Shows how the FilterBox can be used to build API query parameters in real-time.',
+        story: 'Shows how the FilterBox can be used to build API query parameters in real-time.',
       },
     },
   },

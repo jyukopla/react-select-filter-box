@@ -211,7 +211,10 @@ describe('useFilterState', () => {
       expect(result.current.highlightedIndex).toBe(0)
 
       act(() => {
-        result.current.handleKeyDown({ key: 'ArrowDown', preventDefault: vi.fn() } as unknown as React.KeyboardEvent<HTMLInputElement>)
+        result.current.handleKeyDown({
+          key: 'ArrowDown',
+          preventDefault: vi.fn(),
+        } as unknown as React.KeyboardEvent<HTMLInputElement>)
       })
 
       expect(result.current.highlightedIndex).toBe(1)
@@ -227,11 +230,17 @@ describe('useFilterState', () => {
       })
 
       act(() => {
-        result.current.handleKeyDown({ key: 'ArrowDown', preventDefault: vi.fn() } as unknown as React.KeyboardEvent<HTMLInputElement>)
+        result.current.handleKeyDown({
+          key: 'ArrowDown',
+          preventDefault: vi.fn(),
+        } as unknown as React.KeyboardEvent<HTMLInputElement>)
       })
 
       act(() => {
-        result.current.handleKeyDown({ key: 'ArrowUp', preventDefault: vi.fn() } as unknown as React.KeyboardEvent<HTMLInputElement>)
+        result.current.handleKeyDown({
+          key: 'ArrowUp',
+          preventDefault: vi.fn(),
+        } as unknown as React.KeyboardEvent<HTMLInputElement>)
       })
 
       expect(result.current.highlightedIndex).toBe(0)
@@ -951,8 +960,7 @@ describe('useFilterState', () => {
     it('should clear pending tokens after value confirmation', () => {
       const onChange = vi.fn()
       const { result, rerender } = renderHook(
-        ({ value }) =>
-          useFilterState({ schema: createTestSchema(), value, onChange }),
+        ({ value }) => useFilterState({ schema: createTestSchema(), value, onChange }),
         { initialProps: { value: [] as FilterExpression[] } }
       )
 
@@ -992,7 +1000,7 @@ describe('useFilterState', () => {
       rerender({ value: newExpression })
 
       // Now tokens should be completed (no isPending)
-      expect(result.current.tokens.some(t => t.isPending)).toBe(false)
+      expect(result.current.tokens.some((t) => t.isPending)).toBe(false)
       expect(result.current.tokens).toHaveLength(3) // field, operator, value
     })
   })
@@ -1025,7 +1033,7 @@ describe('useFilterState', () => {
       expect(result.current.editingOperatorIndex).toBe(0)
       expect(result.current.isDropdownOpen).toBe(true)
       // Suggestions should be operators for that field
-      expect(result.current.suggestions.every(s => s.type === 'operator')).toBe(true)
+      expect(result.current.suggestions.every((s) => s.type === 'operator')).toBe(true)
     })
 
     it('should update operator when new one is selected during editing', () => {

@@ -31,7 +31,11 @@ function generateTokens(count: number): TokenData[] {
           ? { key: `field-${exprIndex}`, label: `Field ${exprIndex}`, type: 'string' }
           : type === 'operator'
             ? { key: 'equals', label: 'equals', symbol: '=' }
-            : { raw: `value-${exprIndex}`, display: `Value ${exprIndex}`, serialized: `value-${exprIndex}` },
+            : {
+                raw: `value-${exprIndex}`,
+                display: `Value ${exprIndex}`,
+                serialized: `value-${exprIndex}`,
+              },
       position: i,
       expressionIndex: exprIndex,
       isPending: false,
@@ -44,12 +48,7 @@ describe('VirtualTokenContainer', () => {
   describe('basic rendering', () => {
     it('should render with no tokens', () => {
       render(
-        <TestWrapper
-          tokens={[]}
-          inputValue=""
-          onInputChange={vi.fn()}
-          onInputKeyDown={vi.fn()}
-        />
+        <TestWrapper tokens={[]} inputValue="" onInputChange={vi.fn()} onInputKeyDown={vi.fn()} />
       )
 
       expect(screen.getByRole('combobox')).toBeInTheDocument()

@@ -395,7 +395,9 @@ describe('FilterStateMachine', () => {
       const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
       machine.transition({ type: 'CONFIRM_VALUE', payload: value })
       const anotherOperator: OperatorValue = { key: 'neq', label: 'not equals' }
-      expect(machine.canTransition({ type: 'SELECT_OPERATOR', payload: anotherOperator })).toBe(false)
+      expect(machine.canTransition({ type: 'SELECT_OPERATOR', payload: anotherOperator })).toBe(
+        false
+      )
     })
 
     it('should not allow CONFIRM_VALUE from selecting-connector state', () => {

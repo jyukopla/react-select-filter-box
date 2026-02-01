@@ -57,9 +57,7 @@ export class FieldBuilder {
       // Filter default operators by key
       const type = this.config.type ?? 'string'
       const defaults = getDefaultOperators(type)
-      this.config.operators = defaults.filter((op) =>
-        (operators as string[]).includes(op.key)
-      )
+      this.config.operators = defaults.filter((op) => (operators as string[]).includes(op.key))
     } else {
       this.config.operators = operators as OperatorConfig[]
     }
@@ -156,9 +154,7 @@ export class SchemaBuilder {
   /**
    * Set custom connectors
    */
-  withConnectors(
-    connectors: { key: 'AND' | 'OR'; label: string; color?: string }[]
-  ): this {
+  withConnectors(connectors: { key: 'AND' | 'OR'; label: string; color?: string }[]): this {
     this.connectors = connectors
     return this
   }
@@ -216,10 +212,7 @@ export function mergeSchemas(...schemas: FilterSchema[]): FilterSchema {
 /**
  * Pick specific fields from a schema
  */
-export function pickFields(
-  schema: FilterSchema,
-  fieldKeys: string[]
-): FilterSchema {
+export function pickFields(schema: FilterSchema, fieldKeys: string[]): FilterSchema {
   return {
     ...schema,
     fields: schema.fields.filter((f) => fieldKeys.includes(f.key)),
@@ -229,10 +222,7 @@ export function pickFields(
 /**
  * Omit specific fields from a schema
  */
-export function omitFields(
-  schema: FilterSchema,
-  fieldKeys: string[]
-): FilterSchema {
+export function omitFields(schema: FilterSchema, fieldKeys: string[]): FilterSchema {
   return {
     ...schema,
     fields: schema.fields.filter((f) => !fieldKeys.includes(f.key)),

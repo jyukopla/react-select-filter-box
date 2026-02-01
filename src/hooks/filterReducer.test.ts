@@ -440,7 +440,7 @@ describe('filterReducer', () => {
 
   describe('unknown action', () => {
     it('should return current state for unknown action', () => {
-      const result = filterReducer(initialFilterState, { type: 'UNKNOWN' } as any)
+      const result = filterReducer(initialFilterState, { type: 'UNKNOWN' } as unknown as FilterAction)
       expect(result).toEqual(initialFilterState)
     })
   })
@@ -650,11 +650,17 @@ describe('action creators', () => {
   })
 
   it('selectOperator() should create SELECT_OPERATOR action', () => {
-    expect(selectOperator(mockOperatorValue)).toEqual({ type: 'SELECT_OPERATOR', payload: mockOperatorValue })
+    expect(selectOperator(mockOperatorValue)).toEqual({
+      type: 'SELECT_OPERATOR',
+      payload: mockOperatorValue,
+    })
   })
 
   it('confirmValue() should create CONFIRM_VALUE action', () => {
-    expect(confirmValue(mockConditionValue)).toEqual({ type: 'CONFIRM_VALUE', payload: mockConditionValue })
+    expect(confirmValue(mockConditionValue)).toEqual({
+      type: 'CONFIRM_VALUE',
+      payload: mockConditionValue,
+    })
   })
 
   it('selectConnector() should create SELECT_CONNECTOR action', () => {
@@ -682,7 +688,10 @@ describe('action creators', () => {
   })
 
   it('completeTokenEdit() should create COMPLETE_TOKEN_EDIT action', () => {
-    expect(completeTokenEdit(mockConditionValue)).toEqual({ type: 'COMPLETE_TOKEN_EDIT', payload: mockConditionValue })
+    expect(completeTokenEdit(mockConditionValue)).toEqual({
+      type: 'COMPLETE_TOKEN_EDIT',
+      payload: mockConditionValue,
+    })
   })
 
   it('cancelTokenEdit() should create CANCEL_TOKEN_EDIT action', () => {

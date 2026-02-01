@@ -165,14 +165,22 @@ export function VirtualTokenContainer({
   }, [tokens, startIndex, endIndex])
 
   // Handle token click
-  const handleTokenClick = useCallback((token: TokenData, localIndex: number) => {
-    const actualIndex = startIndex + localIndex
-    if (token.type === 'operator' && !token.isPending && token.expressionIndex >= 0 && onOperatorClick) {
-      onOperatorClick(token.expressionIndex)
-    } else {
-      onTokenClick?.(actualIndex)
-    }
-  }, [startIndex, onOperatorClick, onTokenClick])
+  const handleTokenClick = useCallback(
+    (token: TokenData, localIndex: number) => {
+      const actualIndex = startIndex + localIndex
+      if (
+        token.type === 'operator' &&
+        !token.isPending &&
+        token.expressionIndex >= 0 &&
+        onOperatorClick
+      ) {
+        onOperatorClick(token.expressionIndex)
+      } else {
+        onTokenClick?.(actualIndex)
+      }
+    },
+    [startIndex, onOperatorClick, onTokenClick]
+  )
 
   // Handle container click to focus input
   const handleContainerClick = useCallback(() => {
@@ -189,7 +197,8 @@ export function VirtualTokenContainer({
       if (estimatedOffset < scrollLeft) {
         containerRef.current.scrollLeft = Math.max(0, estimatedOffset - 20)
       } else if (estimatedOffset + estimatedTokenWidth > viewportEnd) {
-        containerRef.current.scrollLeft = estimatedOffset - containerWidth + estimatedTokenWidth + 20
+        containerRef.current.scrollLeft =
+          estimatedOffset - containerWidth + estimatedTokenWidth + 20
       }
     }
   }, [selectedTokenIndex, estimatedTokenWidth, scrollLeft, containerWidth, shouldVirtualize])
@@ -231,7 +240,9 @@ export function VirtualTokenContainer({
                 <Token
                   key={token.id}
                   data={token}
-                  isEditable={(token.type === 'value' || token.type === 'operator') && !token.isPending}
+                  isEditable={
+                    (token.type === 'value' || token.type === 'operator') && !token.isPending
+                  }
                   isEditing={actualIndex === editingTokenIndex}
                   isSelected={allTokensSelected || actualIndex === selectedTokenIndex}
                   isDeletable={false}

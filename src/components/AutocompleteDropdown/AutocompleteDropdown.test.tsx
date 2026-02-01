@@ -160,7 +160,11 @@ describe('AutocompleteDropdown', () => {
 
     it('should enable virtual scrolling when explicitly set to true', () => {
       const { container } = render(
-        <AutocompleteDropdown {...defaultProps} items={createLargeList(50)} virtualScrolling={true} />
+        <AutocompleteDropdown
+          {...defaultProps}
+          items={createLargeList(50)}
+          virtualScrolling={true}
+        />
       )
       expect(container.querySelector('.autocomplete-dropdown--virtual')).toBeInTheDocument()
     })
@@ -172,18 +176,16 @@ describe('AutocompleteDropdown', () => {
         label: `Item ${i}`,
         group: i % 2 === 0 ? 'Even' : 'Odd',
       }))
-      const { container } = render(
-        <AutocompleteDropdown {...defaultProps} items={groupedItems} />
-      )
+      const { container } = render(<AutocompleteDropdown {...defaultProps} items={groupedItems} />)
       // Should fall back to standard mode due to groups
       expect(container.querySelector('.autocomplete-dropdown--virtual')).not.toBeInTheDocument()
     })
 
     it('should render only visible items in virtual mode', () => {
       const { container } = render(
-        <AutocompleteDropdown 
-          {...defaultProps} 
-          items={createLargeList(200)} 
+        <AutocompleteDropdown
+          {...defaultProps}
+          items={createLargeList(200)}
           virtualScrolling={true}
           maxHeight={300}
           itemHeight={40}
@@ -199,9 +201,9 @@ describe('AutocompleteDropdown', () => {
 
     it('should highlight correct item in virtual mode', () => {
       const { container } = render(
-        <AutocompleteDropdown 
-          {...defaultProps} 
-          items={createLargeList(150)} 
+        <AutocompleteDropdown
+          {...defaultProps}
+          items={createLargeList(150)}
           highlightedIndex={2}
           virtualScrolling={true}
         />
@@ -214,9 +216,9 @@ describe('AutocompleteDropdown', () => {
     it('should call onSelect in virtual mode', () => {
       const onSelect = vi.fn()
       render(
-        <AutocompleteDropdown 
-          {...defaultProps} 
-          items={createLargeList(150)} 
+        <AutocompleteDropdown
+          {...defaultProps}
+          items={createLargeList(150)}
           onSelect={onSelect}
           virtualScrolling={true}
         />
@@ -228,9 +230,9 @@ describe('AutocompleteDropdown', () => {
     it('should call onHighlight on mouse enter in virtual mode', () => {
       const onHighlight = vi.fn()
       render(
-        <AutocompleteDropdown 
-          {...defaultProps} 
-          items={createLargeList(150)} 
+        <AutocompleteDropdown
+          {...defaultProps}
+          items={createLargeList(150)}
           onHighlight={onHighlight}
           virtualScrolling={true}
         />
@@ -252,7 +254,7 @@ describe('AutocompleteDropdown', () => {
       render(<AutocompleteDropdown {...defaultProps} />)
       // Each item should have the content wrapper for proper touch sizing
       const options = screen.getAllByRole('option')
-      options.forEach(option => {
+      options.forEach((option) => {
         expect(option).toHaveClass('autocomplete-item')
       })
     })

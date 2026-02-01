@@ -90,7 +90,7 @@
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-.custom-widget__number-input[aria-invalid="true"] {
+.custom-widget__number-input[aria-invalid='true'] {
   border-color: #e53935;
 }
 

@@ -71,10 +71,10 @@
  * Custom input widgets in dropdown
  * These inputs (date picker, number input) need larger touch targets
  */
-.custom-widget input[type="date"],
-.custom-widget input[type="datetime-local"],
-.custom-widget input[type="number"],
-.custom-widget input[type="text"] {
+.custom-widget input[type='date'],
+.custom-widget input[type='datetime-local'],
+.custom-widget input[type='number'],
+.custom-widget input[type='text'] {
   min-height: var(--filter-touch-target-size);
   padding: 8px 12px;
   box-sizing: border-box;

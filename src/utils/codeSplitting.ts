@@ -72,9 +72,7 @@ export function createLazyAutocompleter(
   }
 
   return {
-    getSuggestions: async (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
+    getSuggestions: async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
       try {
         const autocompleter = await ensureLoaded()
         if (!autocompleter) {
@@ -95,20 +93,14 @@ export function createLazyAutocompleter(
       return loadedAutocompleter.validate(value)
     },
 
-    format: (
-      value: unknown,
-      context: AutocompleteContext
-    ): string | undefined => {
+    format: (value: unknown, context: AutocompleteContext): string | undefined => {
       if (!loadedAutocompleter?.format) {
         return String(value)
       }
       return loadedAutocompleter.format(value, context)
     },
 
-    parse: (
-      display: string,
-      context: AutocompleteContext
-    ): unknown => {
+    parse: (display: string, context: AutocompleteContext): unknown => {
       if (!loadedAutocompleter?.parse) {
         return display
       }
@@ -166,9 +158,7 @@ export function createLazyComponent<T extends ComponentType<unknown>>(
  * preloadComponent(() => import('./HeavyComponent'))
  * ```
  */
-export function preloadComponent(
-  loader: () => Promise<{ default: ComponentType<unknown> }>
-): void {
+export function preloadComponent(loader: () => Promise<{ default: ComponentType<unknown> }>): void {
   loader().catch(() => {
     // Ignore preload errors
   })
@@ -213,9 +203,7 @@ export function createDynamicAutocompleter(
   }
 
   return {
-    getSuggestions: async (
-      context: AutocompleteContext
-    ): Promise<AutocompleteItem[]> => {
+    getSuggestions: async (context: AutocompleteContext): Promise<AutocompleteItem[]> => {
       const key = context.field?.key || 'default'
       const autocompleter = await getAutocompleter(key)
       if (!autocompleter) {
@@ -232,19 +220,13 @@ export function createDynamicAutocompleter(
       return autocompleter?.validate?.(value) ?? true
     },
 
-    format: (
-      value: unknown,
-      context: AutocompleteContext
-    ): string | undefined => {
+    format: (value: unknown, context: AutocompleteContext): string | undefined => {
       const key = context.field?.key || 'default'
       const autocompleter = cache.get(key)
       return autocompleter?.format?.(value, context) ?? String(value)
     },
 
-    parse: (
-      display: string,
-      context: AutocompleteContext
-    ): unknown => {
+    parse: (display: string, context: AutocompleteContext): unknown => {
       const key = context.field?.key || 'default'
       const autocompleter = cache.get(key)
       return autocompleter?.parse?.(display, context) ?? display

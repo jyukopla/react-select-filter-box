@@ -42,7 +42,7 @@ export function useFocusManagement({
 }: UseFocusManagementProps): UseFocusManagementReturn {
   // Store the element that had focus before the component was activated
   const focusOriginRef = useRef<HTMLElement | null>(null)
-  
+
   // Store the last known focus position within the component
   const lastInternalFocusRef = useRef<HTMLElement | null>(null)
 
@@ -51,10 +51,7 @@ export function useFocusManagement({
    */
   const storeFocusOrigin = useCallback(() => {
     const activeElement = document.activeElement
-    if (
-      activeElement instanceof HTMLElement &&
-      !containerRef.current?.contains(activeElement)
-    ) {
+    if (activeElement instanceof HTMLElement && !containerRef.current?.contains(activeElement)) {
       focusOriginRef.current = activeElement
     }
   }, [containerRef])
@@ -102,14 +99,14 @@ export function useFocusManagement({
 
     const handleFocusOut = (e: FocusEvent) => {
       const relatedTarget = e.relatedTarget as Node | null
-      
+
       // If focus is leaving the container
       if (relatedTarget && !container.contains(relatedTarget)) {
         // Store last internal focus position
         if (e.target instanceof HTMLElement) {
           lastInternalFocusRef.current = e.target
         }
-        
+
         // If dropdown is open, trap focus back to input
         if (isDropdownOpen && inputRef.current) {
           // Use requestAnimationFrame to avoid conflicts with other focus handlers

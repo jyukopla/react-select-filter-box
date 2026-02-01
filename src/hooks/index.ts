@@ -1,4 +1,8 @@
-export { useFilterState, type UseFilterStateProps, type UseFilterStateReturn } from './useFilterState'
+export {
+  useFilterState,
+  type UseFilterStateProps,
+  type UseFilterStateReturn,
+} from './useFilterState'
 export {
   useDropdownPosition,
   type UseDropdownPositionOptions,

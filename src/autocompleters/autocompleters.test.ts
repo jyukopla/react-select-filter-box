@@ -92,10 +92,7 @@ describe('createStaticAutocompleter', () => {
   })
 
   it('should limit results when maxResults is set', () => {
-    const autocompleter = createStaticAutocompleter(
-      ['A', 'B', 'C', 'D', 'E'],
-      { maxResults: 3 }
-    )
+    const autocompleter = createStaticAutocompleter(['A', 'B', 'C', 'D', 'E'], { maxResults: 3 })
     const context = createMockContext('')
 
     const result = autocompleter.getSuggestions(context)
@@ -173,9 +170,7 @@ describe('createAsyncAutocompleter', () => {
   })
 
   it('should call fetch function with query', async () => {
-    const fetchFn = vi.fn().mockResolvedValue([
-      { type: 'value', key: '1', label: 'Result 1' },
-    ])
+    const fetchFn = vi.fn().mockResolvedValue([{ type: 'value', key: '1', label: 'Result 1' }])
 
     const autocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0 })
     const context = createMockContext('test')
@@ -199,9 +194,7 @@ describe('createAsyncAutocompleter', () => {
   })
 
   it('should cache results', async () => {
-    const fetchFn = vi.fn().mockResolvedValue([
-      { type: 'value', key: '1', label: 'Result 1' },
-    ])
+    const fetchFn = vi.fn().mockResolvedValue([{ type: 'value', key: '1', label: 'Result 1' }])
 
     const autocompleter = createAsyncAutocompleter(fetchFn, {
       debounceMs: 0,
@@ -219,39 +212,41 @@ describe('createAsyncAutocompleter', () => {
 
   it('should cancel in-flight requests when a new request is made', async () => {
     const signals: AbortSignal[] = []
-    const fetchFn = vi.fn().mockImplementation((query: string, context: AutocompleteContext, signal?: AbortSignal) => {
-      if (signal) {
-        signals.push(signal)
-      }
-      return new Promise((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-          resolve([{ type: 'value', key: query, label: query }])
-        }, 100)
-        
+    const fetchFn = vi
+      .fn()
+      .mockImplementation((query: string, context: AutocompleteContext, signal?: AbortSignal) => {
         if (signal) {
-          signal.addEventListener('abort', () => {
-            clearTimeout(timeoutId)
-            reject(new DOMException('Aborted', 'AbortError'))
-          })
+          signals.push(signal)
         }
+        return new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            resolve([{ type: 'value', key: query, label: query }])
+          }, 100)
+
+          if (signal) {
+            signal.addEventListener('abort', () => {
+              clearTimeout(timeoutId)
+              reject(new DOMException('Aborted', 'AbortError'))
+            })
+          }
+        })
       })
-    })
 
     const autocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0 })
-    
+
     // Start first request
     const _promise1 = autocompleter.getSuggestions(createMockContext('first'))
-    
+
     // Immediately start second request (should cancel first)
     const promise2 = autocompleter.getSuggestions(createMockContext('second'))
-    
+
     vi.advanceTimersByTime(150)
-    
+
     // First signal should be aborted
     expect(signals[0]?.aborted).toBe(true)
     // Second signal should not be aborted
     expect(signals[1]?.aborted).toBe(false)
-    
+
     // Second request should succeed
     const result2 = await promise2
     expect(result2).toHaveLength(1)
@@ -267,11 +262,7 @@ describe('createAsyncAutocompleter', () => {
     const autocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0 })
     await autocompleter.getSuggestions(createMockContext('test'))
 
-    expect(fetchFn).toHaveBeenCalledWith(
-      'test',
-      expect.any(Object),
-      expect.any(AbortSignal)
-    )
+    expect(fetchFn).toHaveBeenCalledWith('test', expect.any(Object), expect.any(AbortSignal))
   })
 })
 
@@ -293,7 +284,10 @@ describe('withStaleWhileRevalidate', () => {
 
     const onUpdate = vi.fn()
     // Disable the async autocompleter's built-in cache to test SWR behavior
-    const baseAutocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0, cacheResults: false })
+    const baseAutocompleter = createAsyncAutocompleter(fetchFn, {
+      debounceMs: 0,
+      cacheResults: false,
+    })
     const autocompleter = withStaleWhileRevalidate(baseAutocompleter, {
       maxAge: 1000,
       onUpdate,
@@ -317,18 +311,17 @@ describe('withStaleWhileRevalidate', () => {
     await vi.runAllTimersAsync()
 
     // onUpdate should have been called with fresh data
-    expect(onUpdate).toHaveBeenCalledWith([
-      expect.objectContaining({ key: 'result-2' }),
-    ])
+    expect(onUpdate).toHaveBeenCalledWith([expect.objectContaining({ key: 'result-2' })])
   })
 
   it('should return fresh cached data without triggering revalidation', async () => {
-    const fetchFn = vi.fn().mockResolvedValue([
-      { type: 'value', key: 'cached', label: 'Cached' },
-    ])
+    const fetchFn = vi.fn().mockResolvedValue([{ type: 'value', key: 'cached', label: 'Cached' }])
 
     const onUpdate = vi.fn()
-    const baseAutocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0, cacheResults: false })
+    const baseAutocompleter = createAsyncAutocompleter(fetchFn, {
+      debounceMs: 0,
+      cacheResults: false,
+    })
     const autocompleter = withStaleWhileRevalidate(baseAutocompleter, {
       maxAge: 5000,
       onUpdate,
@@ -337,7 +330,7 @@ describe('withStaleWhileRevalidate', () => {
 
     // First call
     await autocompleter.getSuggestions(context)
-    
+
     // Second call within maxAge
     vi.advanceTimersByTime(1000)
     const result = await autocompleter.getSuggestions(context)
@@ -354,7 +347,10 @@ describe('withStaleWhileRevalidate', () => {
       return [{ type: 'value', key: `result-${fetchCount}`, label: `Result ${fetchCount}` }]
     })
 
-    const baseAutocompleter = createAsyncAutocompleter(fetchFn, { debounceMs: 0, cacheResults: false })
+    const baseAutocompleter = createAsyncAutocompleter(fetchFn, {
+      debounceMs: 0,
+      cacheResults: false,
+    })
     const autocompleter = withStaleWhileRevalidate(baseAutocompleter, {
       maxAge: 1000,
       staleAge: 5000,
@@ -490,9 +486,7 @@ describe('createDateAutocompleter', () => {
   })
 
   it('should support custom presets', () => {
-    const customPresets = [
-      { label: 'Custom Date', value: new Date('2024-06-01') },
-    ]
+    const customPresets = [{ label: 'Custom Date', value: new Date('2024-06-01') }]
     const autocompleter = createDateAutocompleter({ presets: customPresets })
     const context = createMockContext('')
 
@@ -566,7 +560,7 @@ describe('withCache', () => {
 
     await cached.getSuggestions(context)
     // Wait for cache to expire
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise((resolve) => setTimeout(resolve, 10))
     await cached.getSuggestions(context)
 
     expect(callCount).toBe(2)
@@ -626,9 +620,9 @@ describe('withDebounce', () => {
 
   it('should return results after debounce period', async () => {
     const autocompleter = {
-      getSuggestions: vi.fn().mockReturnValue([
-        { type: 'value' as const, key: '1', label: 'Result' },
-      ]),
+      getSuggestions: vi
+        .fn()
+        .mockReturnValue([{ type: 'value' as const, key: '1', label: 'Result' }]),
     }
 
     const debounced = withDebounce(autocompleter, 50)
@@ -705,7 +699,7 @@ describe('createDateAutocompleter', () => {
       const result = autocompleter.getSuggestions(context)
 
       expect(result.length).toBeGreaterThan(0)
-      expect(result.some(r => r.label === 'Today')).toBe(true)
+      expect(result.some((r) => r.label === 'Today')).toBe(true)
     })
 
     it('should filter presets by input', () => {
@@ -713,7 +707,7 @@ describe('createDateAutocompleter', () => {
       const context = createMockContext('tod')
       const result = autocompleter.getSuggestions(context)
 
-      expect(result.some(r => r.label === 'Today')).toBe(true)
+      expect(result.some((r) => r.label === 'Today')).toBe(true)
     })
 
     it('should allow custom presets', () => {
@@ -722,7 +716,7 @@ describe('createDateAutocompleter', () => {
       const context = createMockContext('')
       const result = autocompleter.getSuggestions(context)
 
-      expect(result.some(r => r.label === 'Custom')).toBe(true)
+      expect(result.some((r) => r.label === 'Custom')).toBe(true)
     })
 
     it('should parse date input and include in suggestions', () => {
@@ -730,7 +724,7 @@ describe('createDateAutocompleter', () => {
       const context = createMockContext('2024-01-15')
       const result = autocompleter.getSuggestions(context)
 
-      expect(result.some(r => r.key.includes('2024-01-15'))).toBe(true)
+      expect(result.some((r) => r.key.includes('2024-01-15'))).toBe(true)
     })
   })
 })
@@ -750,7 +744,7 @@ describe('createDateTimeAutocompleter', () => {
 
       expect(result.length).toBeGreaterThan(0)
       // Check that presets include "Now" or similar
-      expect(result.some(r => r.label === 'Now' || r.label === 'Today')).toBe(true)
+      expect(result.some((r) => r.label === 'Now' || r.label === 'Today')).toBe(true)
     })
 
     it('should filter presets by input', () => {
@@ -758,7 +752,7 @@ describe('createDateTimeAutocompleter', () => {
       const context = createMockContext('yester')
       const result = autocompleter.getSuggestions(context)
 
-      expect(result.some(r => r.label.toLowerCase().includes('yesterday'))).toBe(true)
+      expect(result.some((r) => r.label.toLowerCase().includes('yesterday'))).toBe(true)
     })
 
     it('should parse ISO datetime string', () => {
@@ -766,7 +760,7 @@ describe('createDateTimeAutocompleter', () => {
       const context = createMockContext('2024-01-15T10:30:00')
       const result = autocompleter.getSuggestions(context)
 
-      expect(result.some(r => r.key.includes('2024-01-15'))).toBe(true)
+      expect(result.some((r) => r.key.includes('2024-01-15'))).toBe(true)
     })
 
     it('should handle custom presets', () => {
@@ -775,7 +769,7 @@ describe('createDateTimeAutocompleter', () => {
       const context = createMockContext('')
       const result = autocompleter.getSuggestions(context)
 
-      expect(result.some(r => r.label === 'Meeting Time')).toBe(true)
+      expect(result.some((r) => r.label === 'Meeting Time')).toBe(true)
     })
   })
 
@@ -839,7 +833,7 @@ describe('createPaginatedAutocompleter', () => {
     vi.useRealTimers()
   })
 
-  const createMockFetchFn = (totalItems: number = 100, pageSize: number = 20) => {
+  const createMockFetchFn = (totalItems: number = 100, _pageSize: number = 20) => {
     const allItems = Array.from({ length: totalItems }, (_, i) => ({
       key: `item-${i}`,
       label: `Item ${i}`,
@@ -855,9 +849,7 @@ describe('createPaginatedAutocompleter', () => {
       ): Promise<PaginatedResult> => {
         // Filter by query
         const filtered = query
-          ? allItems.filter((item) =>
-              item.label.toLowerCase().includes(query.toLowerCase())
-            )
+          ? allItems.filter((item) => item.label.toLowerCase().includes(query.toLowerCase()))
           : allItems
 
         const start = page * size
@@ -997,7 +989,7 @@ describe('createPaginatedAutocompleter', () => {
 
       // Start first request
       const promise1 = autocompleter.getSuggestions(createMockContext('first'))
-      
+
       // Start second request immediately
       const promise2 = autocompleter.getSuggestions(createMockContext('second'))
 
@@ -1063,11 +1055,11 @@ describe('createPaginatedAutocompleter', () => {
       // Reset and refetch - getSuggestions should use cached pages 0 and 1
       autocompleter.reset()
       const cachedItems = await autocompleter.getSuggestions(createMockContext(''))
-      
+
       // Should return all cached items (40) without fetching
       expect(fetchFn).toHaveBeenCalledTimes(2) // No additional calls
       expect(cachedItems).toHaveLength(40)
-      
+
       // loadMore should fetch page 2 since it wasn't cached
       const withThirdPage = await autocompleter.loadMore()
       expect(fetchFn).toHaveBeenCalledTimes(3) // One more call for page 2
@@ -1222,9 +1214,9 @@ describe('createPaginatedAutocompleter', () => {
       const fetchFn = vi.fn().mockRejectedValue(new Error('Network error'))
       const autocompleter = createPaginatedAutocompleter(fetchFn, { debounceMs: 0 })
 
-      await expect(
-        autocompleter.getSuggestions(createMockContext('test'))
-      ).rejects.toThrow('Network error')
+      await expect(autocompleter.getSuggestions(createMockContext('test'))).rejects.toThrow(
+        'Network error'
+      )
     })
 
     it('should handle AbortError and return empty array', async () => {

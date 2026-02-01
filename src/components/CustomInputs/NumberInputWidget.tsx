@@ -59,30 +59,39 @@ function NumberInputComponent({
     inputRef.current?.select()
   }, [])
 
-  const parseValue = useCallback((input: string): number | null => {
-    if (customParse) {
-      return customParse(input)
-    }
-    const trimmed = input.trim()
-    if (trimmed === '') return null
-    const parsed = integer ? parseInt(trimmed, 10) : parseFloat(trimmed)
-    return isNaN(parsed) ? null : parsed
-  }, [customParse, integer])
+  const parseValue = useCallback(
+    (input: string): number | null => {
+      if (customParse) {
+        return customParse(input)
+      }
+      const trimmed = input.trim()
+      if (trimmed === '') return null
+      const parsed = integer ? parseInt(trimmed, 10) : parseFloat(trimmed)
+      return isNaN(parsed) ? null : parsed
+    },
+    [customParse, integer]
+  )
 
-  const validateValue = useCallback((value: number | null): string | null => {
-    if (value === null) return 'Please enter a valid number'
-    if (min !== undefined && value < min) return `Value must be at least ${min}`
-    if (max !== undefined && value > max) return `Value must be at most ${max}`
-    if (integer && !Number.isInteger(value)) return 'Value must be an integer'
-    return null
-  }, [min, max, integer])
+  const validateValue = useCallback(
+    (value: number | null): string | null => {
+      if (value === null) return 'Please enter a valid number'
+      if (min !== undefined && value < min) return `Value must be at least ${min}`
+      if (max !== undefined && value > max) return `Value must be at most ${max}`
+      if (integer && !Number.isInteger(value)) return 'Value must be an integer'
+      return null
+    },
+    [min, max, integer]
+  )
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setInputValue(value)
-    const parsed = parseValue(value)
-    setError(validateValue(parsed))
-  }, [parseValue, validateValue])
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setInputValue(value)
+      const parsed = parseValue(value)
+      setError(validateValue(parsed))
+    },
+    [parseValue, validateValue]
+  )
 
   const handleConfirm = useCallback(() => {
     const parsed = parseValue(inputValue)
@@ -94,25 +103,31 @@ function NumberInputComponent({
     onConfirm(parsed, format(parsed))
   }, [inputValue, parseValue, validateValue, onConfirm, format])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleConfirm()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      onCancel()
-    }
-  }, [handleConfirm, onCancel])
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleConfirm()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        onCancel()
+      }
+    },
+    [handleConfirm, onCancel]
+  )
 
-  const adjustValue = useCallback((delta: number) => {
-    const current = parseValue(inputValue) ?? 0
-    let newValue = current + delta
-    if (min !== undefined) newValue = Math.max(min, newValue)
-    if (max !== undefined) newValue = Math.min(max, newValue)
-    if (integer) newValue = Math.round(newValue)
-    setInputValue(String(newValue))
-    setError(null)
-  }, [inputValue, parseValue, min, max, integer])
+  const adjustValue = useCallback(
+    (delta: number) => {
+      const current = parseValue(inputValue) ?? 0
+      let newValue = current + delta
+      if (min !== undefined) newValue = Math.max(min, newValue)
+      if (max !== undefined) newValue = Math.min(max, newValue)
+      if (integer) newValue = Math.round(newValue)
+      setInputValue(String(newValue))
+      setError(null)
+    },
+    [inputValue, parseValue, min, max, integer]
+  )
 
   const parsedValue = parseValue(inputValue)
   const isValid = parsedValue !== null && validateValue(parsedValue) === null
@@ -122,7 +137,7 @@ function NumberInputComponent({
       <div className="custom-widget__header">
         <span className="custom-widget__title">Enter Number</span>
       </div>
-      
+
       <div className="custom-widget__content">
         <div className="custom-widget__number-group">
           {showButtons && (
@@ -162,12 +177,12 @@ function NumberInputComponent({
             {min !== undefined && max !== undefined
               ? `Range: ${min} to ${max}`
               : min !== undefined
-              ? `Min: ${min}`
-              : `Max: ${max}`}
+                ? `Min: ${min}`
+                : `Max: ${max}`}
           </div>
         )}
       </div>
-      
+
       <div className="custom-widget__footer">
         <button
           type="button"
@@ -192,11 +207,11 @@ function NumberInputComponent({
 /**
  * Create a NumberInput widget for use with autocomplete
  */
-export function createNumberInputWidget(options: NumberInputWidgetOptions = {}): CustomAutocompleteWidget {
+export function createNumberInputWidget(
+  options: NumberInputWidgetOptions = {}
+): CustomAutocompleteWidget {
   return {
-    render: (props: CustomWidgetProps) => (
-      <NumberInputComponent {...props} options={options} />
-    ),
+    render: (props: CustomWidgetProps) => <NumberInputComponent {...props} options={options} />,
     validate: (value: unknown) => {
       if (typeof value !== 'number' || isNaN(value)) return false
       if (options.min !== undefined && value < options.min) return false

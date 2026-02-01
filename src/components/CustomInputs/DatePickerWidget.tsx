@@ -69,13 +69,7 @@ function DatePickerComponent({
   initialValue,
   options = {},
 }: CustomWidgetProps & { options?: DatePickerWidgetOptions }) {
-  const {
-    minDate,
-    maxDate,
-    locale = 'en-US',
-    showPresets = true,
-    presets,
-  } = options
+  const { minDate, maxDate, locale = 'en-US', showPresets = true, presets } = options
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     initialValue instanceof Date ? initialValue : null
@@ -98,34 +92,41 @@ function DatePickerComponent({
     }
   }, [selectedDate, onConfirm, locale])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && selectedDate) {
-      e.preventDefault()
-      handleConfirm()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      onCancel()
-    }
-  }, [selectedDate, handleConfirm, onCancel])
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && selectedDate) {
+        e.preventDefault()
+        handleConfirm()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        onCancel()
+      }
+    },
+    [selectedDate, handleConfirm, onCancel]
+  )
 
-  const handlePresetClick = useCallback((preset: { label: string; getDays: () => number }) => {
-    const date = new Date()
-    date.setDate(date.getDate() + preset.getDays())
-    date.setHours(0, 0, 0, 0)
-    onConfirm(date, preset.label)
-  }, [onConfirm])
+  const handlePresetClick = useCallback(
+    (preset: { label: string; getDays: () => number }) => {
+      const date = new Date()
+      date.setDate(date.getDate() + preset.getDays())
+      date.setHours(0, 0, 0, 0)
+      onConfirm(date, preset.label)
+    },
+    [onConfirm]
+  )
 
-  const displayPresets = presets?.map(p => ({
-    label: p.label,
-    getDays: () => Math.floor((p.value.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-  })) ?? DEFAULT_PRESETS
+  const displayPresets =
+    presets?.map((p) => ({
+      label: p.label,
+      getDays: () => Math.floor((p.value.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+    })) ?? DEFAULT_PRESETS
 
   return (
     <div className="custom-widget custom-widget--date-picker" onKeyDown={handleKeyDown}>
       <div className="custom-widget__header">
         <span className="custom-widget__title">Select Date</span>
       </div>
-      
+
       <div className="custom-widget__content">
         <input
           ref={inputRef}
@@ -136,7 +137,7 @@ function DatePickerComponent({
           min={minDate ? formatDateForInput(minDate) : undefined}
           max={maxDate ? formatDateForInput(maxDate) : undefined}
         />
-        
+
         {showPresets && (
           <div className="custom-widget__presets">
             {displayPresets.map((preset) => (
@@ -152,7 +153,7 @@ function DatePickerComponent({
           </div>
         )}
       </div>
-      
+
       <div className="custom-widget__footer">
         <button
           type="button"
@@ -177,11 +178,11 @@ function DatePickerComponent({
 /**
  * Create a DatePicker widget for use with autocomplete
  */
-export function createDatePickerWidget(options: DatePickerWidgetOptions = {}): CustomAutocompleteWidget {
+export function createDatePickerWidget(
+  options: DatePickerWidgetOptions = {}
+): CustomAutocompleteWidget {
   return {
-    render: (props: CustomWidgetProps) => (
-      <DatePickerComponent {...props} options={options} />
-    ),
+    render: (props: CustomWidgetProps) => <DatePickerComponent {...props} options={options} />,
     validate: (value: unknown) => value instanceof Date && !isNaN(value.getTime()),
     serialize: (value: unknown) => {
       if (value instanceof Date) {

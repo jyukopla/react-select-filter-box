@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  validateExpression,
-  validateExpressions,
-  validateSchema,
-} from './validation'
+import { validateExpression, validateExpressions, validateSchema } from './validation'
 import type { FilterSchema, FilterExpression } from '@/types'
 
 describe('validation', () => {
@@ -298,7 +294,7 @@ describe('validation', () => {
 
       const result = validateExpressions(expressions, schemaWithUnique)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('can only be used once'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('can only be used once'))).toBe(true)
     })
 
     it('should allow using non-unique field multiple times', () => {
@@ -353,7 +349,7 @@ describe('validation', () => {
 
       const result = validateExpressions(expressions, schemaWithUnique)
       expect(result.valid).toBe(false)
-      const uniqueError = result.errors.find(e => e.message.includes('can only be used once'))
+      const uniqueError = result.errors.find((e) => e.message.includes('can only be used once'))
       expect(uniqueError?.expressionIndex).toBe(2) // Second occurrence at index 2
     })
   })
@@ -429,7 +425,7 @@ describe('validation', () => {
 
       const result = validateExpressions(expressions, schemaWithMax)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('Maximum of 2 expressions'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('Maximum of 2 expressions'))).toBe(true)
     })
 
     it('should not limit when maxExpressions is not set', () => {
@@ -511,7 +507,7 @@ describe('validation', () => {
 
       const result = validateExpression(expression, schemaWithMultiValue)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('requires exactly 2 values'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('requires exactly 2 values'))).toBe(true)
     })
 
     it('should error when between has too many values', () => {
@@ -529,7 +525,7 @@ describe('validation', () => {
 
       const result = validateExpression(expression, schemaWithMultiValue)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('requires exactly 2 values'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('requires exactly 2 values'))).toBe(true)
     })
 
     it('should accept any number of values when count is -1 (unlimited)', () => {
@@ -564,7 +560,9 @@ describe('validation', () => {
 
       const result = validateExpression(expression, schemaWithMultiValue)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('requires at least one value'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('requires at least one value'))).toBe(
+        true
+      )
     })
 
     it('should validate non-array values for multi-value operators', () => {
@@ -582,7 +580,7 @@ describe('validation', () => {
 
       const result = validateExpression(expression, schemaWithMultiValue)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('must be an array'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('must be an array'))).toBe(true)
     })
 
     it('should not apply multi-value validation to regular operators', () => {
@@ -636,7 +634,7 @@ describe('validation', () => {
 
       const result = validateExpression(invalidExpression, schemaWithFieldValidator)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('Invalid email format'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('Invalid email format'))).toBe(true)
     })
 
     it('should pass field-level validation for valid value', () => {
@@ -665,7 +663,11 @@ describe('validation', () => {
         condition: {
           field: { key: 'email', label: 'Email', type: 'string' },
           operator: { key: 'eq', label: 'equals' },
-          value: { raw: 'test@example.com', display: 'test@example.com', serialized: 'test@example.com' },
+          value: {
+            raw: 'test@example.com',
+            display: 'test@example.com',
+            serialized: 'test@example.com',
+          },
         },
       }
 
@@ -675,7 +677,7 @@ describe('validation', () => {
 
     it('should provide validation context to field validator', () => {
       let capturedContext: unknown = null
-      
+
       const schemaWithContext: FilterSchema = {
         fields: [
           {
@@ -700,7 +702,7 @@ describe('validation', () => {
       }
 
       validateExpression(expression, schemaWithContext)
-      
+
       expect(capturedContext).not.toBeNull()
       expect((capturedContext as { field: { key: string } }).field.key).toBe('status')
       expect((capturedContext as { operator: { key: string } }).operator.key).toBe('eq')
@@ -714,7 +716,10 @@ describe('validation', () => {
             key: 'age',
             label: 'Age',
             type: 'number',
-            operators: [{ key: 'eq', label: 'equals' }, { key: 'gt', label: 'greater than' }],
+            operators: [
+              { key: 'eq', label: 'equals' },
+              { key: 'gt', label: 'greater than' },
+            ],
             validate: (value) => {
               const num = Number(value.raw)
               if (num < 0 || num > 150) {
@@ -740,8 +745,8 @@ describe('validation', () => {
       const result = validateExpression(invalidExpression, schemaWithFieldValidator)
       expect(result.valid).toBe(false)
       expect(result.errors.length).toBeGreaterThanOrEqual(2)
-      expect(result.errors.some(e => e.type === 'operator')).toBe(true)
-      expect(result.errors.some(e => e.message.includes('Age must be between'))).toBe(true)
+      expect(result.errors.some((e) => e.type === 'operator')).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('Age must be between'))).toBe(true)
     })
   })
 
@@ -764,19 +769,21 @@ describe('validation', () => {
         ],
         validate: (expressions) => {
           // Custom validation: if both dates present, startDate must be before endDate
-          const startExpr = expressions.find(e => e.condition.field.key === 'startDate')
-          const endExpr = expressions.find(e => e.condition.field.key === 'endDate')
-          
+          const startExpr = expressions.find((e) => e.condition.field.key === 'startDate')
+          const endExpr = expressions.find((e) => e.condition.field.key === 'endDate')
+
           if (startExpr && endExpr) {
             const start = new Date(startExpr.condition.value.raw as string)
             const end = new Date(endExpr.condition.value.raw as string)
             if (start >= end) {
               return {
                 valid: false,
-                errors: [{
-                  type: 'expression',
-                  message: 'Start date must be before end date',
-                }],
+                errors: [
+                  {
+                    type: 'expression',
+                    message: 'Start date must be before end date',
+                  },
+                ],
               }
             }
           }
@@ -805,7 +812,7 @@ describe('validation', () => {
 
       const result = validateExpressions(expressions, schemaWithValidation)
       expect(result.valid).toBe(false)
-      expect(result.errors.some(e => e.message.includes('before end date'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('before end date'))).toBe(true)
     })
   })
 })

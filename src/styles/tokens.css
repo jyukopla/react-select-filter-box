@@ -91,7 +91,8 @@
   --filter-token-radius: 4px;
 
   /* Typography */
-  --filter-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --filter-font-family:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --filter-font-size: 14px;
   --filter-font-size-small: 12px;
   --filter-token-font-weight: 500;

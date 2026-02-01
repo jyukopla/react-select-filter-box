@@ -119,9 +119,9 @@ describe('mergeThemes', () => {
       tokens: { fieldBg: 'green' },
       dropdown: { bg: 'black' },
     }
-    
+
     const merged = mergeThemes(base, override)
-    
+
     expect(merged.tokens?.fieldBg).toBe('green')
     expect(merged.tokens?.fieldBorder).toBe('blue')
     expect(merged.container?.bg).toBe('white')
@@ -132,9 +132,9 @@ describe('mergeThemes', () => {
     const theme: FilterBoxTheme = {
       tokens: { fieldBg: 'red' },
     }
-    
+
     const merged = mergeThemes(undefined, theme, undefined)
-    
+
     expect(merged.tokens?.fieldBg).toBe('red')
   })
 
@@ -155,9 +155,9 @@ describe('mergeThemes', () => {
       tokens: { operatorBg: 'f' },
       container: { border: 'g' },
     }
-    
+
     const merged = mergeThemes(theme1, theme2)
-    
+
     expect(merged.tokens?.fieldBg).toBe('a')
     expect(merged.tokens?.operatorBg).toBe('f')
     expect(merged.container?.bg).toBe('b')
@@ -173,7 +173,7 @@ describe('createTheme', () => {
     const custom = createTheme(themes.light, {
       tokens: { fieldBg: '#custom' },
     })
-    
+
     expect(custom.tokens?.fieldBg).toBe('#custom')
     expect(custom.tokens?.fieldBorder).toBe('#2196f3') // from light theme
     expect(custom.container?.bg).toBe('#ffffff') // from light theme
@@ -181,11 +181,11 @@ describe('createTheme', () => {
 
   it('should not modify the base theme', () => {
     const originalFieldBg = themes.light.tokens?.fieldBg
-    
+
     createTheme(themes.light, {
       tokens: { fieldBg: '#modified' },
     })
-    
+
     expect(themes.light.tokens?.fieldBg).toBe(originalFieldBg)
   })
 })
@@ -193,29 +193,31 @@ describe('createTheme', () => {
 describe('CSS variable generation', () => {
   it('should generate all token variables', () => {
     const { container } = render(
-      <FilterBoxThemeProvider theme={{
-        tokens: {
-          fieldBg: '#a',
-          fieldBorder: '#b',
-          fieldText: '#c',
-          operatorBg: '#d',
-          operatorBorder: '#e',
-          operatorText: '#f',
-          valueBg: '#g',
-          valueBorder: '#h',
-          valueText: '#i',
-          connectorBg: '#j',
-          connectorBorder: '#k',
-          connectorText: '#l',
-          gap: '4px',
-          padding: '8px',
-          borderRadius: '6px',
-        },
-      }}>
+      <FilterBoxThemeProvider
+        theme={{
+          tokens: {
+            fieldBg: '#a',
+            fieldBorder: '#b',
+            fieldText: '#c',
+            operatorBg: '#d',
+            operatorBorder: '#e',
+            operatorText: '#f',
+            valueBg: '#g',
+            valueBorder: '#h',
+            valueText: '#i',
+            connectorBg: '#j',
+            connectorBorder: '#k',
+            connectorText: '#l',
+            gap: '4px',
+            padding: '8px',
+            borderRadius: '6px',
+          },
+        }}
+      >
         <div>Content</div>
       </FilterBoxThemeProvider>
     )
-    
+
     const wrapper = container.querySelector('.filter-box-theme-root')
     expect(wrapper).toHaveStyle({ '--filter-token-field-bg': '#a' })
     expect(wrapper).toHaveStyle({ '--filter-token-operator-text': '#f' })
@@ -225,19 +227,21 @@ describe('CSS variable generation', () => {
 
   it('should generate container variables', () => {
     const { container } = render(
-      <FilterBoxThemeProvider theme={{
-        container: {
-          bg: '#white',
-          border: '#gray',
-          borderFocus: '#blue',
-          shadow: '0 2px 4px black',
-          padding: '12px',
-        },
-      }}>
+      <FilterBoxThemeProvider
+        theme={{
+          container: {
+            bg: '#white',
+            border: '#gray',
+            borderFocus: '#blue',
+            shadow: '0 2px 4px black',
+            padding: '12px',
+          },
+        }}
+      >
         <div>Content</div>
       </FilterBoxThemeProvider>
     )
-    
+
     const wrapper = container.querySelector('.filter-box-theme-root')
     expect(wrapper).toHaveStyle({ '--filter-container-bg': '#white' })
     expect(wrapper).toHaveStyle({ '--filter-container-border-focus': '#blue' })
@@ -245,19 +249,21 @@ describe('CSS variable generation', () => {
 
   it('should generate dropdown variables', () => {
     const { container } = render(
-      <FilterBoxThemeProvider theme={{
-        dropdown: {
-          bg: '#dropdown-bg',
-          border: '#dropdown-border',
-          shadow: 'shadow-value',
-          itemHover: '#hover',
-          itemSelected: '#selected',
-        },
-      }}>
+      <FilterBoxThemeProvider
+        theme={{
+          dropdown: {
+            bg: '#dropdown-bg',
+            border: '#dropdown-border',
+            shadow: 'shadow-value',
+            itemHover: '#hover',
+            itemSelected: '#selected',
+          },
+        }}
+      >
         <div>Content</div>
       </FilterBoxThemeProvider>
     )
-    
+
     const wrapper = container.querySelector('.filter-box-theme-root')
     expect(wrapper).toHaveStyle({ '--filter-dropdown-bg': '#dropdown-bg' })
     expect(wrapper).toHaveStyle({ '--filter-dropdown-item-selected': '#selected' })
@@ -265,17 +271,19 @@ describe('CSS variable generation', () => {
 
   it('should generate typography variables', () => {
     const { container } = render(
-      <FilterBoxThemeProvider theme={{
-        typography: {
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '16px',
-          tokenFontWeight: '600',
-        },
-      }}>
+      <FilterBoxThemeProvider
+        theme={{
+          typography: {
+            fontFamily: 'Arial, sans-serif',
+            fontSize: '16px',
+            tokenFontWeight: '600',
+          },
+        }}
+      >
         <div>Content</div>
       </FilterBoxThemeProvider>
     )
-    
+
     const wrapper = container.querySelector('.filter-box-theme-root')
     expect(wrapper).toHaveStyle({ '--filter-font-family': 'Arial, sans-serif' })
     expect(wrapper).toHaveStyle({ '--filter-font-size': '16px' })

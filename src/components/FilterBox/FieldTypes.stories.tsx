@@ -22,7 +22,13 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Helper component for stories
-function FilterBoxWithState({ schema, description }: { schema: FilterSchema; description?: string }) {
+function FilterBoxWithState({
+  schema,
+  description,
+}: {
+  schema: FilterSchema
+  description?: string
+}) {
   const [value, setValue] = useState<FilterExpression[]>([])
   return (
     <div style={{ maxWidth: '650px' }}>
@@ -30,7 +36,16 @@ function FilterBoxWithState({ schema, description }: { schema: FilterSchema; des
         <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>{description}</p>
       )}
       <FilterBox schema={schema} value={value} onChange={setValue} />
-      <pre style={{ marginTop: '1rem', fontSize: '12px', background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
+      <pre
+        style={{
+          marginTop: '1rem',
+          fontSize: '12px',
+          background: '#f5f5f5',
+          padding: '1rem',
+          borderRadius: '4px',
+          overflow: 'auto',
+        }}
+      >
         {JSON.stringify(value, null, 2) || '[]'}
       </pre>
     </div>
@@ -82,7 +97,8 @@ export const StringFields: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'String fields with text operators: equals, not equals, contains, starts with, ends with, like.',
+        story:
+          'String fields with text operators: equals, not equals, contains, starts with, ends with, like.',
       },
     },
   },
@@ -194,7 +210,8 @@ export const DateFields: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Date fields with temporal operators: on, before, after, between. Supports date presets.',
+        story:
+          'Date fields with temporal operators: on, before, after, between. Supports date presets.',
       },
     },
   },

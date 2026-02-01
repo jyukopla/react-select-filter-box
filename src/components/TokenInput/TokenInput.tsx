@@ -4,11 +4,21 @@
  * Auto-sizing input for entering new token values.
  */
 
-import { type KeyboardEvent, type RefObject, type InputHTMLAttributes, useState, useRef, useLayoutEffect } from 'react'
+import {
+  type KeyboardEvent,
+  type RefObject,
+  type InputHTMLAttributes,
+  useState,
+  useRef,
+  useLayoutEffect,
+} from 'react'
 import { clsx } from 'clsx'
 import './TokenInput.css'
 
-export interface TokenInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onKeyDown' | 'onFocus' | 'onBlur'> {
+export interface TokenInputProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  'value' | 'onChange' | 'onKeyDown' | 'onFocus' | 'onBlur'
+> {
   /** Current input value */
   value: string
   /** Called when value changes */
@@ -67,11 +77,7 @@ export function TokenInput({
   return (
     <span className="token-input-wrapper">
       {/* Hidden sizer span */}
-      <span
-        ref={sizerRef}
-        className="token-input-sizer"
-        aria-hidden="true"
-      >
+      <span ref={sizerRef} className="token-input-sizer" aria-hidden="true">
         {sizerText}
       </span>
       <input

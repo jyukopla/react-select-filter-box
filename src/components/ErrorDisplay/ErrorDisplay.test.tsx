@@ -5,18 +5,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { renderHook, act } from '@testing-library/react'
-import {
-  ErrorTooltip,
-  ErrorSummary,
-  ErrorIndicator,
-  useValidationErrors,
-} from './ErrorDisplay'
+import { ErrorTooltip, ErrorSummary, ErrorIndicator, useValidationErrors } from './ErrorDisplay'
 import type { ValidationError } from '@/types'
 
 describe('ErrorTooltip', () => {
-  const mockErrors: ValidationError[] = [
-    { type: 'value', message: 'Invalid value format' },
-  ]
+  const mockErrors: ValidationError[] = [{ type: 'value', message: 'Invalid value format' }]
 
   it('should render children when no errors', () => {
     render(
@@ -34,7 +27,7 @@ describe('ErrorTooltip', () => {
         <span>Hover me</span>
       </ErrorTooltip>
     )
-    
+
     fireEvent.mouseEnter(screen.getByText('Hover me').parentElement!)
     expect(screen.getByRole('tooltip')).toBeInTheDocument()
     expect(screen.getByText('Invalid value format')).toBeInTheDocument()
@@ -46,11 +39,11 @@ describe('ErrorTooltip', () => {
         <span>Hover me</span>
       </ErrorTooltip>
     )
-    
+
     const trigger = screen.getByText('Hover me').parentElement!
     fireEvent.mouseEnter(trigger)
     expect(screen.getByRole('tooltip')).toBeInTheDocument()
-    
+
     fireEvent.mouseLeave(trigger)
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
@@ -60,13 +53,13 @@ describe('ErrorTooltip', () => {
       { type: 'value', message: 'Error 1' },
       { type: 'field', message: 'Error 2' },
     ]
-    
+
     render(
       <ErrorTooltip errors={multipleErrors}>
         <span>Hover me</span>
       </ErrorTooltip>
     )
-    
+
     fireEvent.mouseEnter(screen.getByText('Hover me').parentElement!)
     expect(screen.getByText('Error 1')).toBeInTheDocument()
     expect(screen.getByText('Error 2')).toBeInTheDocument()
@@ -78,7 +71,7 @@ describe('ErrorTooltip', () => {
         <span>Hover me</span>
       </ErrorTooltip>
     )
-    
+
     fireEvent.mouseEnter(screen.getByText('Hover me').parentElement!)
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
@@ -89,7 +82,7 @@ describe('ErrorTooltip', () => {
         <button>Focus me</button>
       </ErrorTooltip>
     )
-    
+
     fireEvent.focus(screen.getByRole('button').parentElement!)
     expect(screen.getByRole('tooltip')).toBeInTheDocument()
   })
@@ -141,13 +134,11 @@ describe('ErrorSummary', () => {
 
   it('should show dismiss button when dismissible', () => {
     const onDismiss = vi.fn()
-    render(
-      <ErrorSummary errors={mockErrors} dismissible onDismiss={onDismiss} />
-    )
-    
+    render(<ErrorSummary errors={mockErrors} dismissible onDismiss={onDismiss} />)
+
     const dismissBtn = screen.getByRole('button', { name: 'Dismiss errors' })
     expect(dismissBtn).toBeInTheDocument()
-    
+
     fireEvent.click(dismissBtn)
     expect(onDismiss).toHaveBeenCalled()
   })
@@ -171,11 +162,9 @@ describe('ErrorIndicator', () => {
   })
 
   it('should apply size classes', () => {
-    const { rerender, container } = render(
-      <ErrorIndicator hasError={true} size="small" />
-    )
+    const { rerender, container } = render(<ErrorIndicator hasError={true} size="small" />)
     expect(container.querySelector('.error-indicator--small')).toBeInTheDocument()
-    
+
     rerender(<ErrorIndicator hasError={true} size="large" />)
     expect(container.querySelector('.error-indicator--large')).toBeInTheDocument()
   })
@@ -190,61 +179,61 @@ describe('useValidationErrors', () => {
 
   it('should add error', () => {
     const { result } = renderHook(() => useValidationErrors())
-    
+
     act(() => {
       result.current.addError({ type: 'value', message: 'Test error' })
     })
-    
+
     expect(result.current.errors).toHaveLength(1)
     expect(result.current.hasErrors).toBe(true)
   })
 
   it('should remove errors by expression index', () => {
     const { result } = renderHook(() => useValidationErrors())
-    
+
     act(() => {
       result.current.addError({ type: 'value', message: 'Error 1', expressionIndex: 0 })
       result.current.addError({ type: 'value', message: 'Error 2', expressionIndex: 1 })
       result.current.addError({ type: 'value', message: 'Error 3', expressionIndex: 0 })
     })
-    
+
     expect(result.current.errors).toHaveLength(3)
-    
+
     act(() => {
       result.current.removeErrorsByExpression(0)
     })
-    
+
     expect(result.current.errors).toHaveLength(1)
     expect(result.current.errors[0].message).toBe('Error 2')
   })
 
   it('should clear all errors', () => {
     const { result } = renderHook(() => useValidationErrors())
-    
+
     act(() => {
       result.current.addError({ type: 'value', message: 'Error 1' })
       result.current.addError({ type: 'value', message: 'Error 2' })
     })
-    
+
     expect(result.current.errors).toHaveLength(2)
-    
+
     act(() => {
       result.current.clearErrors()
     })
-    
+
     expect(result.current.errors).toHaveLength(0)
     expect(result.current.hasErrors).toBe(false)
   })
 
   it('should get errors for specific expression', () => {
     const { result } = renderHook(() => useValidationErrors())
-    
+
     act(() => {
       result.current.addError({ type: 'value', message: 'Expr 0 - Error 1', expressionIndex: 0 })
       result.current.addError({ type: 'value', message: 'Expr 1 - Error', expressionIndex: 1 })
       result.current.addError({ type: 'value', message: 'Expr 0 - Error 2', expressionIndex: 0 })
     })
-    
+
     const expr0Errors = result.current.getErrorsForExpression(0)
     expect(expr0Errors).toHaveLength(2)
     expect(expr0Errors[0].message).toBe('Expr 0 - Error 1')
@@ -253,17 +242,17 @@ describe('useValidationErrors', () => {
   it('should call onError callback when errors change', () => {
     const onError = vi.fn()
     const { result } = renderHook(() => useValidationErrors({ onError }))
-    
+
     act(() => {
       result.current.addError({ type: 'value', message: 'Test' })
     })
-    
+
     expect(onError).toHaveBeenCalledWith([{ type: 'value', message: 'Test' }])
-    
+
     act(() => {
       result.current.clearErrors()
     })
-    
+
     expect(onError).toHaveBeenLastCalledWith([])
   })
 })

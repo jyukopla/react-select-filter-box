@@ -139,12 +139,16 @@ describe('Token', () => {
 
   describe('Selection Styling', () => {
     it('should have selected class when isSelected is true', () => {
-      const { container } = render(<Token {...defaultProps} data={createFieldToken()} isSelected={true} />)
+      const { container } = render(
+        <Token {...defaultProps} data={createFieldToken()} isSelected={true} />
+      )
       expect(container.querySelector('.token--selected')).toBeInTheDocument()
     })
 
     it('should not have selected class when isSelected is false', () => {
-      const { container } = render(<Token {...defaultProps} data={createFieldToken()} isSelected={false} />)
+      const { container } = render(
+        <Token {...defaultProps} data={createFieldToken()} isSelected={false} />
+      )
       expect(container.querySelector('.token--selected')).not.toBeInTheDocument()
     })
   })
@@ -238,9 +242,7 @@ describe('Token', () => {
 
   describe('Error State', () => {
     it('should apply error class when hasError is true', () => {
-      const { container } = render(
-        <Token {...defaultProps} data={createValueToken()} hasError />
-      )
+      const { container } = render(<Token {...defaultProps} data={createValueToken()} hasError />)
       expect(container.querySelector('.token--error')).toBeInTheDocument()
     })
 
@@ -252,9 +254,7 @@ describe('Token', () => {
     })
 
     it('should apply error class in addition to type class', () => {
-      const { container } = render(
-        <Token {...defaultProps} data={createValueToken()} hasError />
-      )
+      const { container } = render(<Token {...defaultProps} data={createValueToken()} hasError />)
       expect(container.querySelector('.token--value.token--error')).toBeInTheDocument()
     })
 
@@ -268,16 +268,19 @@ describe('Token', () => {
 
     it('should have data-error-message attribute for CSS tooltip', () => {
       render(
-        <Token {...defaultProps} data={createValueToken()} hasError errorMessage="Value is required" />
+        <Token
+          {...defaultProps}
+          data={createValueToken()}
+          hasError
+          errorMessage="Value is required"
+        />
       )
       const token = screen.getByRole('option')
       expect(token).toHaveAttribute('data-error-message', 'Value is required')
     })
 
     it('should not have data-error-message when no error message provided', () => {
-      render(
-        <Token {...defaultProps} data={createValueToken()} hasError />
-      )
+      render(<Token {...defaultProps} data={createValueToken()} hasError />)
       const token = screen.getByRole('option')
       expect(token).not.toHaveAttribute('data-error-message')
     })
