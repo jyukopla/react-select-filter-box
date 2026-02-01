@@ -87,3 +87,12 @@
   outline: 2px solid var(--filter-focus-ring-color, #1976d2);
   outline-offset: 1px;
 }
+
+/* Custom widget container */
+.filter-box__custom-widget {
+  background: var(--filter-dropdown-bg, #fff);
+  border: 1px solid var(--filter-dropdown-border, #ddd);
+  border-radius: var(--filter-dropdown-radius, 4px);
+  box-shadow: var(--filter-dropdown-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+  overflow: hidden;
+}

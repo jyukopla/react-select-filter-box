@@ -80,11 +80,11 @@ export const Token = memo(function Token({
   isEditable,
   isEditing,
   isSelected,
-  isDeletable: _isDeletable,
+  isDeletable,
   hasError = false,
   errorMessage,
   onEdit,
-  onDelete: _onDelete,
+  onDelete,
   onEditComplete,
   onEditCancel,
   className,
@@ -113,6 +113,11 @@ export const Token = memo(function Token({
     if (isEditable && !isEditing) {
       onEdit()
     }
+  }
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onDelete()
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -167,12 +172,23 @@ export const Token = memo(function Token({
           'token--selected': isSelected,
           'token--error': hasError,
           'token--pending': data.isPending,
+          'token--deletable': isDeletable && isSelected,
         },
         className
       )}
       onClick={handleClick}
     >
       {display}
+      {isDeletable && isSelected && (
+        <button
+          type="button"
+          className="token__delete-button"
+          onClick={handleDeleteClick}
+          aria-label={`Delete ${data.type}`}
+        >
+          ×
+        </button>
+      )}
     </span>
   )
 })

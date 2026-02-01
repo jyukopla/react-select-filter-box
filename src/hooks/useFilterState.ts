@@ -15,6 +15,9 @@ import type {
   FieldValue,
   OperatorValue,
   ConditionValue,
+  OperatorConfig,
+  FieldConfig,
+  CustomAutocompleteWidget,
 } from '@/types'
 
 export interface UseFilterStateProps {
@@ -51,6 +54,18 @@ export interface UseFilterStateReturn {
   allTokensSelected: boolean
   /** Index of expression whose operator is being edited (-1 if not editing) */
   editingOperatorIndex: number
+  /** Index of expression whose connector is being edited (-1 if not editing) */
+  editingConnectorIndex: number
+  /** Active custom widget to render (when in entering-value state with customInput) */
+  activeCustomWidget: CustomAutocompleteWidget | undefined
+  /** Current field config (when building expression) */
+  currentFieldConfig: FieldConfig | undefined
+  /** Current operator config (when building expression) */
+  currentOperatorConfig: OperatorConfig | undefined
+  /** Handle custom widget value confirmation */
+  handleCustomWidgetConfirm: (value: unknown, display: string) => void
+  /** Handle custom widget cancellation */
+  handleCustomWidgetCancel: () => void
   /** Handle focus event */
   handleFocus: () => void
   /** Handle blur event */
@@ -77,6 +92,12 @@ export interface UseFilterStateReturn {
   handleOperatorEdit: (expressionIndex: number) => void
   /** Cancel operator editing */
   handleOperatorEditCancel: () => void
+  /** Start editing a connector in an existing expression */
+  handleConnectorEdit: (expressionIndex: number) => void
+  /** Cancel connector editing */
+  handleConnectorEditCancel: () => void
+  /** Delete an expression by index */
+  handleExpressionDelete: (expressionIndex: number) => void
 }
 
 /**
@@ -275,6 +296,7 @@ export function useFilterState({
   const [currentOperator, setCurrentOperator] = useState<OperatorValue | undefined>()
   const [announcement, setAnnouncement] = useState('')
   const [editingOperatorIndex, setEditingOperatorIndex] = useState(-1)
+  const [editingConnectorIndex, setEditingConnectorIndex] = useState(-1)
 
   // Sync machine with external value on mount
   useEffect(() => {
@@ -288,8 +310,20 @@ export function useFilterState({
     return [...completedTokens, ...pendingTokens]
   }, [value, currentField, currentOperator])
 
-  // Get suggestions - handles both normal state and operator editing mode
+  // Get suggestions - handles both normal state and operator/connector editing mode
   const suggestions = useMemo(() => {
+    // If editing a connector, show connector options
+    if (editingConnectorIndex >= 0 && value[editingConnectorIndex]) {
+      const connectors = schema.connectors ?? [
+        { key: 'AND' as const, label: 'AND' },
+        { key: 'OR' as const, label: 'OR' },
+      ]
+      return connectors.map((conn) => ({
+        type: 'connector' as const,
+        key: conn.key,
+        label: conn.label,
+      }))
+    }
     // If editing an operator, show operators for that expression's field
     if (editingOperatorIndex >= 0 && value[editingOperatorIndex]) {
       const expr = value[editingOperatorIndex]
@@ -306,9 +340,27 @@ export function useFilterState({
       return []
     }
     return getSuggestions(state, schema, currentField, inputValue)
-  }, [state, schema, currentField, inputValue, editingOperatorIndex, value])
+  }, [state, schema, currentField, inputValue, editingOperatorIndex, editingConnectorIndex, value])
 
   const placeholder = useMemo(() => getPlaceholder(state), [state])
+
+  // Compute current field config (when building expression)
+  const currentFieldConfig = useMemo(() => {
+    if (!currentField) return undefined
+    return schema.fields.find((f) => f.key === currentField.key)
+  }, [currentField, schema.fields])
+
+  // Compute current operator config (when building expression)
+  const currentOperatorConfig = useMemo(() => {
+    if (!currentFieldConfig || !currentOperator) return undefined
+    return currentFieldConfig.operators.find((op) => op.key === currentOperator.key)
+  }, [currentFieldConfig, currentOperator])
+
+  // Compute active custom widget (show when in entering-value state and operator has customInput)
+  const activeCustomWidget = useMemo(() => {
+    if (state !== 'entering-value') return undefined
+    return currentOperatorConfig?.customInput
+  }, [state, currentOperatorConfig])
 
   // Reset highlighted index when state changes (new suggestions context)
   useEffect(() => {
@@ -366,6 +418,23 @@ export function useFilterState({
 
   const handleSelect = useCallback(
     (item: AutocompleteItem) => {
+      // Handle connector editing mode
+      if (editingConnectorIndex >= 0 && item.type === 'connector') {
+        const expr = value[editingConnectorIndex]
+        const newConnector = item.key as 'AND' | 'OR'
+        // Update the expression with new connector
+        const newExpressions = [...value]
+        newExpressions[editingConnectorIndex] = {
+          ...expr,
+          connector: newConnector,
+        }
+        onChange(newExpressions)
+        setEditingConnectorIndex(-1)
+        setIsDropdownOpen(false)
+        setAnnouncement(`Connector changed to ${newConnector}`)
+        return
+      }
+
       // Handle operator editing mode
       if (editingOperatorIndex >= 0 && item.type === 'operator') {
         const expr = value[editingOperatorIndex]
@@ -408,7 +477,25 @@ export function useFilterState({
           machine.transition({ type: 'SELECT_FIELD', payload: fieldValue })
           setState(machine.getState())
           setInputValue('')
-          setAnnouncement(`Selected ${fieldValue.label}. Now select an operator.`)
+
+          // Auto-select operator if there's only one
+          if (fieldConfig.operators.length === 1) {
+            const opConfig = fieldConfig.operators[0]
+            const operatorValue: OperatorValue = {
+              key: opConfig.key,
+              label: opConfig.label,
+              symbol: opConfig.symbol,
+            }
+            setCurrentOperator(operatorValue)
+            machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
+            setState(machine.getState())
+            // Close dropdown for value entry (free text) unless there's a custom widget
+            const hasCustomWidget = opConfig.customInput !== undefined
+            setIsDropdownOpen(hasCustomWidget)
+            setAnnouncement(`Selected ${fieldValue.label} with ${operatorValue.label}. Now enter a value.`)
+          } else {
+            setAnnouncement(`Selected ${fieldValue.label}. Now select an operator.`)
+          }
         }
       } else if (currentState === 'selecting-operator') {
         const fieldConfig = schema.fields.find((f) => f.key === currentField?.key)
@@ -436,7 +523,7 @@ export function useFilterState({
         setAnnouncement(`Added ${item.key} connector. Now select a field.`)
       }
     },
-    [machine, schema, currentField, onChange, editingOperatorIndex, value]
+    [machine, schema, currentField, onChange, editingOperatorIndex, editingConnectorIndex, value]
   )
 
   const handleConfirmValue = useCallback(() => {
@@ -459,6 +546,44 @@ export function useFilterState({
       )
     }
   }, [machine, inputValue, onChange])
+
+  // Handle custom widget value confirmation
+  const handleCustomWidgetConfirm = useCallback(
+    (value: unknown, display: string) => {
+      if (machine.getState() !== 'entering-value') return
+
+      // Serialize the value if the widget has a serialize function
+      const serialized = activeCustomWidget?.serialize
+        ? activeCustomWidget.serialize(value)
+        : String(value)
+
+      const conditionValue: ConditionValue = {
+        raw: value,
+        display,
+        serialized,
+      }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: conditionValue })
+      const newExpressions = machine.getContext().completedExpressions
+      onChange([...newExpressions])
+      setState(machine.getState())
+      setInputValue('')
+      setCurrentField(undefined)
+      setCurrentOperator(undefined)
+      setIsDropdownOpen(true)
+      setAnnouncement(`Filter added: value "${display}". Select AND, OR, or press Enter to finish.`)
+    },
+    [machine, onChange, activeCustomWidget]
+  )
+
+  // Handle custom widget cancellation
+  const handleCustomWidgetCancel = useCallback(() => {
+    // Go back to operator selection
+    machine.transition({ type: 'DELETE_LAST' })
+    setState(machine.getState())
+    setCurrentOperator(undefined)
+    setIsDropdownOpen(true)
+    setAnnouncement('Value input cancelled. Select an operator.')
+  }, [machine])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -543,9 +668,19 @@ export function useFilterState({
           if (selectedTokenIndex >= 0) {
             e.preventDefault()
             const token = tokens[selectedTokenIndex]
-            if (token) {
+            if (token && token.expressionIndex >= 0) {
               const expressionIndex = token.expressionIndex
-              const newExpressions = value.filter((_, i) => i !== expressionIndex)
+              // Remove the expression and fix connectors
+              const newExpressions = value
+                .filter((_, i) => i !== expressionIndex)
+                .map((expr, i, arr) => {
+                  // If this is now the last expression, remove its connector
+                  if (i === arr.length - 1 && expr.connector) {
+                    const { connector: _, ...rest } = expr
+                    return rest
+                  }
+                  return expr
+                })
               onChange(newExpressions)
               setSelectedTokenIndex(-1)
               setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
@@ -653,6 +788,48 @@ export function useFilterState({
     setIsDropdownOpen(false)
   }, [])
 
+  // Connector editing handlers
+  const handleConnectorEdit = useCallback(
+    (expressionIndex: number) => {
+      // Only expressions with connectors can be edited
+      if (expressionIndex < 0 || expressionIndex >= value.length) return
+      if (!value[expressionIndex]?.connector) return
+      setEditingConnectorIndex(expressionIndex)
+      setIsDropdownOpen(true)
+      setHighlightedIndex(0)
+      setAnnouncement('Select a new connector')
+    },
+    [value]
+  )
+
+  const handleConnectorEditCancel = useCallback(() => {
+    setEditingConnectorIndex(-1)
+    setIsDropdownOpen(false)
+  }, [])
+
+  // Delete an expression by index
+  const handleExpressionDelete = useCallback(
+    (expressionIndex: number) => {
+      if (expressionIndex < 0 || expressionIndex >= value.length) return
+
+      // Remove the expression and fix connectors
+      const newExpressions = value
+        .filter((_, i) => i !== expressionIndex)
+        .map((expr, i, arr) => {
+          // If this is now the last expression, remove its connector
+          if (i === arr.length - 1 && expr.connector) {
+            const { connector: _, ...rest } = expr
+            return rest
+          }
+          return expr
+        })
+      onChange(newExpressions)
+      setSelectedTokenIndex(-1)
+      setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+    },
+    [value, onChange]
+  )
+
   return {
     state,
     tokens,
@@ -666,6 +843,10 @@ export function useFilterState({
     selectedTokenIndex,
     allTokensSelected,
     editingOperatorIndex,
+    editingConnectorIndex,
+    activeCustomWidget,
+    currentFieldConfig,
+    currentOperatorConfig,
     handleFocus,
     handleBlur,
     handleInputChange,
@@ -679,5 +860,10 @@ export function useFilterState({
     handleTokenEditCancel,
     handleOperatorEdit,
     handleOperatorEditCancel,
+    handleConnectorEdit,
+    handleConnectorEditCancel,
+    handleCustomWidgetConfirm,
+    handleCustomWidgetCancel,
+    handleExpressionDelete,
   }
 }

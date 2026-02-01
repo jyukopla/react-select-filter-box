@@ -24,6 +24,8 @@ export interface TokenContainerProps {
   onTokenClick?: (position: number) => void
   /** Called when an operator token is clicked (for editing) */
   onOperatorClick?: (expressionIndex: number) => void
+  /** Called when a connector token is clicked (for editing) */
+  onConnectorClick?: (expressionIndex: number) => void
   /** Called when input gains focus */
   onInputFocus?: () => void
   /** Called when input loses focus */
@@ -52,6 +54,8 @@ export interface TokenContainerProps {
   onTokenEditComplete?: (newValue: ConditionValue) => void
   /** Called when token edit is cancelled */
   onTokenEditCancel?: () => void
+  /** Called when an expression should be deleted */
+  onExpressionDelete?: (expressionIndex: number) => void
   /** Whether the container should take full available width (default: true) */
   fullWidth?: boolean
 }
@@ -66,6 +70,7 @@ export function TokenContainer({
   onInputKeyDown,
   onTokenClick,
   onOperatorClick,
+  onConnectorClick,
   onInputFocus,
   onInputBlur,
   onFocus,
@@ -80,6 +85,7 @@ export function TokenContainer({
   allTokensSelected = false,
   onTokenEditComplete,
   onTokenEditCancel,
+  onExpressionDelete,
   fullWidth = true,
 }: TokenContainerProps) {
   // Support both onInputFocus/onInputBlur and legacy onFocus/onBlur
@@ -91,7 +97,7 @@ export function TokenContainer({
     inputRef.current?.focus()
   }
 
-  // Handle token click - operators get special handling
+  // Handle token click - operators and connectors get special handling
   const handleTokenClick = (token: TokenData, index: number) => {
     if (
       token.type === 'operator' &&
@@ -100,6 +106,13 @@ export function TokenContainer({
       onOperatorClick
     ) {
       onOperatorClick(token.expressionIndex)
+    } else if (
+      token.type === 'connector' &&
+      !token.isPending &&
+      token.expressionIndex >= 0 &&
+      onConnectorClick
+    ) {
+      onConnectorClick(token.expressionIndex)
     } else {
       onTokenClick?.(index)
     }
@@ -114,20 +127,29 @@ export function TokenContainer({
       )}
       onClick={handleContainerClick}
     >
-      {tokens.map((token, index) => (
-        <Token
-          key={token.id}
-          data={token}
-          isEditable={(token.type === 'value' || token.type === 'operator') && !token.isPending}
-          isEditing={index === editingTokenIndex}
-          isSelected={allTokensSelected || index === selectedTokenIndex}
-          isDeletable={false}
-          onEdit={() => handleTokenClick(token, index)}
-          onDelete={() => {}}
-          onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}
-          onEditCancel={() => onTokenEditCancel?.()}
-        />
-      ))}
+      {tokens.map((token, index) => {
+        const isSelected = allTokensSelected || index === selectedTokenIndex
+        // Tokens are deletable when selected and belong to a completed expression
+        const isDeletable = isSelected && !token.isPending && token.expressionIndex >= 0
+        return (
+          <Token
+            key={token.id}
+            data={token}
+            isEditable={(token.type === 'value' || token.type === 'operator' || token.type === 'connector') && !token.isPending}
+            isEditing={index === editingTokenIndex}
+            isSelected={isSelected}
+            isDeletable={isDeletable}
+            onEdit={() => handleTokenClick(token, index)}
+            onDelete={() => {
+              if (token.expressionIndex >= 0 && onExpressionDelete) {
+                onExpressionDelete(token.expressionIndex)
+              }
+            }}
+            onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}
+            onEditCancel={() => onTokenEditCancel?.()}
+          />
+        )
+      })}
       <TokenInput
         {...inputProps}
         value={inputValue}

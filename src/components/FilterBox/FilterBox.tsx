@@ -121,6 +121,9 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     editingTokenIndex,
     selectedTokenIndex,
     allTokensSelected,
+    activeCustomWidget,
+    currentFieldConfig,
+    currentOperatorConfig,
     handleFocus,
     handleBlur,
     handleInputChange,
@@ -132,6 +135,10 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     handleTokenEditComplete,
     handleTokenEditCancel,
     handleOperatorEdit,
+    handleConnectorEdit,
+    handleCustomWidgetConfirm,
+    handleCustomWidgetCancel,
+    handleExpressionDelete,
   } = useFilterState({ schema, value, onChange })
 
   // Focus management for trap and restoration
@@ -168,12 +175,23 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
 
   const { position, maxHeight } = useDropdownPosition({
     anchorRef: containerRef,
-    isOpen: isDropdownOpen && !disabled,
+    isOpen: (isDropdownOpen || !!activeCustomWidget) && !disabled,
     dropdownHeight: 300,
     offset: 4,
   })
 
-  const dropdownContent = (
+  // Render custom widget or autocomplete dropdown
+  const dropdownContent = activeCustomWidget ? (
+    <div className="filter-box__custom-widget">
+      {activeCustomWidget.render({
+        onConfirm: handleCustomWidgetConfirm,
+        onCancel: handleCustomWidgetCancel,
+        initialValue: undefined,
+        fieldConfig: currentFieldConfig!,
+        operatorConfig: currentOperatorConfig!,
+      })}
+    </div>
+  ) : (
     <AutocompleteDropdown
       id={dropdownId}
       items={suggestions}
@@ -184,6 +202,9 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       maxHeight={maxHeight}
     />
   )
+
+  // Should show dropdown portal when dropdown is open or custom widget is active
+  const showDropdownPortal = (isDropdownOpen || !!activeCustomWidget) && !disabled
 
   return (
     <div
@@ -221,11 +242,13 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
           onInputKeyDown={handleKeyDown}
           onTokenClick={handleTokenEdit}
           onOperatorClick={handleOperatorEdit}
+          onConnectorClick={handleConnectorEdit}
           editingTokenIndex={editingTokenIndex}
           selectedTokenIndex={selectedTokenIndex}
           allTokensSelected={allTokensSelected}
           onTokenEditComplete={handleTokenEditComplete}
           onTokenEditCancel={handleTokenEditCancel}
+          onExpressionDelete={handleExpressionDelete}
           disabled={disabled}
           fullWidth={fullWidth}
           inputProps={{
@@ -252,7 +275,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       </div>
       {usePortal ? (
         <DropdownPortal>
-          {isDropdownOpen && !disabled && (
+          {showDropdownPortal && (
             <div
               className="filter-box-dropdown-portal"
               style={{
@@ -268,7 +291,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
           )}
         </DropdownPortal>
       ) : (
-        dropdownContent
+        (showDropdownPortal || isDropdownOpen) && dropdownContent
       )}
     </div>
   )
