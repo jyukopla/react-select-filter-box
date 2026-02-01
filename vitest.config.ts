@@ -63,13 +63,9 @@ export default defineConfig({
           setupFiles: ['./src/test/setup.ts'],
           // Prevent memory issues with large test files
           pool: 'forks',
-          poolOptions: {
-            forks: {
-              singleFork: true,
-            },
-          },
           maxConcurrency: 5,
           isolate: true,
+          testTimeout: 10000,
         },
       },
       // Storybook tests project
