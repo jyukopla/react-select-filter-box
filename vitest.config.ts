@@ -61,6 +61,15 @@ export default defineConfig({
           include: ['src/**/*.{test,spec}.{ts,tsx}'],
           exclude: ['src/**/*.stories.{ts,tsx}'],
           setupFiles: ['./src/test/setup.ts'],
+          // Prevent memory issues with large test files
+          pool: 'forks',
+          poolOptions: {
+            forks: {
+              singleFork: true,
+            },
+          },
+          maxConcurrency: 5,
+          isolate: true,
         },
       },
       // Storybook tests project

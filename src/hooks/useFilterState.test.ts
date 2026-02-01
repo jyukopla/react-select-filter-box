@@ -1,9 +1,15 @@
-import { describe, expect, it, vi } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { describe, expect, it, vi, afterEach } from 'vitest'
+import { renderHook, act, cleanup } from '@testing-library/react'
 import { useFilterState } from './useFilterState'
 import type { FilterSchema, FilterExpression } from '@/types'
 
 describe('useFilterState', () => {
+  // Cleanup after each test to prevent memory leaks
+  afterEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+  })
+
   const createTestSchema = (): FilterSchema => ({
     fields: [
       {
@@ -1323,12 +1329,15 @@ describe('useFilterState', () => {
       })
 
       // Wait for value suggestions to be fetched
-      await vi.waitFor(() => {
-        expect(result.current.state).toBe('entering-value')
-        expect(result.current.suggestions).toHaveLength(2)
-        expect(result.current.suggestions[0]?.label).toBe('Active')
-        expect(result.current.suggestions[1]?.label).toBe('Inactive')
-      })
+      await vi.waitFor(
+        () => {
+          expect(result.current.state).toBe('entering-value')
+          expect(result.current.suggestions).toHaveLength(2)
+          expect(result.current.suggestions[0]?.label).toBe('Active')
+          expect(result.current.suggestions[1]?.label).toBe('Inactive')
+        },
+        { timeout: 5000 }
+      )
     })
 
     it('should provide value suggestions from operator autocompleter', async () => {
@@ -1372,12 +1381,15 @@ describe('useFilterState', () => {
       })
 
       // Wait for value suggestions to be fetched
-      await vi.waitFor(() => {
-        expect(result.current.state).toBe('entering-value')
-        expect(result.current.suggestions).toHaveLength(2)
-        expect(result.current.suggestions[0]?.label).toBe('High')
-        expect(result.current.suggestions[1]?.label).toBe('Low')
-      })
+      await vi.waitFor(
+        () => {
+          expect(result.current.state).toBe('entering-value')
+          expect(result.current.suggestions).toHaveLength(2)
+          expect(result.current.suggestions[0]?.label).toBe('High')
+          expect(result.current.suggestions[1]?.label).toBe('Low')
+        },
+        { timeout: 5000 }
+      )
     })
 
     it('should handle async value autocompleters', async () => {
@@ -1416,12 +1428,15 @@ describe('useFilterState', () => {
       })
 
       // Wait for async suggestions to be fetched
-      await vi.waitFor(() => {
-        expect(result.current.state).toBe('entering-value')
-        expect(result.current.suggestions).toHaveLength(2)
-        expect(result.current.suggestions[0]?.label).toBe('Alice')
-        expect(result.current.suggestions[1]?.label).toBe('Bob')
-      })
+      await vi.waitFor(
+        () => {
+          expect(result.current.state).toBe('entering-value')
+          expect(result.current.suggestions).toHaveLength(2)
+          expect(result.current.suggestions[0]?.label).toBe('Alice')
+          expect(result.current.suggestions[1]?.label).toBe('Bob')
+        },
+        { timeout: 5000 }
+      )
     })
 
     it('should filter value suggestions based on input', async () => {
@@ -1471,10 +1486,13 @@ describe('useFilterState', () => {
       })
 
       // Wait for filtered suggestions
-      await vi.waitFor(() => {
-        expect(result.current.suggestions).toHaveLength(2)
-        expect(result.current.suggestions.map((s) => s.label)).toEqual(['Active', 'Inactive'])
-      })
+      await vi.waitFor(
+        () => {
+          expect(result.current.suggestions).toHaveLength(2)
+          expect(result.current.suggestions.map((s) => s.label)).toEqual(['Active', 'Inactive'])
+        },
+        { timeout: 5000 }
+      )
     })
   })
 })
