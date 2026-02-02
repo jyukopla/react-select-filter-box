@@ -208,12 +208,12 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
   )
 
   // Container-level blur handler to catch when focus leaves the entire FilterBox
-  // This handles cases where tokens are clicked (which don't focus the input) 
+  // This handles cases where tokens are clicked (which don't focus the input)
   // and then the user clicks outside
   const handleContainerBlur = useCallback(
     (event: React.FocusEvent<HTMLDivElement>) => {
       const relatedTarget = event.relatedTarget as HTMLElement | null
-      
+
       // If focus is moving to null (e.g., clicking on non-focusable element outside)
       // we need to wait a tick to check if focus actually left the container
       if (!relatedTarget) {
@@ -240,12 +240,12 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       if (portalContainer) {
         return
       }
-      
+
       // Check if focus is moving within the container itself
       if (containerRef.current?.contains(relatedTarget)) {
         return
       }
-      
+
       // Focus has left the container entirely - call blur handler
       handleBlur()
     },
