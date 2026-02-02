@@ -386,17 +386,13 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
       </div>
     )
 
-    // Input should be focused due to autoFocus
-    const input = screen.getByRole('combobox')
-    expect(input).toHaveFocus()
+    // Select a token using mouse click (single click selects, doesn't edit)
+    const valueToken = screen.getByRole('option', { name: /value: Active/i })
+    await user.click(valueToken)
 
-    // Select a token using mouse click - this will keep focus on input since we use keyboard to select
-    await user.keyboard('{ArrowLeft}')
-
-    const fieldToken = screen.getByRole('option', { name: /value: Active/i })
     // Token should be selected
     await waitFor(() => {
-      expect(fieldToken).toHaveClass('token--selected')
+      expect(valueToken).toHaveClass('token--selected')
     })
 
     // Click outside to blur the FilterBox
@@ -405,7 +401,48 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
 
     // Token should no longer be selected after blur
     await waitFor(() => {
-      expect(fieldToken).not.toHaveClass('token--selected')
+      expect(valueToken).not.toHaveClass('token--selected')
     })
+  })
+
+  it('should clear editing state when clicking outside while editing a token', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const expressions: FilterExpression[] = [
+      {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'eq', label: 'equals', symbol: '=' },
+          value: { raw: 'active', display: 'Active', serialized: 'active' },
+        },
+      },
+    ]
+
+    render(
+      <div>
+        <FilterBox schema={schema} value={expressions} onChange={onChange} autoFocus />
+        <button type="button">Outside Button</button>
+      </div>
+    )
+
+    // Double-click to start editing
+    const valueToken = screen.getByRole('option', { name: /value: Active/i })
+    await user.dblClick(valueToken)
+
+    // Should be in edit mode
+    const editInput = await screen.findByRole('textbox', { name: /edit value/i })
+    expect(editInput).toBeInTheDocument()
+
+    // Click outside to blur the FilterBox
+    const outsideButton = screen.getByRole('button', { name: 'Outside Button' })
+    await user.click(outsideButton)
+
+    // Should exit edit mode - edit input should be gone
+    await waitFor(() => {
+      expect(screen.queryByRole('textbox', { name: /edit value/i })).not.toBeInTheDocument()
+    })
+
+    // Original token should still be there (edit was cancelled, not committed)
+    expect(screen.getByText('Active')).toBeInTheDocument()
   })
 })

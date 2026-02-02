@@ -434,6 +434,9 @@ export function useFilterState({
   // Store the step before token editing so we can restore it after
   const stepBeforeEditRef = useRef<FilterStep | null>(null)
 
+  // Track if we just selected a token (to prevent handleFocus from clearing it)
+  const justSelectedTokenRef = useRef(false)
+
   // Undo/Redo history stacks
   const undoStack = useRef<FilterExpression[][]>([])
   const redoStack = useRef<FilterExpression[][]>([])
@@ -648,6 +651,11 @@ export function useFilterState({
 
   // Handlers
   const handleFocus = useCallback(() => {
+    // If a token was just selected, don't clear the selection
+    if (justSelectedTokenRef.current) {
+      justSelectedTokenRef.current = false
+      return
+    }
     machine.transition({ type: 'FOCUS' })
     // Determine correct state based on completed expressions and partial expression
     let newState = machine.getState()
@@ -674,6 +682,10 @@ export function useFilterState({
     // Clear token selection when losing focus
     setSelectedTokenIndex(-1)
     setAllTokensSelected(false)
+    // Clear editing states when losing focus
+    setEditingTokenIndex(-1)
+    setEditingOperatorIndex(-1)
+    setEditingConnectorIndex(-1)
   }, [machine])
 
   const handleInputChange = useCallback((newValue: string) => {
@@ -1562,6 +1574,8 @@ export function useFilterState({
       // Select the token (for deletion with Delete or Backspace)
       const token = tokens[tokenIndex]
       if (token && !token.isPending && token.expressionIndex >= 0) {
+        // Set flag to prevent handleFocus from clearing the selection
+        justSelectedTokenRef.current = true
         setSelectedTokenIndex(tokenIndex)
         setIsDropdownOpen(false)
         setAllTokensSelected(false)

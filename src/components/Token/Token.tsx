@@ -115,9 +115,11 @@ export const Token = memo(function Token({
     }
   }, [isEditing, display])
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     // Stop propagation to prevent container click from focusing input
     e.stopPropagation()
+    // Prevent default to stop any focus-related browser behavior
+    e.preventDefault()
     // For selectable tokens, single click selects (for deletion)
     // Double-click will be handled separately for editing
     if (isSelectable && onSelect) {
@@ -186,6 +188,7 @@ export const Token = memo(function Token({
       aria-invalid={hasError ? 'true' : undefined}
       title={hasError && errorMessage ? errorMessage : undefined}
       data-error-message={hasError && errorMessage ? errorMessage : undefined}
+      tabIndex={-1}
       className={clsx(
         'token',
         `token--${data.type}`,

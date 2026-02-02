@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createRef, useState } from 'react'
 import { FilterBox, type FilterBoxHandle } from './FilterBox'
@@ -113,7 +113,10 @@ describe('FilterBox', () => {
 
       fireEvent.blur(input)
 
-      expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+      // Blur uses async check when relatedTarget is null, so we need to wait
+      await waitFor(() => {
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+      })
     })
   })
 

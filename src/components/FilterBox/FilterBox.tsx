@@ -182,8 +182,71 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
         if (containerRef.current?.contains(relatedTarget)) {
           return
         }
+      } else {
+        // When relatedTarget is null (e.g., clicking on non-focusable elements like tokens),
+        // we need to wait a tick to check if the click was inside the container
+        setTimeout(() => {
+          const activeElement = document.activeElement
+          // Check if focus is now inside our container
+          if (containerRef.current?.contains(activeElement)) {
+            return
+          }
+          // Check if focus is in a portal
+          const portalContainer = activeElement?.closest(`[${FILTER_BOX_PORTAL_ATTR}]`)
+          if (portalContainer) {
+            return
+          }
+          // Focus has truly left - call blur handler
+          handleBlur()
+        }, 0)
+        return
       }
       // Otherwise, call the actual blur handler
+      handleBlur()
+    },
+    [handleBlur]
+  )
+
+  // Container-level blur handler to catch when focus leaves the entire FilterBox
+  // This handles cases where tokens are clicked (which don't focus the input) 
+  // and then the user clicks outside
+  const handleContainerBlur = useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      const relatedTarget = event.relatedTarget as HTMLElement | null
+      
+      // If focus is moving to null (e.g., clicking on non-focusable element outside)
+      // we need to wait a tick to check if focus actually left the container
+      if (!relatedTarget) {
+        // Use setTimeout to check after the click event completes
+        setTimeout(() => {
+          // Check if focus is now inside our container or portal
+          const activeElement = document.activeElement
+          if (containerRef.current?.contains(activeElement)) {
+            return
+          }
+          // Check if focus is in a portal
+          const portalContainer = activeElement?.closest(`[${FILTER_BOX_PORTAL_ATTR}]`)
+          if (portalContainer) {
+            return
+          }
+          // Focus has truly left - call blur handler
+          handleBlur()
+        }, 0)
+        return
+      }
+
+      // Check if the target is inside a FilterBox portal
+      const portalContainer = relatedTarget.closest(`[${FILTER_BOX_PORTAL_ATTR}]`)
+      if (portalContainer) {
+        return
+      }
+      
+      // Check if focus is moving within the container itself
+      if (containerRef.current?.contains(relatedTarget)) {
+        return
+      }
+      
+      // Focus has left the container entirely - call blur handler
       handleBlur()
     },
     [handleBlur]
@@ -254,6 +317,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       role="group"
       aria-label={ariaLabel ?? 'Filter expression builder'}
       aria-describedby={tokens.length > 0 ? `${generatedId}-status` : undefined}
+      onBlur={handleContainerBlur}
     >
       {/* Skip link for keyboard accessibility */}
       {skipToId && (
