@@ -111,15 +111,27 @@ Autocompleters are pluggable providers for suggestions:
 
 ## Common Commands
 
+This project uses a Makefile for common tasks. Dependencies are automatically installed when needed.
+
 ```bash
-npm run dev          # Start Vite dev server
+make test            # Run unit tests
+make test-watch      # Run tests in watch mode
+make test-coverage   # Run tests with coverage
+make storybook       # Start Storybook dev server
+make build-lib       # Build library for distribution
+make lint            # Run ESLint
+make typecheck       # TypeScript type checking
+make format          # Format code with Prettier
+make clean           # Remove node_modules, dist, coverage
+make help            # Show all available targets
+```
+
+Alternatively, you can use npm scripts directly:
+
+```bash
 npm run test         # Run unit tests
-npm run test:watch   # Run tests in watch mode
-npm run test:coverage # Run tests with coverage
 npm run storybook    # Start Storybook dev server
 npm run build:lib    # Build library for distribution
-npm run lint         # Run ESLint
-npm run typecheck    # TypeScript type checking
 ```
 
 ## File Naming Conventions

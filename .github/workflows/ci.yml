@@ -19,11 +19,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run ESLint
-        run: npm run lint
+        run: make lint
 
   typecheck:
     name: Type Check
@@ -37,11 +34,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run TypeScript type check
-        run: npm run typecheck
+        run: make typecheck
 
   test:
     name: Test
@@ -55,11 +49,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run tests with coverage
-        run: npm run test:coverage
+        run: make test-coverage
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
@@ -80,11 +71,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Build library
-        run: npm run build:lib
+        run: make build-lib
 
       - name: Check bundle size
         run: |
@@ -109,11 +97,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Check formatting
-        run: npm run format:check
+        run: make format-check
 
   visual-regression:
     name: Visual Regression Tests
@@ -130,7 +115,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: make node_modules
 
       - name: Run Chromatic
         uses: chromaui/action@latest
@@ -163,14 +148,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Build Storybook
-        run: npm run build-storybook
+        run: make build-storybook
 
       - name: Build API Docs
-        run: npm run docs:api
+        run: make docs-api
 
       - name: Convert Markdown Docs to HTML
         run: bash .github/scripts/convert-markdown-docs.sh

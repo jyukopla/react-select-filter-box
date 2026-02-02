@@ -218,21 +218,33 @@ if (!result.valid) {
 
 ## Development
 
-```bash
-# Install dependencies
-npm install
+This project uses a Makefile for common tasks. Run `make help` to see all available targets.
 
-# Start development server
-npm run dev
+```bash
+# Install dependencies (auto-runs when needed)
+make node_modules
 
 # Run tests
-npm test
+make test
 
 # Run Storybook
-npm run storybook
+make storybook
 
 # Build library
-npm run build:lib
+make build-lib
+
+# Lint and format
+make lint
+make format
+
+# Type checking
+make typecheck
+
+# Run tests with coverage
+make test-coverage
+
+# Clean build artifacts
+make clean
 ```
 
 ## License
