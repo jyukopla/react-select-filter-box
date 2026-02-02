@@ -472,9 +472,14 @@ export function useFilterState({
   // Derived state - combine completed tokens with pending tokens
   const tokens = useMemo(() => {
     const completedTokens = expressionsToTokens(value)
+    // Don't show pending tokens when editing an existing token with custom widget
+    // In editing-token state, currentField/currentOperator are set for widget context only
+    if (state === 'editing-token') {
+      return completedTokens
+    }
     const pendingTokens = generatePendingTokens(currentField, currentOperator, value.length)
     return [...completedTokens, ...pendingTokens]
-  }, [value, currentField, currentOperator])
+  }, [value, currentField, currentOperator, state])
 
   // Get suggestions - handles both normal state and operator/connector editing mode
   const suggestions = useMemo(() => {

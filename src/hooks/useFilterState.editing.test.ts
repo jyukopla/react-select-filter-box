@@ -546,6 +546,32 @@ describe('useFilterState - Editing', () => {
       expect(result.current.editingTokenIndex).toBe(-1)
     })
 
+    it('should not show pending tokens when editing with custom widget', () => {
+      const customWidget = createMockCustomWidget()
+      const schema = createTestSchemaWithCustomWidget(customWidget)
+      const initialValue = [createExpressionWithCustomWidget()]
+      const onChange = vi.fn()
+
+      const { result } = renderHook(() => useFilterState({ schema, value: initialValue, onChange }))
+
+      // Initial state: one expression with 3 tokens
+      expect(result.current.tokens.length).toBe(3)
+      expect(result.current.tokens.every((t) => !t.isPending)).toBe(true)
+
+      // Double-click on value token (index 2) to edit with custom widget
+      act(() => {
+        result.current.handleTokenEdit(2)
+      })
+
+      // Should still only have 3 tokens (no pending tokens added)
+      expect(result.current.tokens.length).toBe(3)
+      expect(result.current.tokens.every((t) => !t.isPending)).toBe(true)
+
+      // Confirm the currentField and currentOperator are set (for widget context)
+      // but they don't create pending tokens
+      expect(result.current.state).toBe('editing-token')
+    })
+
     it('should cancel custom widget edit without changes', () => {
       const customWidget = createMockCustomWidget()
       const schema = createTestSchemaWithCustomWidget(customWidget)
