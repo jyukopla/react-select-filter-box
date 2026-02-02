@@ -1339,7 +1339,7 @@ export function useFilterState({
                     setAnnouncement(
                       `Pasted ${pastedExpressions.length} expression${pastedExpressions.length !== 1 ? 's' : ''}.`
                     )
-                  } catch (error) {
+                  } catch (_error) {
                     setAnnouncement('Invalid clipboard data format.')
                   }
                 },

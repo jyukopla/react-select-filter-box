@@ -69,7 +69,9 @@ describe('useFilterState - Connector Deletion', () => {
 
     // Simulate keyboard selection (ArrowLeft until connector is selected)
     act(() => {
-      const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' }) as any
+      const event = new KeyboardEvent('keydown', {
+        key: 'ArrowLeft',
+      }) as unknown as React.KeyboardEvent<HTMLInputElement>
       result.current.handleKeyDown(event)
     })
 
@@ -80,7 +82,9 @@ describe('useFilterState - Connector Deletion', () => {
     // Keep pressing ArrowLeft until connector is selected
     while (result.current.selectedTokenIndex !== connectorTokenIndex) {
       act(() => {
-        const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' }) as any
+        const event = new KeyboardEvent('keydown', {
+          key: 'ArrowLeft',
+        }) as unknown as React.KeyboardEvent<HTMLInputElement>
         result.current.handleKeyDown(event)
       })
     }
@@ -89,7 +93,10 @@ describe('useFilterState - Connector Deletion', () => {
 
     // Now press Backspace to delete the connector
     act(() => {
-      const event = new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }) as any
+      const event = new KeyboardEvent('keydown', {
+        key: 'Backspace',
+        bubbles: true,
+      }) as unknown as React.KeyboardEvent<HTMLInputElement>
       event.preventDefault = vi.fn()
       result.current.handleKeyDown(event)
     })
@@ -131,7 +138,7 @@ describe('useFilterState - Connector Deletion', () => {
       },
     ]
 
-    const { result } = renderHook(() =>
+    const { result: _result } = renderHook(() =>
       useFilterState({
         schema,
         value: expressions,
