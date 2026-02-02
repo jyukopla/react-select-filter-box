@@ -1,42 +1,55 @@
 <style>
+  /* Force full height for all storybook containers */
   html,
   body {
     height: 100% !important;
     min-height: 100vh !important;
     margin: 0;
     padding: 0;
+    overflow: auto !important;
   }
 
+  /* Root elements should fill height */
   #storybook-root,
   #storybook-root > *,
   #storybook-docs,
   #root,
   #root > * {
-    height: 100% !important;
-    min-height: 100vh !important;
+    min-height: 600px !important;
   }
 
-  /* Fix for storybook-preview-wrapper height issue */
+  /* Fix for storybook-preview-wrapper height issue - this is the critical fix */
   #storybook-preview-wrapper {
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: static !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
+    min-height: 600px !important;
+    max-height: none !important;
   }
 
-  /* Target all possible wrapper containers */
+  /* Ensure story containers have proper height */
   .sb-show-main,
   .sb-main-padded,
   .sb-main-centered,
-  .sb-main-fullscreen,
+  .sb-main-fullscreen {
+    min-height: 600px !important;
+    height: auto !important;
+  }
+
+  /* Docs story containers */
+  .docs-story,
   .docs-story > div,
   [data-test-state='ready'],
   .innerZoomElementWrapper {
     height: auto !important;
     min-height: 600px !important;
     max-height: none !important;
+  }
+
+  /* Override any inline styles that might be setting 150px */
+  [style*="height: 150px"],
+  [style*="height:150px"] {
+    height: auto !important;
+    min-height: 600px !important;
   }
 </style>
