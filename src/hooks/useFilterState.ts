@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { FilterStateMachine, type FilterStep } from '@/core'
+import { serialize, deserialize } from '@/utils/serialization'
 import type {
   FilterSchema,
   FilterExpression,
@@ -1195,6 +1196,132 @@ export function useFilterState({
             }
           }
           break
+        case 'c':
+          // Ctrl+C for copy
+          if (e.ctrlKey) {
+            e.preventDefault()
+            if (selectedTokenIndex >= 0 || allTokensSelected) {
+              // Determine which expressions to copy
+              let expressionsToCopy: FilterExpression[]
+              if (allTokensSelected) {
+                // Copy all expressions
+                expressionsToCopy = value
+              } else {
+                // Copy the selected expression
+                const token = tokens[selectedTokenIndex]
+                if (token && token.expressionIndex >= 0) {
+                  expressionsToCopy = [value[token.expressionIndex]]
+                } else {
+                  expressionsToCopy = []
+                }
+              }
+
+              if (expressionsToCopy.length > 0) {
+                // Serialize to JSON and copy to clipboard
+                const serialized = serialize(expressionsToCopy, schema)
+                const text = JSON.stringify(serialized, null, 2)
+                
+                // Use Clipboard API
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard.writeText(text).then(
+                    () => {
+                      setAnnouncement(
+                        `Copied ${expressionsToCopy.length} expression${expressionsToCopy.length !== 1 ? 's' : ''} to clipboard.`
+                      )
+                    },
+                    () => {
+                      setAnnouncement('Failed to copy to clipboard.')
+                    }
+                  )
+                } else {
+                  // Fallback for older browsers
+                  setAnnouncement('Clipboard not supported.')
+                }
+              }
+            }
+          }
+          break
+        case 'v':
+          // Ctrl+V for paste
+          if (e.ctrlKey) {
+            e.preventDefault()
+            // Use Clipboard API to read from clipboard
+            if (navigator.clipboard && navigator.clipboard.readText) {
+              navigator.clipboard.readText().then(
+                (text) => {
+                  try {
+                    // Parse JSON
+                    const parsed = JSON.parse(text)
+                    if (!Array.isArray(parsed)) {
+                      setAnnouncement('Invalid clipboard data.')
+                      return
+                    }
+
+                    // Deserialize back to expressions
+                    const pastedExpressions = deserialize(parsed, schema)
+                    
+                    if (pastedExpressions.length === 0) {
+                      setAnnouncement('No valid expressions to paste.')
+                      return
+                    }
+
+                    // Append pasted expressions to current expressions
+                    const newExpressions = [...value]
+                    
+                    // If there are existing expressions, remove connector from last one
+                    // and add it to pasted expressions
+                    if (newExpressions.length > 0) {
+                      // Remove connector from last existing expression
+                      const lastExisting = newExpressions[newExpressions.length - 1]
+                      if (!lastExisting.connector) {
+                        // Add AND connector to connect with pasted expressions
+                        newExpressions[newExpressions.length - 1] = {
+                          ...lastExisting,
+                          connector: 'AND',
+                        }
+                      }
+                    }
+                    
+                    // Add pasted expressions
+                    pastedExpressions.forEach((expr, index) => {
+                      // Remove connector from last pasted expression
+                      if (index === pastedExpressions.length - 1 && expr.connector) {
+                        const { connector: _, ...exprWithoutConnector } = expr
+                        newExpressions.push(exprWithoutConnector)
+                      } else {
+                        newExpressions.push(expr)
+                      }
+                    })
+
+                    onChange(newExpressions)
+                    
+                    // Clear partial expression state
+                    setInputValue('')
+                    setCurrentField(undefined)
+                    setCurrentOperator(undefined)
+                    setSelectedTokenIndex(-1)
+                    setAllTokensSelected(false)
+                    
+                    // Update machine state
+                    machine.loadExpressions(newExpressions)
+                    setState('selecting-connector')
+                    
+                    setAnnouncement(
+                      `Pasted ${pastedExpressions.length} expression${pastedExpressions.length !== 1 ? 's' : ''}.`
+                    )
+                  } catch (error) {
+                    setAnnouncement('Invalid clipboard data format.')
+                  }
+                },
+                () => {
+                  setAnnouncement('Failed to read from clipboard.')
+                }
+              )
+            } else {
+              setAnnouncement('Clipboard not supported.')
+            }
+          }
+          break
         case 'y':
           // Ctrl+Y for redo (alternative)
           if (e.ctrlKey) {
@@ -1245,11 +1372,13 @@ export function useFilterState({
       inputValue,
       tokens,
       selectedTokenIndex,
+      allTokensSelected,
       value,
       onChange,
       handleSelect,
       handleConfirmValue,
       machine,
+      schema,
     ]
   )
 
