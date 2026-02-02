@@ -61,6 +61,8 @@ export interface UseFilterStateReturn {
   editingConnectorIndex: number
   /** Active custom widget to render (when in entering-value state with customInput) */
   activeCustomWidget: CustomAutocompleteWidget | undefined
+  /** Initial value for custom widget when editing existing value */
+  customWidgetInitialValue: unknown
   /** Current field config (when building expression) */
   currentFieldConfig: FieldConfig | undefined
   /** Current operator config (when building expression) */
@@ -544,9 +546,31 @@ export function useFilterState({
 
   // Compute active custom widget (show when in entering-value state and operator has customInput)
   const activeCustomWidget = useMemo(() => {
-    if (state !== 'entering-value') return undefined
+    if (state !== 'entering-value' && state !== 'editing-token') return undefined
     return currentOperatorConfig?.customInput
   }, [state, currentOperatorConfig])
+
+  // Compute the initial value for custom widget when editing
+  const customWidgetInitialValue = useMemo(() => {
+    if (state !== 'editing-token' || editingTokenIndex < 0) return undefined
+
+    const token = tokens[editingTokenIndex]
+    if (!token || token.type !== 'value') return undefined
+
+    const expressionIndex = token.expressionIndex
+    if (expressionIndex < 0 || expressionIndex >= value.length) return undefined
+
+    const conditionValue = value[expressionIndex]?.condition.value
+    if (!conditionValue) return undefined
+
+    // If the widget has a parse function, use it to convert serialized back to raw
+    if (activeCustomWidget?.parse) {
+      return activeCustomWidget.parse(conditionValue.serialized)
+    }
+
+    // Otherwise return the raw value
+    return conditionValue.raw
+  }, [state, editingTokenIndex, tokens, value, activeCustomWidget])
 
   // Fetch value suggestions when in entering-value state
   useEffect(() => {
@@ -902,16 +926,65 @@ export function useFilterState({
 
   // Handle custom widget value confirmation
   const handleCustomWidgetConfirm = useCallback(
-    (value: unknown, display: string) => {
-      if (machine.getState() !== 'entering-value') return
+    (widgetValue: unknown, display: string) => {
+      const currentState = machine.getState()
+
+      // Handle editing-token state (editing existing value with custom widget)
+      if (currentState === 'editing-token' && editingTokenIndex >= 0) {
+        // Find which expression this token belongs to
+        const token = tokens[editingTokenIndex]
+        if (!token || token.type !== 'value') return
+
+        const expressionIndex = token.expressionIndex
+        if (expressionIndex < 0 || expressionIndex >= value.length) return
+
+        // Serialize the value if the widget has a serialize function
+        const serialized = activeCustomWidget?.serialize
+          ? activeCustomWidget.serialize(widgetValue)
+          : String(widgetValue)
+
+        const conditionValue: ConditionValue = {
+          raw: widgetValue,
+          display,
+          serialized,
+        }
+
+        // Create updated expressions
+        const newExpressions = value.map((expr, idx) => {
+          if (idx === expressionIndex) {
+            return {
+              ...expr,
+              condition: {
+                ...expr.condition,
+                value: conditionValue,
+              },
+            }
+          }
+          return expr
+        })
+
+        setEditingTokenIndex(-1)
+        setIsDropdownOpen(true)
+        setState('selecting-connector')
+        setCurrentField(undefined)
+        setCurrentOperator(undefined)
+        stepBeforeEditRef.current = null
+
+        onChange(newExpressions)
+        setAnnouncement(`Value updated to "${display}". Select AND, OR, or press Enter to finish.`)
+        return
+      }
+
+      // Handle entering-value state (new value entry)
+      if (currentState !== 'entering-value') return
 
       // Serialize the value if the widget has a serialize function
       const serialized = activeCustomWidget?.serialize
-        ? activeCustomWidget.serialize(value)
-        : String(value)
+        ? activeCustomWidget.serialize(widgetValue)
+        : String(widgetValue)
 
       const conditionValue: ConditionValue = {
-        raw: value,
+        raw: widgetValue,
         display,
         serialized,
       }
@@ -925,11 +998,30 @@ export function useFilterState({
       setIsDropdownOpen(true)
       setAnnouncement(`Filter added: value "${display}". Select AND, OR, or press Enter to finish.`)
     },
-    [machine, onChange, activeCustomWidget]
+    [machine, onChange, activeCustomWidget, editingTokenIndex, tokens, value]
   )
 
   // Handle custom widget cancellation
   const handleCustomWidgetCancel = useCallback(() => {
+    const currentState = machine.getState()
+
+    // Handle editing-token state (cancel edit)
+    if (currentState === 'editing-token') {
+      setEditingTokenIndex(-1)
+      setCurrentField(undefined)
+      setCurrentOperator(undefined)
+      setIsDropdownOpen(false)
+
+      // Restore the step from before editing started
+      if (stepBeforeEditRef.current !== null) {
+        setState(stepBeforeEditRef.current)
+        stepBeforeEditRef.current = null
+      }
+      setAnnouncement('Edit cancelled.')
+      return
+    }
+
+    // Handle entering-value state (cancel new value entry)
     // Go back to operator selection
     machine.transition({ type: 'DELETE_LAST' })
     setState(machine.getState())
@@ -1428,14 +1520,37 @@ export function useFilterState({
     (tokenIndex: number) => {
       // Only value tokens are editable
       const token = tokens[tokenIndex]
-      if (token?.type === 'value') {
-        // Store the current step so we can restore it after editing
-        stepBeforeEditRef.current = state
-        setEditingTokenIndex(tokenIndex)
-        setIsDropdownOpen(false)
+      if (token?.type === 'value' && token.expressionIndex >= 0) {
+        const expression = value[token.expressionIndex]
+        if (!expression) return
+
+        // Get the field and operator configs
+        const fieldKey = expression.condition.field.key
+        const operatorKey = expression.condition.operator.key
+        const fieldConfig = schema.fields.find((f) => f.key === fieldKey)
+        const operatorConfig = fieldConfig?.operators.find((op) => op.key === operatorKey)
+
+        // Check if this operator has a custom widget
+        if (operatorConfig?.customInput) {
+          // Set up context for editing with custom widget
+          setCurrentField(expression.condition.field)
+          setCurrentOperator(expression.condition.operator)
+          stepBeforeEditRef.current = state
+
+          // Transition to editing-token state and open dropdown with custom widget
+          setState('editing-token')
+          setEditingTokenIndex(tokenIndex)
+          setIsDropdownOpen(true)
+          setInputValue('') // Clear input to show widget
+        } else {
+          // Regular inline editing for non-widget values
+          stepBeforeEditRef.current = state
+          setEditingTokenIndex(tokenIndex)
+          setIsDropdownOpen(false)
+        }
       }
     },
-    [tokens, state]
+    [tokens, value, schema, state]
   )
 
   // Token selection handler (for mouse clicks)
@@ -1574,6 +1689,7 @@ export function useFilterState({
     editingOperatorIndex,
     editingConnectorIndex,
     activeCustomWidget,
+    customWidgetInitialValue,
     currentFieldConfig,
     currentOperatorConfig,
     handleFocus,

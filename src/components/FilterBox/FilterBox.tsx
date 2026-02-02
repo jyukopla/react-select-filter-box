@@ -131,6 +131,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     selectedTokenIndex,
     allTokensSelected,
     activeCustomWidget,
+    customWidgetInitialValue,
     currentFieldConfig,
     currentOperatorConfig,
     handleFocus,
@@ -225,7 +226,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       {activeCustomWidget.render({
         onConfirm: handleCustomWidgetConfirm,
         onCancel: handleCustomWidgetCancel,
-        initialValue: undefined,
+        initialValue: customWidgetInitialValue,
         fieldConfig: currentFieldConfig!,
         operatorConfig: currentOperatorConfig!,
       })}
