@@ -431,6 +431,33 @@ export function useFilterState({
   // Store the step before token editing so we can restore it after
   const stepBeforeEditRef = useRef<FilterStep | null>(null)
 
+  // Undo/Redo history stacks
+  const undoStack = useRef<FilterExpression[][]>([])
+  const redoStack = useRef<FilterExpression[][]>([])
+  const isUndoRedoOperation = useRef(false)
+  const previousValue = useRef<FilterExpression[]>([])
+
+  // Track history changes - push to undo stack when expressions change (but not during undo/redo)
+  useEffect(() => {
+    if (isUndoRedoOperation.current) {
+      isUndoRedoOperation.current = false
+      previousValue.current = value
+      return
+    }
+    
+    // Don't push duplicate states
+    if (JSON.stringify(previousValue.current) !== JSON.stringify(value)) {
+      undoStack.current.push(JSON.parse(JSON.stringify(previousValue.current)))
+      // Limit history to 50 entries
+      if (undoStack.current.length > 50) {
+        undoStack.current.shift()
+      }
+      // Clear redo stack when new changes are made
+      redoStack.current = []
+      previousValue.current = JSON.parse(JSON.stringify(value))
+    }
+  }, [value])
+
   // Sync machine with external value on mount
   useEffect(() => {
     machine.loadExpressions(value)
@@ -1088,6 +1115,124 @@ export function useFilterState({
           if (e.ctrlKey && tokens.length > 0) {
             e.preventDefault()
             setAllTokensSelected(true)
+          }
+          break
+        case 'z':
+          // Ctrl+Z for undo
+          if (e.ctrlKey && !e.shiftKey) {
+            e.preventDefault()
+            if (undoStack.current.length > 0) {
+              // Save current state to redo stack
+              redoStack.current.push(JSON.parse(JSON.stringify(value)))
+              // Pop and restore previous state from undo stack
+              const previousState = undoStack.current.pop()!
+              
+              isUndoRedoOperation.current = true
+              onChange(previousState)
+              
+              // Clear partial expression state
+              setInputValue('')
+              setCurrentField(undefined)
+              setCurrentOperator(undefined)
+              setSelectedTokenIndex(-1)
+              setAllTokensSelected(false)
+              setIsDropdownOpen(false)
+              
+              // Update machine state - use clear() if going back to empty, otherwise load expressions
+              if (previousState.length === 0) {
+                machine.clear()
+                setState('idle')
+              } else {
+                machine.loadExpressions(previousState)
+                setState('selecting-connector')
+              }
+              
+              setAnnouncement(
+                previousState.length === 0
+                  ? 'Undone. All filters cleared.'
+                  : `Undone. ${previousState.length} filter${previousState.length !== 1 ? 's' : ''} remaining.`
+              )
+            } else {
+              setAnnouncement('Nothing to undo.')
+            }
+          }
+          // Ctrl+Shift+Z for redo
+          else if (e.ctrlKey && e.shiftKey) {
+            e.preventDefault()
+            if (redoStack.current.length > 0) {
+              // Save current state to undo stack
+              undoStack.current.push(value)
+              // Pop and restore next state from redo stack
+              const nextState = redoStack.current.pop()!
+              
+              isUndoRedoOperation.current = true
+              onChange(nextState)
+              
+              // Clear partial expression state
+              setInputValue('')
+              setCurrentField(undefined)
+              setCurrentOperator(undefined)
+              setSelectedTokenIndex(-1)
+              setAllTokensSelected(false)
+              setIsDropdownOpen(false)
+              
+              // Update machine state - use clear() if going to empty, otherwise load expressions
+              if (nextState.length === 0) {
+                machine.clear()
+                setState('idle')
+              } else {
+                machine.loadExpressions(nextState)
+                setState('selecting-connector')
+              }
+              
+              setAnnouncement(
+                nextState.length === 0
+                  ? 'Redone. All filters cleared.'
+                  : `Redone. ${nextState.length} filter${nextState.length !== 1 ? 's' : ''} restored.`
+              )
+            } else {
+              setAnnouncement('Nothing to redo.')
+            }
+          }
+          break
+        case 'y':
+          // Ctrl+Y for redo (alternative)
+          if (e.ctrlKey) {
+            e.preventDefault()
+            if (redoStack.current.length > 0) {
+              // Save current state to undo stack
+              undoStack.current.push(value)
+              // Pop and restore next state from redo stack
+              const nextState = redoStack.current.pop()!
+              
+              isUndoRedoOperation.current = true
+              onChange(nextState)
+              
+              // Clear partial expression state
+              setInputValue('')
+              setCurrentField(undefined)
+              setCurrentOperator(undefined)
+              setSelectedTokenIndex(-1)
+              setAllTokensSelected(false)
+              setIsDropdownOpen(false)
+              
+              // Update machine state - use clear() if going to empty, otherwise load expressions
+              if (nextState.length === 0) {
+                machine.clear()
+                setState('idle')
+              } else {
+                machine.loadExpressions(nextState)
+                setState('selecting-connector')
+              }
+              
+              setAnnouncement(
+                nextState.length === 0
+                  ? 'Redone. All filters cleared.'
+                  : `Redone. ${nextState.length} filter${nextState.length !== 1 ? 's' : ''} restored.`
+              )
+            } else {
+              setAnnouncement('Nothing to redo.')
+            }
           }
           break
       }

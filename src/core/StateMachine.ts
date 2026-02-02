@@ -191,6 +191,7 @@ export class FilterStateMachine {
    * Clear all expressions but maintain current state
    */
   clear(): void {
+    this.state = 'idle'
     this.context = {
       ...this.context,
       completedExpressions: [],

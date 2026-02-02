@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createRef } from 'react'
+import { createRef, useState } from 'react'
 import { FilterBox, type FilterBoxHandle } from './FilterBox'
 import type { FilterSchema, FilterExpression } from '@/types'
 
@@ -1183,6 +1183,260 @@ describe('FilterBox', () => {
       const alertRegion = document.querySelector('[role="alert"]')
       expect(alertRegion).toBeInTheDocument()
       expect(alertRegion?.textContent).toContain('error')
+    })
+  })
+
+  describe('Undo/Redo Functionality', () => {
+    // Helper to create a controlled FilterBox for testing undo/redo
+    function createControlledFilterBox(schema: FilterSchema, onChange: (value: FilterExpression[]) => void) {
+      function ControlledFilterBox() {
+        const [value, setValue] = useState<FilterExpression[]>([])
+        return (
+          <FilterBox
+            schema={schema}
+            value={value}
+            onChange={(newValue) => {
+              setValue(newValue)
+              onChange(newValue)
+            }}
+          />
+        )
+      }
+      return <ControlledFilterBox />
+    }
+
+    it('should undo adding an expression with Ctrl+Z', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const schema = createTestSchema()
+
+      render(createControlledFilterBox(schema, onChange))
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Add a complete expression: Status = active
+      await user.click(screen.getByText('Status'))
+      await user.click(screen.getByText('equals'))
+      await user.type(input, 'active')
+      await user.keyboard('{Enter}')
+
+      expect(onChange).toHaveBeenLastCalledWith([
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ])
+
+      // Now undo with Ctrl+Z
+      await user.keyboard('{Control>}z{/Control}')
+
+      // Should be called with empty array
+      expect(onChange).toHaveBeenLastCalledWith([])
+    })
+
+    it('should redo with Ctrl+Shift+Z', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const schema = createTestSchema()
+
+      render(createControlledFilterBox(schema, onChange))
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Add an expression
+      await user.click(screen.getByText('Status'))
+      await user.click(screen.getByText('equals'))
+      await user.type(input, 'active')
+      await user.keyboard('{Enter}')
+
+      const addedExpression = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      expect(onChange).toHaveBeenLastCalledWith(addedExpression)
+
+      // Undo
+      await user.keyboard('{Control>}z{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith([])
+
+      // Redo with Ctrl+Shift+Z
+      await user.keyboard('{Control>}{Shift>}z{/Shift}{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith(addedExpression)
+    })
+
+    it('should redo with Ctrl+Y', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const schema = createTestSchema()
+
+      render(createControlledFilterBox(schema, onChange))
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Add an expression
+      await user.click(screen.getByText('Status'))
+      await user.click(screen.getByText('equals'))
+      await user.type(input, 'active')
+      await user.keyboard('{Enter}')
+
+      const addedExpression = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      // Undo
+      await user.keyboard('{Control>}z{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith([])
+
+      // Redo with Ctrl+Y (alternative shortcut)
+      await user.keyboard('{Control>}y{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith(addedExpression)
+    })
+
+    it('should undo multiple expressions in sequence', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const schema = createTestSchema()
+
+      render(createControlledFilterBox(schema, onChange))
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Add first expression
+      await user.click(screen.getByText('Status'))
+      await user.click(screen.getByText('equals'))
+      await user.type(input, 'active')
+      await user.keyboard('{Enter}')
+
+      // Add connector
+      await user.click(screen.getByText('AND'))
+
+      // Add second expression
+      await user.click(screen.getByText('Name'))
+      await user.click(screen.getByText('contains'))
+      await user.type(input, 'test')
+      await user.keyboard('{Enter}')
+
+      // Should have 2 expressions
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            condition: expect.objectContaining({
+              field: expect.objectContaining({ key: 'status' }),
+            }),
+            connector: 'AND',
+          }),
+          expect.objectContaining({
+            condition: expect.objectContaining({
+              field: expect.objectContaining({ key: 'name' }),
+            }),
+          }),
+        ])
+      )
+
+      // Undo once - should remove second expression and connector
+      await user.keyboard('{Control>}z{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          condition: expect.objectContaining({
+            field: expect.objectContaining({ key: 'status' }),
+          }),
+          connector: 'AND',
+        }),
+      ])
+
+      // Undo again - should remove connector
+      await user.keyboard('{Control>}z{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          condition: expect.objectContaining({
+            field: expect.objectContaining({ key: 'status' }),
+          }),
+        }),
+      ])
+
+      // Undo again - should remove first expression
+      await user.keyboard('{Control>}z{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith([])
+    })
+
+    it('should clear redo stack when new changes are made after undo', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const schema = createTestSchema()
+
+      render(createControlledFilterBox(schema, onChange))
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Add first expression
+      await user.click(screen.getByText('Status'))
+      await user.click(screen.getByText('equals'))
+      await user.type(input, 'active')
+      await user.keyboard('{Enter}')
+
+      // Undo
+      await user.keyboard('{Control>}z{/Control}')
+      expect(onChange).toHaveBeenLastCalledWith([])
+
+      // Add a different expression
+      await user.click(input) // Re-open dropdown after undo
+      await user.click(screen.getByText('Name'))
+      await user.click(screen.getByText('contains'))
+      await user.type(input, 'new')
+      await user.keyboard('{Enter}')
+
+      // Try to redo - should do nothing (redo stack was cleared)
+      onChange.mockClear()
+      await user.keyboard('{Control>}y{/Control}')
+
+      // onChange should not be called or called with the current state
+      // (no redo available because we made new changes)
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('should announce undo action to screen readers', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const schema = createTestSchema()
+
+      render(createControlledFilterBox(schema, onChange))
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Add an expression
+      await user.click(screen.getByText('Status'))
+      await user.click(screen.getByText('equals'))
+      await user.type(input, 'active')
+      await user.keyboard('{Enter}')
+
+      // Undo
+      await user.keyboard('{Control>}z{/Control}')
+
+      // Check for announcement in live region (wait a bit for state update)
+      await new Promise(resolve => setTimeout(resolve, 100))
+      const liveRegion = screen.getByRole('status')
+      expect(liveRegion).toHaveTextContent(/undone/i)
     })
   })
 })
