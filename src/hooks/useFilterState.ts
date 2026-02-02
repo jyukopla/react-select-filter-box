@@ -942,7 +942,9 @@ export function useFilterState({
   // Handle custom widget value confirmation
   const handleCustomWidgetConfirm = useCallback(
     (widgetValue: unknown, display: string) => {
-      const currentState = machine.getState()
+      // Use React state instead of machine.getState() because editing-token
+      // state is managed in React state only, not the state machine
+      const currentState = state
 
       // Handle editing-token state (editing existing value with custom widget)
       if (currentState === 'editing-token' && editingTokenIndex >= 0) {
@@ -991,7 +993,8 @@ export function useFilterState({
       }
 
       // Handle entering-value state (new value entry)
-      if (currentState !== 'entering-value') return
+      // Use machine state for this since entering-value is managed by state machine
+      if (machine.getState() !== 'entering-value') return
 
       // Serialize the value if the widget has a serialize function
       const serialized = activeCustomWidget?.serialize
@@ -1013,12 +1016,14 @@ export function useFilterState({
       setIsDropdownOpen(true)
       setAnnouncement(`Filter added: value "${display}". Select AND, OR, or press Enter to finish.`)
     },
-    [machine, onChange, activeCustomWidget, editingTokenIndex, tokens, value]
+    [machine, onChange, activeCustomWidget, editingTokenIndex, tokens, value, state]
   )
 
   // Handle custom widget cancellation
   const handleCustomWidgetCancel = useCallback(() => {
-    const currentState = machine.getState()
+    // Use React state instead of machine.getState() because editing-token
+    // state is managed in React state only, not the state machine
+    const currentState = state
 
     // Handle editing-token state (cancel edit)
     if (currentState === 'editing-token') {
@@ -1043,7 +1048,7 @@ export function useFilterState({
     setCurrentOperator(undefined)
     setIsDropdownOpen(true)
     setAnnouncement('Value input cancelled. Select an operator.')
-  }, [machine])
+  }, [machine, state])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1104,11 +1109,35 @@ export function useFilterState({
             e.preventDefault()
             const token = tokens[selectedTokenIndex]
             if (token?.type === 'value' && !token.isPending && token.expressionIndex >= 0) {
-              // Store the current step so we can restore it after editing
-              stepBeforeEditRef.current = state
-              setEditingTokenIndex(selectedTokenIndex)
-              setSelectedTokenIndex(-1)
-              setIsDropdownOpen(false)
+              // Get the field and operator configs to check for custom widget
+              const expression = value[token.expressionIndex]
+              if (expression) {
+                const fieldKey = expression.condition.field.key
+                const operatorKey = expression.condition.operator.key
+                const fieldConfig = schema.fields.find((f) => f.key === fieldKey)
+                const operatorConfig = fieldConfig?.operators.find((op) => op.key === operatorKey)
+
+                // Check if this operator has a custom widget
+                if (operatorConfig?.customInput) {
+                  // Set up context for editing with custom widget
+                  setCurrentField(expression.condition.field)
+                  setCurrentOperator(expression.condition.operator)
+                  stepBeforeEditRef.current = state
+
+                  // Transition to editing-token state and open dropdown with custom widget
+                  setState('editing-token')
+                  setEditingTokenIndex(selectedTokenIndex)
+                  setSelectedTokenIndex(-1)
+                  setIsDropdownOpen(true)
+                  setInputValue('') // Clear input to show widget
+                } else {
+                  // Regular inline editing for non-widget values
+                  stepBeforeEditRef.current = state
+                  setEditingTokenIndex(selectedTokenIndex)
+                  setSelectedTokenIndex(-1)
+                  setIsDropdownOpen(false)
+                }
+              }
             }
           } else if (state === 'entering-value') {
             e.preventDefault()

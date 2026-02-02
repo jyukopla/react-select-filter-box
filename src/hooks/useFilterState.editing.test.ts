@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useFilterState } from './useFilterState'
 import type { FilterExpression, ConditionValue } from '@/types'
-import { createTestSchema } from './useFilterState.testUtils'
+import {
+  createTestSchema,
+  createMockCustomWidget,
+  createTestSchemaWithCustomWidget,
+  createExpressionWithCustomWidget,
+} from './useFilterState.testUtils'
 
 describe('useFilterState - Editing', () => {
   describe('Token Editing', () => {
@@ -494,6 +499,126 @@ describe('useFilterState - Editing', () => {
       // State should be restored to selecting-connector
       expect(result.current.state).toBe('selecting-connector')
       expect(result.current.editingTokenIndex).toBe(-1)
+    })
+  })
+
+  describe('Custom Widget Editing', () => {
+    it('should update existing expression when confirming custom widget edit (not create new)', () => {
+      const customWidget = createMockCustomWidget()
+      const schema = createTestSchemaWithCustomWidget(customWidget)
+      const initialValue = [createExpressionWithCustomWidget()]
+      const onChange = vi.fn()
+
+      const { result } = renderHook(() => useFilterState({ schema, value: initialValue, onChange }))
+
+      // Initial state: one expression
+      expect(result.current.tokens.length).toBe(3) // field, operator, value
+
+      // Double-click on value token (index 2) to edit with custom widget
+      act(() => {
+        result.current.handleTokenEdit(2)
+      })
+
+      // State should be editing-token, not entering-value
+      expect(result.current.state).toBe('editing-token')
+      expect(result.current.editingTokenIndex).toBe(2)
+      expect(result.current.activeCustomWidget).toBeDefined()
+      expect(result.current.isDropdownOpen).toBe(true)
+
+      // Now confirm the custom widget with a new value
+      act(() => {
+        result.current.handleCustomWidgetConfirm('2025-02-20', 'Feb 20, 2025')
+      })
+
+      // Should have called onChange with UPDATED expression, not a new one
+      expect(onChange).toHaveBeenCalledTimes(1)
+      const updatedExpressions = onChange.mock.calls[0][0]
+
+      // Should still be just one expression (updated, not two)
+      expect(updatedExpressions.length).toBe(1)
+
+      // The value should be updated
+      expect(updatedExpressions[0].condition.value.raw).toBe('2025-02-20')
+      expect(updatedExpressions[0].condition.value.display).toBe('Feb 20, 2025')
+
+      // Should be back to selecting-connector state
+      expect(result.current.state).toBe('selecting-connector')
+      expect(result.current.editingTokenIndex).toBe(-1)
+    })
+
+    it('should cancel custom widget edit without changes', () => {
+      const customWidget = createMockCustomWidget()
+      const schema = createTestSchemaWithCustomWidget(customWidget)
+      const initialValue = [createExpressionWithCustomWidget()]
+      const onChange = vi.fn()
+
+      const { result } = renderHook(() => useFilterState({ schema, value: initialValue, onChange }))
+
+      // Focus to activate
+      act(() => {
+        result.current.handleFocus()
+      })
+      const stateBefore = result.current.state
+
+      // Double-click on value token (index 2) to edit with custom widget
+      act(() => {
+        result.current.handleTokenEdit(2)
+      })
+
+      expect(result.current.state).toBe('editing-token')
+
+      // Cancel the custom widget edit
+      act(() => {
+        result.current.handleCustomWidgetCancel()
+      })
+
+      // Should NOT have called onChange
+      expect(onChange).not.toHaveBeenCalled()
+
+      // Should restore to previous state
+      expect(result.current.editingTokenIndex).toBe(-1)
+      expect(result.current.isDropdownOpen).toBe(false)
+    })
+
+    it('should show custom widget when editing via keyboard (Enter on selected token)', () => {
+      const customWidget = createMockCustomWidget()
+      const schema = createTestSchemaWithCustomWidget(customWidget)
+      const initialValue = [createExpressionWithCustomWidget()]
+      const onChange = vi.fn()
+
+      const { result } = renderHook(() => useFilterState({ schema, value: initialValue, onChange }))
+
+      // Focus to activate
+      act(() => {
+        result.current.handleFocus()
+      })
+
+      // Use arrow key to select the value token (index 2)
+      // First, simulate selecting the token via handleTokenSelect (as arrow keys would)
+      act(() => {
+        result.current.handleTokenSelect(2)
+      })
+
+      expect(result.current.selectedTokenIndex).toBe(2)
+
+      // Now press Enter to edit the selected token
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'Enter',
+          preventDefault: vi.fn(),
+          stopPropagation: vi.fn(),
+          ctrlKey: false,
+          shiftKey: false,
+          metaKey: false,
+        } as unknown as React.KeyboardEvent<HTMLInputElement>)
+      })
+
+      // Should be in editing-token state with custom widget shown
+      expect(result.current.state).toBe('editing-token')
+      expect(result.current.editingTokenIndex).toBe(2)
+      expect(result.current.activeCustomWidget).toBeDefined()
+      expect(result.current.isDropdownOpen).toBe(true)
+      expect(result.current.selectedTokenIndex).toBe(-1) // Selection should be cleared
     })
   })
 })
