@@ -48,7 +48,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:all": "vitest run",
-    "test:coverage": "vitest run --project unit --coverage",
+    "test:coverage": "vitest run --coverage",
     "test:storybook": "vitest run --project storybook",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

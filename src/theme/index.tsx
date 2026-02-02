@@ -245,6 +245,7 @@ export function FilterBoxThemeProvider({ theme, children }: FilterBoxThemeProvid
 /**
  * Hook to access the current theme
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useFilterBoxTheme(): FilterBoxTheme | undefined {
   const context = useContext(FilterBoxThemeContext)
   return context?.theme
@@ -253,6 +254,7 @@ export function useFilterBoxTheme(): FilterBoxTheme | undefined {
 /**
  * Hook to get CSS variables from the current theme
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useThemeCssVariables(): Record<string, string> {
   const context = useContext(FilterBoxThemeContext)
   return context?.cssVariables ?? {}
@@ -261,6 +263,7 @@ export function useThemeCssVariables(): Record<string, string> {
 /**
  * Pre-built themes
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const themes = {
   /** Default light theme */
   light: {
@@ -362,6 +365,7 @@ export const themes = {
 /**
  * Merge multiple themes together
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function mergeThemes(...themesToMerge: (FilterBoxTheme | undefined)[]): FilterBoxTheme {
   const result: FilterBoxTheme = {}
 
@@ -391,6 +395,7 @@ export function mergeThemes(...themesToMerge: (FilterBoxTheme | undefined)[]): F
 /**
  * Create a custom theme by extending a base theme
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function createTheme(baseTheme: FilterBoxTheme, overrides: FilterBoxTheme): FilterBoxTheme {
   return mergeThemes(baseTheme, overrides)
 }

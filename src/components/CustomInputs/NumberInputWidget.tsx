@@ -207,6 +207,7 @@ function NumberInputComponent({
 /**
  * Create a NumberInput widget for use with autocomplete
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function createNumberInputWidget(
   options: NumberInputWidgetOptions = {}
 ): CustomAutocompleteWidget {

@@ -178,6 +178,7 @@ function DatePickerComponent({
 /**
  * Create a DatePicker widget for use with autocomplete
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function createDatePickerWidget(
   options: DatePickerWidgetOptions = {}
 ): CustomAutocompleteWidget {

@@ -79,6 +79,7 @@ export interface UseLiveAnnounceReturn {
  * }
  * ```
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLiveAnnounce({
   clearAfter = 5000,
 }: UseLiveAnnounceOptions = {}): UseLiveAnnounceReturn {

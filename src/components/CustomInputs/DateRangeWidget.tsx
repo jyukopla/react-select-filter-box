@@ -284,6 +284,7 @@ function DateRangeComponent({
 /**
  * Create a DateRange widget for use with autocomplete
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function createDateRangeWidget(
   options: DateRangeWidgetOptions = {}
 ): CustomAutocompleteWidget {
