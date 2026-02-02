@@ -20,6 +20,19 @@ export {
   type AutocompleteDropdownProps,
 } from './components'
 
+// Custom Input Widgets
+export {
+  DatePickerWidget,
+  createDatePickerWidget,
+  NumberInputWidget,
+  createNumberInputWidget,
+  DateRangeWidget,
+  createDateRangeWidget,
+  type DatePickerWidgetOptions,
+  type NumberInputWidgetOptions,
+  type DateRangeWidgetOptions,
+} from './components'
+
 // Hooks
 export { useFilterState, type UseFilterStateProps, type UseFilterStateReturn } from './hooks'
 export {
