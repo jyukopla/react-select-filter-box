@@ -416,4 +416,38 @@ describe('Keyboard-Only Navigation Flow', () => {
     // onChange should not have been called
     expect(onChange).not.toHaveBeenCalled()
   })
+
+  it('pressing Enter in selecting-connector state closes dropdown and allows Tab to leave', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    // Start with a complete expression (without connector), which puts us in selecting-connector state on focus
+    const existingValue: FilterExpression[] = [
+      {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'equals', label: 'equals', symbol: '=' },
+          value: { raw: 'active', display: 'active', serialized: 'active' },
+        },
+      },
+    ]
+    render(<FilterBox schema={createFullSchema()} value={existingValue} onChange={onChange} />)
+
+    // Get input and click to focus - this should change state to selecting-connector
+    const input = screen.getByRole('combobox')
+    await user.click(input)
+
+    // Dropdown should be open showing connector options
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+    expect(screen.getByText('AND')).toBeInTheDocument()
+    expect(screen.getByText('OR')).toBeInTheDocument()
+
+    // Press Enter without selecting anything - should close dropdown
+    await user.keyboard('{Enter}')
+
+    // Dropdown should be closed
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+
+    // Expression should remain unchanged (no connector added)
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })

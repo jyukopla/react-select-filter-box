@@ -404,4 +404,96 @@ describe('useFilterState - Editing', () => {
       expect(result.current.editingConnectorIndex).toBe(-1)
     })
   })
+
+  describe('State Restoration After Token Edit', () => {
+    it('should restore step to selecting-connector after editing a value token', () => {
+      const initialValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const onChange = vi.fn()
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange })
+      )
+
+      // Focus to activate - with a completed expression, state should be selecting-connector
+      act(() => {
+        result.current.handleFocus()
+      })
+      expect(result.current.state).toBe('selecting-connector')
+
+      // Close dropdown (simulating user pressing Escape)
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'Escape',
+          preventDefault: vi.fn(),
+          stopPropagation: vi.fn(),
+          ctrlKey: false,
+        } as unknown as React.KeyboardEvent<HTMLInputElement>)
+      })
+      expect(result.current.isDropdownOpen).toBe(false)
+
+      // Start editing a value token - this should preserve the state
+      act(() => {
+        result.current.handleTokenEdit(2) // value token
+      })
+      expect(result.current.editingTokenIndex).toBe(2)
+
+      // Complete the edit with a new value
+      const newValue = {
+        raw: 'inactive',
+        display: 'Inactive',
+        serialized: 'inactive',
+      }
+      act(() => {
+        result.current.handleTokenEditComplete(newValue)
+      })
+
+      // State should be restored to selecting-connector, not selecting-field
+      expect(result.current.state).toBe('selecting-connector')
+      expect(result.current.editingTokenIndex).toBe(-1)
+    })
+
+    it('should restore step to selecting-connector after cancelling token edit', () => {
+      const initialValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
+      )
+
+      // Focus to activate
+      act(() => {
+        result.current.handleFocus()
+      })
+      expect(result.current.state).toBe('selecting-connector')
+
+      // Start editing a value token
+      act(() => {
+        result.current.handleTokenEdit(2) // value token
+      })
+
+      // Cancel the edit
+      act(() => {
+        result.current.handleTokenEditCancel()
+      })
+
+      // State should be restored to selecting-connector
+      expect(result.current.state).toBe('selecting-connector')
+      expect(result.current.editingTokenIndex).toBe(-1)
+    })
+  })
 })

@@ -5,7 +5,7 @@
  * with React state management.
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { FilterStateMachine, type FilterStep } from '@/core'
 import type {
   FilterSchema,
@@ -428,6 +428,9 @@ export function useFilterState({
   const [editingConnectorIndex, setEditingConnectorIndex] = useState(-1)
   const [valueSuggestions, setValueSuggestions] = useState<AutocompleteItem[]>([])
 
+  // Store the step before token editing so we can restore it after
+  const stepBeforeEditRef = useRef<FilterStep | null>(null)
+
   // Sync machine with external value on mount
   useEffect(() => {
     machine.loadExpressions(value)
@@ -458,7 +461,12 @@ export function useFilterState({
     if (editingOperatorIndex >= 0 && value[editingOperatorIndex]) {
       const expr = value[editingOperatorIndex]
       const fieldKey = expr.condition.field.key
-      const fieldConfig = schema.fields.find((f) => f.key === fieldKey)
+      const fieldLabel = expr.condition.field.label
+      // First check schema fields, then check if it's a freeform field
+      let fieldConfig = schema.fields.find((f) => f.key === fieldKey)
+      if (!fieldConfig && isFreeformField(schema, fieldKey)) {
+        fieldConfig = getFreeformFieldConfig(schema, fieldKey, fieldLabel)
+      }
       if (fieldConfig) {
         return fieldConfig.operators.map((op) => ({
           type: 'operator' as const,
@@ -589,11 +597,17 @@ export function useFilterState({
   // Handlers
   const handleFocus = useCallback(() => {
     machine.transition({ type: 'FOCUS' })
-    const newState = machine.getState()
+    // Determine correct state based on completed expressions and partial expression
+    let newState = machine.getState()
+    // If there are completed expressions but no partial expression in progress,
+    // we should be in selecting-connector state
+    if (value.length > 0 && !currentField && !currentOperator) {
+      newState = 'selecting-connector'
+    }
     setState(newState)
     setIsDropdownOpen(true)
     // Announcement will be set after suggestions are calculated
-  }, [machine])
+  }, [machine, value.length, currentField, currentOperator])
 
   const handleBlur = useCallback(() => {
     machine.transition({ type: 'BLUR' })
@@ -637,7 +651,13 @@ export function useFilterState({
       // Handle operator editing mode
       if (editingOperatorIndex >= 0 && item.type === 'operator') {
         const expr = value[editingOperatorIndex]
-        const fieldConfig = schema.fields.find((f) => f.key === expr.condition.field.key)
+        const fieldKey = expr.condition.field.key
+        const fieldLabel = expr.condition.field.label
+        // First check schema fields, then check if it's a freeform field
+        let fieldConfig = schema.fields.find((f) => f.key === fieldKey)
+        if (!fieldConfig && isFreeformField(schema, fieldKey)) {
+          fieldConfig = getFreeformFieldConfig(schema, fieldKey, fieldLabel)
+        }
         const opConfig = fieldConfig?.operators.find((op) => op.key === item.key)
         if (opConfig) {
           const operatorValue: OperatorValue = {
@@ -944,6 +964,11 @@ export function useFilterState({
           } else if (state === 'entering-value') {
             e.preventDefault()
             handleConfirmValue()
+          } else if (state === 'selecting-connector' && isDropdownOpen) {
+            // When in selecting-connector state with dropdown open but nothing highlighted,
+            // close the dropdown to "complete" the expression without adding a connector
+            e.preventDefault()
+            setIsDropdownOpen(false)
           }
           // Otherwise, allow Enter to bubble up (e.g., form submission)
           break
@@ -1085,11 +1110,13 @@ export function useFilterState({
       // Only value tokens are editable
       const token = tokens[tokenIndex]
       if (token?.type === 'value') {
+        // Store the current step so we can restore it after editing
+        stepBeforeEditRef.current = state
         setEditingTokenIndex(tokenIndex)
         setIsDropdownOpen(false)
       }
     },
-    [tokens]
+    [tokens, state]
   )
 
   // Token selection handler (for mouse clicks)
@@ -1132,6 +1159,13 @@ export function useFilterState({
       })
 
       setEditingTokenIndex(-1)
+
+      // Restore the step from before editing started
+      if (stepBeforeEditRef.current !== null) {
+        setState(stepBeforeEditRef.current)
+        stepBeforeEditRef.current = null
+      }
+
       onChange(newExpressions)
     },
     [editingTokenIndex, tokens, value, onChange]
@@ -1139,6 +1173,12 @@ export function useFilterState({
 
   const handleTokenEditCancel = useCallback(() => {
     setEditingTokenIndex(-1)
+
+    // Restore the step from before editing started
+    if (stepBeforeEditRef.current !== null) {
+      setState(stepBeforeEditRef.current)
+      stepBeforeEditRef.current = null
+    }
   }, [])
 
   // Operator editing handlers

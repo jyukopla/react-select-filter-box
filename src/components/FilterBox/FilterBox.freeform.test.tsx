@@ -458,4 +458,75 @@ describe('FilterBox - Freeform Fields', () => {
       expect(expressions[0].condition.field.key).toBe('myField')
     })
   })
+
+  describe('Operator Editing for Freeform Fields', () => {
+    it('should allow editing operator on a freeform field expression', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      // Start with an existing freeform field expression
+      const initialValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'customField', label: 'customField', type: 'string' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+      render(<FilterBox schema={createFreeformSchema()} value={initialValue} onChange={onChange} />)
+
+      // Click on the operator token to edit it
+      const operatorToken = screen.getByText('=')
+      await user.click(operatorToken)
+
+      // Should show operator options from freeform field config
+      expect(screen.getByText('equals')).toBeInTheDocument()
+      expect(screen.getByText('not equals')).toBeInTheDocument()
+      expect(screen.getByText('contains')).toBeInTheDocument()
+
+      // Select a new operator
+      await user.click(screen.getByText('contains'))
+
+      // Verify onChange was called with updated operator
+      expect(onChange).toHaveBeenCalled()
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0]
+      expect(lastCall[0].condition.operator.key).toBe('contains')
+      expect(lastCall[0].condition.operator.label).toBe('contains')
+    })
+
+    it('should use custom operators from freeformFieldConfig when editing', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const customOperators = [
+        { key: 'is', label: 'is', symbol: '≡' },
+        { key: 'isNot', label: 'is not', symbol: '≢' },
+      ]
+      const initialValue: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'myCustomField', label: 'myCustomField', type: 'string' },
+            operator: { key: 'is', label: 'is', symbol: '≡' },
+            value: { raw: 'val', display: 'val', serialized: 'val' },
+          },
+        },
+      ]
+      render(
+        <FilterBox
+          schema={createFreeformSchema({ operators: customOperators })}
+          value={initialValue}
+          onChange={onChange}
+        />
+      )
+
+      // Click on the operator token
+      const operatorToken = screen.getByText('≡')
+      await user.click(operatorToken)
+
+      // Should show custom operators only
+      expect(screen.getByText('is')).toBeInTheDocument()
+      expect(screen.getByText('is not')).toBeInTheDocument()
+      // Should not show default operators
+      expect(screen.queryByText('contains')).not.toBeInTheDocument()
+    })
+  })
 })
