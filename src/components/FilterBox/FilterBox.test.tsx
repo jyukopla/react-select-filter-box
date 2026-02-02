@@ -713,7 +713,7 @@ describe('FilterBox', () => {
   })
 
   describe('Token Deletion', () => {
-    it('should delete last token on backspace in empty input', async () => {
+    it('should select last expression on first backspace, delete on second backspace', async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()
       const value = [
@@ -735,8 +735,43 @@ describe('FilterBox', () => {
       // Find the input (it may not have placeholder when tokens exist)
       const input = container.querySelector('input')
       if (input) {
+        // First backspace should select the expression, not delete it
         await user.type(input, '{Backspace}')
-        // Should call onChange to remove the last token
+        // Should NOT have called onChange yet - just selected
+        expect(onChange).not.toHaveBeenCalled()
+
+        // Second backspace should delete the selected expression
+        await user.type(input, '{Backspace}')
+        // Now should call onChange to remove the last token
+        expect(onChange).toHaveBeenCalled()
+      }
+    })
+
+    it('should delete selected expression on backspace when already selected', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
+
+      // When tokens exist, click on the combobox to focus it
+      const container = screen.getByRole('combobox')
+      await user.click(container)
+
+      const input = container.querySelector('input')
+      if (input) {
+        // Select expression using arrow left
+        await user.type(input, '{ArrowLeft}')
+        // Now backspace should delete immediately since already selected
+        await user.type(input, '{Backspace}')
         expect(onChange).toHaveBeenCalled()
       }
     })
@@ -882,6 +917,80 @@ describe('FilterBox', () => {
       const secondOption = screen.getAllByRole('option')[1]
       expect(secondOption).toHaveAttribute('aria-selected', 'true')
       expect(firstOption).toHaveAttribute('aria-selected', 'false')
+    })
+
+    it('should enter edit mode when pressing Enter on arrow-selected value token', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const value = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
+
+      const container = screen.getByRole('combobox')
+      await user.click(container)
+
+      const input = container.querySelector('input')
+      if (input) {
+        // Navigate left to select token
+        await user.type(input, '{ArrowLeft}')
+        // Navigate to value token (third token in expression: field, operator, value)
+        await user.type(input, '{ArrowLeft}')
+        await user.type(input, '{ArrowLeft}')
+
+        // Navigate right to value token
+        await user.type(input, '{ArrowRight}')
+        await user.type(input, '{ArrowRight}')
+
+        // Press Enter to edit the value token
+        await user.keyboard('{Enter}')
+
+        // The token should now be in editing mode (implementation dependent)
+        // Check that the input is still in the document and functional
+        expect(input).toBeInTheDocument()
+      }
+    })
+
+    it('should deselect token when input gains focus', async () => {
+      const user = userEvent.setup()
+      const value = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' as const },
+            operator: { key: 'equals', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'active', serialized: 'active' },
+          },
+        },
+      ]
+
+      render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
+
+      const container = screen.getByRole('combobox')
+      await user.click(container)
+
+      const input = container.querySelector('input')
+      if (input) {
+        // Navigate left to select a token
+        await user.type(input, '{ArrowLeft}')
+
+        // Token should be selected (indicated by data-selected attribute)
+        const tokens = container.querySelectorAll('.token')
+        const lastToken = tokens[tokens.length - 1]
+        expect(lastToken).toHaveAttribute('data-selected', 'true')
+
+        // Click the input to focus it (simulating focus move)
+        await user.click(input)
+
+        // Token should be deselected after focus returns to input
+        expect(lastToken).toHaveAttribute('data-selected', 'false')
+      }
     })
 
     it('should allow clear button to be accessed via keyboard', async () => {

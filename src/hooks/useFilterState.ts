@@ -606,6 +606,9 @@ export function useFilterState({
     }
     setState(newState)
     setIsDropdownOpen(true)
+    // Clear token selection when input gains focus (Issue 3: deselect on focus move)
+    setSelectedTokenIndex(-1)
+    setAllTokensSelected(false)
     // Announcement will be set after suggestions are calculated
   }, [machine, value.length, currentField, currentOperator])
 
@@ -961,6 +964,17 @@ export function useFilterState({
           if (isDropdownOpen && highlightedIndex >= 0 && suggestions[highlightedIndex]) {
             e.preventDefault()
             handleSelect(suggestions[highlightedIndex])
+          } else if (selectedTokenIndex >= 0) {
+            // When a token is arrow-selected, Enter should enable editing (for value tokens)
+            e.preventDefault()
+            const token = tokens[selectedTokenIndex]
+            if (token?.type === 'value' && !token.isPending && token.expressionIndex >= 0) {
+              // Store the current step so we can restore it after editing
+              stepBeforeEditRef.current = state
+              setEditingTokenIndex(selectedTokenIndex)
+              setSelectedTokenIndex(-1)
+              setIsDropdownOpen(false)
+            }
           } else if (state === 'entering-value') {
             e.preventDefault()
             handleConfirmValue()
@@ -1034,14 +1048,15 @@ export function useFilterState({
             setAnnouncement('Operator removed. Select operator.')
           } else if (
             inputValue === '' &&
-            (state === 'idle' || state === 'selecting-field') &&
+            (state === 'idle' || state === 'selecting-field' || state === 'selecting-connector') &&
             value.length > 0
           ) {
-            // Delete the last completed expression
             e.preventDefault()
-            const newExpressions = value.slice(0, -1)
-            onChange(newExpressions)
-            setAnnouncement(`Last filter expression deleted. ${newExpressions.length} remaining.`)
+            // If no token is selected, select the last token first (instead of deleting immediately)
+            // The next backspace will delete it
+            setSelectedTokenIndex(tokens.length - 1)
+            setIsDropdownOpen(false)
+            setAnnouncement(`Selected last filter expression. Press Backspace or Delete to remove.`)
           }
           break
         case 'Delete':

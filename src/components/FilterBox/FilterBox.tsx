@@ -5,11 +5,20 @@
  * to provide a complete filter expression builder.
  */
 
-import { useRef, useId, useEffect, useImperativeHandle, forwardRef, useState, useMemo } from 'react'
+import {
+  useRef,
+  useId,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react'
 import clsx from 'clsx'
 import { TokenContainer } from '@/components/TokenContainer'
 import { AutocompleteDropdown } from '@/components/AutocompleteDropdown'
-import { DropdownPortal } from '@/components/DropdownPortal'
+import { DropdownPortal, FILTER_BOX_PORTAL_ATTR } from '@/components/DropdownPortal'
 import { LiveRegion } from '@/components/LiveRegion'
 import {
   useFilterState,
@@ -155,6 +164,30 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     hasActiveCustomWidget: !!activeCustomWidget,
   })
 
+  // Wrap the blur handler to prevent blur when focus moves to custom widget in portal
+  // This fixes Issue 4: clicking on custom widget was closing the dropdown and clearing expression
+  const handleInputBlur = useCallback(
+    (event?: React.FocusEvent<HTMLInputElement>) => {
+      // Check if focus is moving to an element inside the FilterBox portal (custom widget)
+      const relatedTarget = event?.relatedTarget as HTMLElement | null
+      if (relatedTarget) {
+        // Check if the target is inside a FilterBox portal (matches our portalId or any FilterBox portal)
+        const portalContainer = relatedTarget.closest(`[${FILTER_BOX_PORTAL_ATTR}]`)
+        if (portalContainer) {
+          // Focus is moving to the portal (custom widget) - don't blur
+          return
+        }
+        // Also check if focus is moving within the container itself
+        if (containerRef.current?.contains(relatedTarget)) {
+          return
+        }
+      }
+      // Otherwise, call the actual blur handler
+      handleBlur()
+    },
+    [handleBlur]
+  )
+
   // Expose imperative handle
   useImperativeHandle(
     ref,
@@ -244,7 +277,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
           placeholder={placeholder}
           onInputChange={handleInputChange}
           onInputFocus={handleFocus}
-          onInputBlur={handleBlur}
+          onInputBlur={handleInputBlur}
           onInputKeyDown={handleKeyDown}
           onTokenClick={handleTokenEdit}
           onTokenSelect={handleTokenSelect}

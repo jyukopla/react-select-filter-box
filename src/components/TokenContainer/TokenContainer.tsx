@@ -4,7 +4,7 @@
  * Container that holds all tokens and the input field.
  */
 
-import type { KeyboardEvent, RefObject, InputHTMLAttributes } from 'react'
+import type { KeyboardEvent, FocusEvent, RefObject, InputHTMLAttributes } from 'react'
 import { clsx } from 'clsx'
 import { Token } from '../Token'
 import { TokenInput } from '../TokenInput'
@@ -30,8 +30,8 @@ export interface TokenContainerProps {
   onConnectorClick?: (expressionIndex: number) => void
   /** Called when input gains focus */
   onInputFocus?: () => void
-  /** Called when input loses focus */
-  onInputBlur?: () => void
+  /** Called when input loses focus (receives event to check relatedTarget) */
+  onInputBlur?: (e?: FocusEvent<HTMLInputElement>) => void
   /** Called when container gains focus (legacy) */
   onFocus?: () => void
   /** Called when container loses focus (legacy) */

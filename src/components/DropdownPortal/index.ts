@@ -1,1 +1,1 @@
-export { DropdownPortal, type DropdownPortalProps } from './DropdownPortal'
+export { DropdownPortal, type DropdownPortalProps, FILTER_BOX_PORTAL_ATTR } from './DropdownPortal'

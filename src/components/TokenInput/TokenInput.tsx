@@ -6,6 +6,7 @@
 
 import {
   type KeyboardEvent,
+  type FocusEvent,
   type RefObject,
   type InputHTMLAttributes,
   useState,
@@ -26,9 +27,9 @@ export interface TokenInputProps extends Omit<
   /** Called on keydown events */
   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
   /** Called when input gains focus */
-  onFocus?: () => void
+  onFocus?: (e?: FocusEvent<HTMLInputElement>) => void
   /** Called when input loses focus */
-  onBlur?: () => void
+  onBlur?: (e?: FocusEvent<HTMLInputElement>) => void
   /** Placeholder text */
   placeholder?: string
   /** Whether to auto-focus on mount */
