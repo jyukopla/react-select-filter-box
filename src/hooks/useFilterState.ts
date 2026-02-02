@@ -444,7 +444,7 @@ export function useFilterState({
       previousValue.current = value
       return
     }
-    
+
     // Don't push duplicate states
     if (JSON.stringify(previousValue.current) !== JSON.stringify(value)) {
       undoStack.current.push(JSON.parse(JSON.stringify(previousValue.current)))
@@ -1126,10 +1126,10 @@ export function useFilterState({
               redoStack.current.push(JSON.parse(JSON.stringify(value)))
               // Pop and restore previous state from undo stack
               const previousState = undoStack.current.pop()!
-              
+
               isUndoRedoOperation.current = true
               onChange(previousState)
-              
+
               // Clear partial expression state
               setInputValue('')
               setCurrentField(undefined)
@@ -1137,7 +1137,7 @@ export function useFilterState({
               setSelectedTokenIndex(-1)
               setAllTokensSelected(false)
               setIsDropdownOpen(false)
-              
+
               // Update machine state - use clear() if going back to empty, otherwise load expressions
               if (previousState.length === 0) {
                 machine.clear()
@@ -1146,7 +1146,7 @@ export function useFilterState({
                 machine.loadExpressions(previousState)
                 setState('selecting-connector')
               }
-              
+
               setAnnouncement(
                 previousState.length === 0
                   ? 'Undone. All filters cleared.'
@@ -1164,10 +1164,10 @@ export function useFilterState({
               undoStack.current.push(value)
               // Pop and restore next state from redo stack
               const nextState = redoStack.current.pop()!
-              
+
               isUndoRedoOperation.current = true
               onChange(nextState)
-              
+
               // Clear partial expression state
               setInputValue('')
               setCurrentField(undefined)
@@ -1175,7 +1175,7 @@ export function useFilterState({
               setSelectedTokenIndex(-1)
               setAllTokensSelected(false)
               setIsDropdownOpen(false)
-              
+
               // Update machine state - use clear() if going to empty, otherwise load expressions
               if (nextState.length === 0) {
                 machine.clear()
@@ -1184,7 +1184,7 @@ export function useFilterState({
                 machine.loadExpressions(nextState)
                 setState('selecting-connector')
               }
-              
+
               setAnnouncement(
                 nextState.length === 0
                   ? 'Redone. All filters cleared.'
@@ -1204,10 +1204,10 @@ export function useFilterState({
               undoStack.current.push(value)
               // Pop and restore next state from redo stack
               const nextState = redoStack.current.pop()!
-              
+
               isUndoRedoOperation.current = true
               onChange(nextState)
-              
+
               // Clear partial expression state
               setInputValue('')
               setCurrentField(undefined)
@@ -1215,7 +1215,7 @@ export function useFilterState({
               setSelectedTokenIndex(-1)
               setAllTokensSelected(false)
               setIsDropdownOpen(false)
-              
+
               // Update machine state - use clear() if going to empty, otherwise load expressions
               if (nextState.length === 0) {
                 machine.clear()
@@ -1224,7 +1224,7 @@ export function useFilterState({
                 machine.loadExpressions(nextState)
                 setState('selecting-connector')
               }
-              
+
               setAnnouncement(
                 nextState.length === 0
                   ? 'Redone. All filters cleared.'

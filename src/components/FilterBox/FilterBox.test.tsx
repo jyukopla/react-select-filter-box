@@ -1188,7 +1188,10 @@ describe('FilterBox', () => {
 
   describe('Undo/Redo Functionality', () => {
     // Helper to create a controlled FilterBox for testing undo/redo
-    function createControlledFilterBox(schema: FilterSchema, onChange: (value: FilterExpression[]) => void) {
+    function createControlledFilterBox(
+      schema: FilterSchema,
+      onChange: (value: FilterExpression[]) => void
+    ) {
       function ControlledFilterBox() {
         const [value, setValue] = useState<FilterExpression[]>([])
         return (
@@ -1434,7 +1437,7 @@ describe('FilterBox', () => {
       await user.keyboard('{Control>}z{/Control}')
 
       // Check for announcement in live region (wait a bit for state update)
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
       const liveRegion = screen.getByRole('status')
       expect(liveRegion).toHaveTextContent(/undone/i)
     })
