@@ -115,7 +115,9 @@ export const Token = memo(function Token({
     }
   }, [isEditing, display])
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Stop propagation to prevent container click from focusing input
+    e.stopPropagation()
     // For selectable tokens, single click selects (for deletion)
     // Double-click will be handled separately for editing
     if (isSelectable && onSelect) {
@@ -126,7 +128,9 @@ export const Token = memo(function Token({
     }
   }
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    // Stop propagation to prevent container click from focusing input
+    e.stopPropagation()
     // Double-click on editable tokens enters edit mode
     if (isEditable && !isEditing) {
       onEdit()

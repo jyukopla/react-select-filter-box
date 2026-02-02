@@ -179,18 +179,27 @@ export function VirtualTokenContainer({
       ) {
         onOperatorClick(token.expressionIndex)
       } else if (token.type === 'value') {
-        // Value tokens are editable
-        onTokenClick?.(actualIndex)
+        // Value tokens: single-click selects (for deletion), double-click edits
+        // This handler is for single-click, so select the token
+        onTokenSelect?.(actualIndex)
       } else {
         // Other tokens are selectable for deletion
         onTokenSelect?.(actualIndex)
-        // Focus input after selection
-        requestAnimationFrame(() => {
-          inputRef.current?.focus()
-        })
       }
     },
-    [startIndex, onOperatorClick, onTokenClick, onTokenSelect, inputRef]
+    [startIndex, onOperatorClick, onTokenSelect]
+  )
+
+  // Handle token double-click for editing
+  const handleTokenDoubleClick = useCallback(
+    (token: TokenData, localIndex: number) => {
+      const actualIndex = startIndex + localIndex
+      if (token.type === 'value' || token.type === 'operator') {
+        // Double-click on value or operator tokens triggers editing
+        onTokenClick?.(actualIndex)
+      }
+    },
+    [startIndex, onTokenClick]
   )
 
   // Handle container click to focus input
@@ -258,7 +267,7 @@ export function VirtualTokenContainer({
                   isEditing={actualIndex === editingTokenIndex}
                   isSelected={allTokensSelected || actualIndex === selectedTokenIndex}
                   isDeletable={false}
-                  onEdit={() => handleTokenClickInternal(token, localIndex)}
+                  onEdit={() => handleTokenDoubleClick(token, localIndex)}
                   onSelect={() => handleTokenClickInternal(token, localIndex)}
                   onDelete={() => {}}
                   onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}
@@ -279,7 +288,7 @@ export function VirtualTokenContainer({
             isEditing={index === editingTokenIndex}
             isSelected={allTokensSelected || index === selectedTokenIndex}
             isDeletable={false}
-            onEdit={() => handleTokenClickInternal(token, index)}
+            onEdit={() => handleTokenDoubleClick(token, index)}
             onSelect={() => handleTokenClickInternal(token, index)}
             onDelete={() => {}}
             onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}

@@ -117,15 +117,20 @@ export function TokenContainer({
     ) {
       onConnectorClick(token.expressionIndex)
     } else if (token.type === 'value') {
-      // Value tokens are editable
-      onTokenClick?.(index)
+      // Value tokens: single-click selects (for deletion), double-click edits
+      // This handler is for single-click, so select the token
+      onTokenSelect?.(index)
     } else {
       // Other tokens (field) are selectable for deletion
       onTokenSelect?.(index)
-      // Focus input after selection
-      requestAnimationFrame(() => {
-        inputRef.current?.focus()
-      })
+    }
+  }
+
+  // Handle token double-click for editing
+  const handleTokenDoubleClick = (token: TokenData, index: number) => {
+    if (token.type === 'value' || token.type === 'operator') {
+      // Double-click on value or operator tokens triggers editing
+      onTokenClick?.(index)
     }
   }
 
@@ -154,7 +159,7 @@ export function TokenContainer({
             isEditing={index === editingTokenIndex}
             isSelected={isSelected}
             isDeletable={isDeletable}
-            onEdit={() => handleTokenClickInternal(token, index)}
+            onEdit={() => handleTokenDoubleClick(token, index)}
             onSelect={() => handleTokenClickInternal(token, index)}
             onDelete={() => {
               if (token.expressionIndex >= 0 && onExpressionDelete) {
