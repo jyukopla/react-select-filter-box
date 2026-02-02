@@ -20,8 +20,10 @@ export interface TokenContainerProps {
   onInputChange: (value: string) => void
   /** Called on input keydown */
   onInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
-  /** Called when a token is clicked */
+  /** Called when a token is clicked for editing */
   onTokenClick?: (position: number) => void
+  /** Called when a token is clicked for selection (deletion) */
+  onTokenSelect?: (position: number) => void
   /** Called when an operator token is clicked (for editing) */
   onOperatorClick?: (expressionIndex: number) => void
   /** Called when a connector token is clicked (for editing) */
@@ -69,6 +71,7 @@ export function TokenContainer({
   onInputChange,
   onInputKeyDown,
   onTokenClick,
+  onTokenSelect,
   onOperatorClick,
   onConnectorClick,
   onInputFocus,
@@ -98,7 +101,7 @@ export function TokenContainer({
   }
 
   // Handle token click - operators and connectors get special handling
-  const handleTokenClick = (token: TokenData, index: number) => {
+  const handleTokenClickInternal = (token: TokenData, index: number) => {
     if (
       token.type === 'operator' &&
       !token.isPending &&
@@ -113,8 +116,16 @@ export function TokenContainer({
       onConnectorClick
     ) {
       onConnectorClick(token.expressionIndex)
-    } else {
+    } else if (token.type === 'value') {
+      // Value tokens are editable
       onTokenClick?.(index)
+    } else {
+      // Other tokens (field) are selectable for deletion
+      onTokenSelect?.(index)
+      // Focus input after selection
+      requestAnimationFrame(() => {
+        inputRef.current?.focus()
+      })
     }
   }
 
@@ -143,8 +154,8 @@ export function TokenContainer({
             isEditing={index === editingTokenIndex}
             isSelected={isSelected}
             isDeletable={isDeletable}
-            onEdit={() => handleTokenClick(token, index)}
-            onSelect={() => handleTokenClick(token, index)}
+            onEdit={() => handleTokenClickInternal(token, index)}
+            onSelect={() => handleTokenClickInternal(token, index)}
             onDelete={() => {
               if (token.expressionIndex >= 0 && onExpressionDelete) {
                 onExpressionDelete(token.expressionIndex)

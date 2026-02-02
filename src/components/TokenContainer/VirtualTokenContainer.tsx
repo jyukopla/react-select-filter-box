@@ -24,8 +24,10 @@ export interface VirtualTokenContainerProps {
   onInputChange: (value: string) => void
   /** Called on input keydown */
   onInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
-  /** Called when a token is clicked */
+  /** Called when a token is clicked for editing */
   onTokenClick?: (position: number) => void
+  /** Called when a token is clicked for selection (deletion) */
+  onTokenSelect?: (position: number) => void
   /** Called when an operator token is clicked (for editing) */
   onOperatorClick?: (expressionIndex: number) => void
   /** Called when input gains focus */
@@ -73,6 +75,7 @@ export function VirtualTokenContainer({
   onInputChange,
   onInputKeyDown,
   onTokenClick,
+  onTokenSelect,
   onOperatorClick,
   onInputFocus,
   onInputBlur,
@@ -165,7 +168,7 @@ export function VirtualTokenContainer({
   }, [tokens, startIndex, endIndex])
 
   // Handle token click
-  const handleTokenClick = useCallback(
+  const handleTokenClickInternal = useCallback(
     (token: TokenData, localIndex: number) => {
       const actualIndex = startIndex + localIndex
       if (
@@ -175,11 +178,19 @@ export function VirtualTokenContainer({
         onOperatorClick
       ) {
         onOperatorClick(token.expressionIndex)
-      } else {
+      } else if (token.type === 'value') {
+        // Value tokens are editable
         onTokenClick?.(actualIndex)
+      } else {
+        // Other tokens are selectable for deletion
+        onTokenSelect?.(actualIndex)
+        // Focus input after selection
+        requestAnimationFrame(() => {
+          inputRef.current?.focus()
+        })
       }
     },
-    [startIndex, onOperatorClick, onTokenClick]
+    [startIndex, onOperatorClick, onTokenClick, onTokenSelect, inputRef]
   )
 
   // Handle container click to focus input
@@ -243,10 +254,12 @@ export function VirtualTokenContainer({
                   isEditable={
                     (token.type === 'value' || token.type === 'operator') && !token.isPending
                   }
+                  isSelectable={!token.isPending && token.expressionIndex >= 0}
                   isEditing={actualIndex === editingTokenIndex}
                   isSelected={allTokensSelected || actualIndex === selectedTokenIndex}
                   isDeletable={false}
-                  onEdit={() => handleTokenClick(token, localIndex)}
+                  onEdit={() => handleTokenClickInternal(token, localIndex)}
+                  onSelect={() => handleTokenClickInternal(token, localIndex)}
                   onDelete={() => {}}
                   onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}
                   onEditCancel={() => onTokenEditCancel?.()}
@@ -262,10 +275,12 @@ export function VirtualTokenContainer({
             key={token.id}
             data={token}
             isEditable={(token.type === 'value' || token.type === 'operator') && !token.isPending}
+            isSelectable={!token.isPending && token.expressionIndex >= 0}
             isEditing={index === editingTokenIndex}
             isSelected={allTokensSelected || index === selectedTokenIndex}
             isDeletable={false}
-            onEdit={() => handleTokenClick(token, index)}
+            onEdit={() => handleTokenClickInternal(token, index)}
+            onSelect={() => handleTokenClickInternal(token, index)}
             onDelete={() => {}}
             onEditComplete={(newValue) => onTokenEditComplete?.(newValue)}
             onEditCancel={() => onTokenEditCancel?.()}

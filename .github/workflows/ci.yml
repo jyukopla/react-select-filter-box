@@ -139,3 +139,169 @@ jobs:
           exitZeroOnChanges: true
           exitOnceUploaded: true
         continue-on-error: true
+
+  # Deploy Storybook and Docs to GitHub Pages
+  deploy-gh-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    # Only deploy on push to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, typecheck, test, build, format]
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Build API Docs
+        run: npm run docs:api
+
+      - name: Combine Storybook and Docs
+        run: |
+          # Create gh-pages directory structure
+          mkdir -p gh-pages/storybook
+          mkdir -p gh-pages/api
+          mkdir -p gh-pages/docs
+
+          # Copy Storybook build
+          cp -r storybook-static/* gh-pages/storybook/
+
+          # Copy API docs
+          cp -r docs/api/* gh-pages/api/
+
+          # Copy other documentation
+          [ -d "docs/guides" ] && cp -r docs/guides gh-pages/docs/
+          [ -d "docs/examples" ] && cp -r docs/examples gh-pages/docs/
+          [ -d "docs/architecture" ] && cp -r docs/architecture gh-pages/docs/
+          [ -d "docs/testing" ] && cp -r docs/testing gh-pages/docs/
+
+          # Create main index page
+          cat > gh-pages/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>React Select Filter Box - Documentation</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+              }
+              .container {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                padding: 60px;
+                max-width: 600px;
+                width: 100%;
+              }
+              h1 {
+                color: #333;
+                font-size: 2.5em;
+                margin-bottom: 16px;
+              }
+              .tagline {
+                color: #666;
+                font-size: 1.1em;
+                margin-bottom: 40px;
+                line-height: 1.6;
+              }
+              .nav-links {
+                display: grid;
+                gap: 16px;
+              }
+              .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 20px 24px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1.1em;
+                transition: transform 0.2s, box-shadow 0.2s;
+              }
+              .nav-link:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+              }
+              .icon {
+                font-size: 1.5em;
+                margin-right: 12px;
+              }
+              .github-link {
+                margin-top: 30px;
+                text-align: center;
+              }
+              .github-link a {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: 500;
+              }
+              .github-link a:hover {
+                text-decoration: underline;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>React Select Filter Box</h1>
+              <p class="tagline">
+                A Sequential Filter Box component for React that provides a Select2-like 
+                single-line filter expression builder with keyboard navigation and accessibility support.
+              </p>
+              <div class="nav-links">
+                <a href="./storybook/index.html" class="nav-link">
+                  <span class="icon">📚</span>
+                  <span>Interactive Storybook</span>
+                </a>
+                <a href="./api/" class="nav-link">
+                  <span class="icon">📖</span>
+                  <span>API Documentation</span>
+                </a>
+              </div>
+              <div class="github-link">
+                <a href="https://github.com/jyukopla/react-select-filter-box" target="_blank">
+                  View on GitHub →
+                </a>
+              </div>
+            </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./gh-pages
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

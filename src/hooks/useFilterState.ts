@@ -86,6 +86,8 @@ export interface UseFilterStateReturn {
   handleClear: () => void
   /** Start editing a token */
   handleTokenEdit: (tokenIndex: number) => void
+  /** Select a token (for deletion with Delete or Backspace) */
+  handleTokenSelect: (tokenIndex: number) => void
   /** Complete editing a token */
   handleTokenEditComplete: (newValue: ConditionValue) => void
   /** Cancel editing a token */
@@ -955,6 +957,27 @@ export function useFilterState({
             setAllTokensSelected(false)
             onChange([])
             setAnnouncement('All filters cleared.')
+          } else if (selectedTokenIndex >= 0) {
+            // Delete the selected token (entire expression) - same as Delete key
+            e.preventDefault()
+            const token = tokens[selectedTokenIndex]
+            if (token && token.expressionIndex >= 0) {
+              const expressionIndex = token.expressionIndex
+              // Remove the expression and fix connectors
+              const newExpressions = value
+                .filter((_, i) => i !== expressionIndex)
+                .map((expr, i, arr) => {
+                  // If this is now the last expression, remove its connector
+                  if (i === arr.length - 1 && expr.connector) {
+                    const { connector: _, ...rest } = expr
+                    return rest
+                  }
+                  return expr
+                })
+              onChange(newExpressions)
+              setSelectedTokenIndex(-1)
+              setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+            }
           } else if (inputValue === '' && state === 'entering-value') {
             machine.transition({ type: 'DELETE_LAST' })
             setState(machine.getState())
@@ -1041,6 +1064,20 @@ export function useFilterState({
       if (token?.type === 'value') {
         setEditingTokenIndex(tokenIndex)
         setIsDropdownOpen(false)
+      }
+    },
+    [tokens]
+  )
+
+  // Token selection handler (for mouse clicks)
+  const handleTokenSelect = useCallback(
+    (tokenIndex: number) => {
+      // Select the token (for deletion with Delete or Backspace)
+      const token = tokens[tokenIndex]
+      if (token && !token.isPending && token.expressionIndex >= 0) {
+        setSelectedTokenIndex(tokenIndex)
+        setIsDropdownOpen(false)
+        setAllTokensSelected(false)
       }
     },
     [tokens]
@@ -1166,6 +1203,7 @@ export function useFilterState({
     handleConfirmValue,
     handleClear,
     handleTokenEdit,
+    handleTokenSelect,
     handleTokenEditComplete,
     handleTokenEditCancel,
     handleOperatorEdit,

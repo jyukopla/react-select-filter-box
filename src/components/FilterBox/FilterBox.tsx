@@ -132,6 +132,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     handleHighlight,
     handleClear,
     handleTokenEdit,
+    handleTokenSelect,
     handleTokenEditComplete,
     handleTokenEditCancel,
     handleOperatorEdit,
@@ -245,6 +246,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
           onInputBlur={handleBlur}
           onInputKeyDown={handleKeyDown}
           onTokenClick={handleTokenEdit}
+          onTokenSelect={handleTokenSelect}
           onOperatorClick={handleOperatorEdit}
           onConnectorClick={handleConnectorEdit}
           editingTokenIndex={editingTokenIndex}
