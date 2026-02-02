@@ -16,6 +16,17 @@
     min-height: 100vh !important;
   }
 
+  /* Fix for storybook-preview-wrapper height issue */
+  #storybook-preview-wrapper {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
   /* Target all possible wrapper containers */
   .sb-show-main,
   .sb-main-padded,

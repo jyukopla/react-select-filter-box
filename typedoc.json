@@ -2,7 +2,6 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src/index.ts"],
   "out": "docs/api",
-  "plugin": ["typedoc-plugin-markdown"],
   "readme": "none",
   "name": "React Select Filter Box",
   "excludePrivate": true,
@@ -23,6 +22,6 @@
   "groupOrder": ["Components", "Hooks", "Types", "Functions", "Interfaces", "*"],
   "hideGenerator": true,
   "disableSources": false,
-  "githubPages": false,
+  "githubPages": true,
   "includeVersion": true
 }

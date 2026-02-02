@@ -182,8 +182,11 @@ jobs:
           # Copy Storybook build
           cp -r storybook-static/* gh-pages/storybook/
 
-          # Copy API docs
+          # Copy API docs (now HTML files)
           cp -r docs/api/* gh-pages/api/
+
+          # Add .nojekyll to disable Jekyll processing
+          touch gh-pages/.nojekyll
 
           # Copy other documentation
           [ -d "docs/guides" ] && cp -r docs/guides gh-pages/docs/
