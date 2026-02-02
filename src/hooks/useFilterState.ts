@@ -563,7 +563,7 @@ export function useFilterState({
 
   // Reset highlighted index when state changes (new suggestions context)
   useEffect(() => {
-    setHighlightedIndex(0)
+    setHighlightedIndex(-1)
   }, [state])
 
   // Generate announcements when dropdown opens or suggestions change
@@ -892,11 +892,23 @@ export function useFilterState({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault()
-          setHighlightedIndex((prev) => Math.min(prev + 1, suggestions.length - 1))
+          setHighlightedIndex((prev) => {
+            // If nothing selected, select first item
+            if (prev === -1) return suggestions.length > 0 ? 0 : -1
+            // Otherwise move down
+            return Math.min(prev + 1, suggestions.length - 1)
+          })
           break
         case 'ArrowUp':
           e.preventDefault()
-          setHighlightedIndex((prev) => Math.max(prev - 1, 0))
+          setHighlightedIndex((prev) => {
+            // If at first item, deselect
+            if (prev === 0) return -1
+            // If nothing selected, do nothing
+            if (prev === -1) return -1
+            // Otherwise move up
+            return Math.max(prev - 1, 0)
+          })
           break
         case 'ArrowLeft':
           // Navigate to tokens when input is empty
@@ -926,21 +938,32 @@ export function useFilterState({
           }
           break
         case 'Enter':
-          e.preventDefault()
-          if (isDropdownOpen && suggestions[highlightedIndex]) {
+          if (isDropdownOpen && highlightedIndex >= 0 && suggestions[highlightedIndex]) {
+            e.preventDefault()
             handleSelect(suggestions[highlightedIndex])
           } else if (state === 'entering-value') {
+            e.preventDefault()
             handleConfirmValue()
           }
+          // Otherwise, allow Enter to bubble up (e.g., form submission)
           break
         case 'Escape':
           setIsDropdownOpen(false)
           break
         case 'Tab':
-          // Tab selects the highlighted item and moves to next step
-          if (isDropdownOpen && suggestions[highlightedIndex]) {
-            e.preventDefault()
-            handleSelect(suggestions[highlightedIndex])
+          // Tab behavior:
+          // 1. If nothing selected, select first item
+          // 2. If item selected, add it to expression
+          if (isDropdownOpen && suggestions.length > 0) {
+            if (highlightedIndex === -1) {
+              // First Tab: select first item
+              e.preventDefault()
+              setHighlightedIndex(0)
+            } else if (suggestions[highlightedIndex]) {
+              // Second Tab: add selected item
+              e.preventDefault()
+              handleSelect(suggestions[highlightedIndex])
+            }
           }
           // If dropdown is not open, let Tab move focus naturally
           break
@@ -1124,7 +1147,7 @@ export function useFilterState({
       if (expressionIndex < 0 || expressionIndex >= value.length) return
       setEditingOperatorIndex(expressionIndex)
       setIsDropdownOpen(true)
-      setHighlightedIndex(0)
+      setHighlightedIndex(-1)
       setAnnouncement('Select a new operator')
     },
     [value.length]
@@ -1143,7 +1166,7 @@ export function useFilterState({
       if (!value[expressionIndex]?.connector) return
       setEditingConnectorIndex(expressionIndex)
       setIsDropdownOpen(true)
-      setHighlightedIndex(0)
+      setHighlightedIndex(-1)
       setAnnouncement('Select a new connector')
     },
     [value]

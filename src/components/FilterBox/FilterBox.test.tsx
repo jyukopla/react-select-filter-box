@@ -121,12 +121,16 @@ describe('FilterBox', () => {
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
 
-      // First item should be highlighted
-      const firstItem = screen.getAllByRole('option')[0]
-      expect(firstItem).toHaveClass('autocomplete-item--highlighted')
+      // Initially nothing should be highlighted
+      const items = screen.getAllByRole('option')
+      expect(items[0]).not.toHaveClass('autocomplete-item--highlighted')
 
+      // Press ArrowDown to select first item
       await user.keyboard('{ArrowDown}')
+      expect(items[0]).toHaveClass('autocomplete-item--highlighted')
 
+      // Press ArrowDown again to move to second item
+      await user.keyboard('{ArrowDown}')
       const secondItem = screen.getAllByRole('option')[1]
       expect(secondItem).toHaveClass('autocomplete-item--highlighted')
     })
@@ -137,6 +141,10 @@ describe('FilterBox', () => {
 
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
+
+      // Press ArrowDown to select first item
+      await user.keyboard('{ArrowDown}')
+      // Now press Enter to select it
       await user.keyboard('{Enter}')
 
       // After selecting a field with Enter, should transition to operator selection
@@ -167,9 +175,13 @@ describe('FilterBox', () => {
       // Dropdown is open with field suggestions
       expect(screen.getByRole('listbox')).toBeInTheDocument()
 
-      // Press Tab to select the highlighted item (first field)
+      // First Tab should select the first item (highlight it)
       await user.tab()
+      const firstItem = screen.getAllByRole('option')[0]
+      expect(firstItem).toHaveClass('autocomplete-item--highlighted')
 
+      // Second Tab should add it to expression
+      await user.tab()
       // Should transition to operator selection
       expect(input).toHaveAttribute('placeholder', 'Select operator...')
     })
@@ -778,10 +790,12 @@ describe('FilterBox', () => {
       const input = screen.getByRole('combobox')
       expect(document.activeElement).toBe(input)
 
-      // Arrow down to navigate, Enter to select field
+      // Arrow down to select first field, then Enter to confirm
+      await user.keyboard('{ArrowDown}')
       await user.keyboard('{Enter}')
 
-      // Select operator with Enter
+      // Arrow down to select first operator, then Enter to confirm
+      await user.keyboard('{ArrowDown}')
       await user.keyboard('{Enter}')
 
       // Type value and confirm
@@ -798,18 +812,26 @@ describe('FilterBox', () => {
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
 
-      // Initial first item should be highlighted
+      // Initially nothing should be highlighted
       const options = screen.getAllByRole('option')
+      expect(options[0]).toHaveAttribute('aria-selected', 'false')
+
+      // Navigate down to select first item
+      await user.keyboard('{ArrowDown}')
       expect(options[0]).toHaveAttribute('aria-selected', 'true')
 
-      // Navigate down
+      // Navigate down to second item
       await user.keyboard('{ArrowDown}')
       expect(options[1]).toHaveAttribute('aria-selected', 'true')
       expect(options[0]).toHaveAttribute('aria-selected', 'false')
 
-      // Navigate up
+      // Navigate up back to first item
       await user.keyboard('{ArrowUp}')
       expect(options[0]).toHaveAttribute('aria-selected', 'true')
+
+      // Navigate up again should deselect
+      await user.keyboard('{ArrowUp}')
+      expect(options[0]).toHaveAttribute('aria-selected', 'false')
     })
 
     it('should have focus styling on container when input is focused', async () => {
@@ -831,7 +853,8 @@ describe('FilterBox', () => {
 
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
-      await user.keyboard('{Enter}') // Select first field
+      await user.keyboard('{ArrowDown}') // Select first item
+      await user.keyboard('{Enter}') // Confirm selection
 
       // Focus should remain on input
       expect(document.activeElement).toBe(input)
@@ -844,10 +867,15 @@ describe('FilterBox', () => {
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
 
-      // Initial item highlighted
+      // Initially nothing is highlighted
       const firstOption = screen.getAllByRole('option')[0]
+      expect(firstOption).toHaveAttribute('aria-selected', 'false')
+
+      // Press ArrowDown to highlight first item
+      await user.keyboard('{ArrowDown}')
       expect(firstOption).toHaveAttribute('aria-selected', 'true')
 
+      // Press ArrowDown again to move to second item
       await user.keyboard('{ArrowDown}')
 
       // Second item now highlighted
@@ -914,7 +942,13 @@ describe('FilterBox', () => {
       const input = screen.getByPlaceholderText('Add filter...')
       await user.click(input)
 
-      // Input should have aria-activedescendant pointing to highlighted item
+      // Initially nothing is highlighted, so no aria-activedescendant
+      expect(input).not.toHaveAttribute('aria-activedescendant')
+
+      // Press ArrowDown to highlight first item
+      await user.keyboard('{ArrowDown}')
+
+      // Now input should have aria-activedescendant pointing to highlighted item
       expect(input).toHaveAttribute('aria-activedescendant')
       const activedescendant = input.getAttribute('aria-activedescendant')
       expect(activedescendant).toMatch(/dropdown-item-\d+/)

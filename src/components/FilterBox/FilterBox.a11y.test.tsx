@@ -142,7 +142,12 @@ describe('Screen Reader Tests', () => {
         const input = screen.getByRole('combobox')
         await user.click(input)
 
+        // Initially nothing is highlighted
         const options = screen.getAllByRole('option')
+        expect(options[0]).toHaveAttribute('aria-selected', 'false')
+
+        // Press ArrowDown to highlight first option
+        await user.keyboard('{ArrowDown}')
         expect(options[0]).toHaveAttribute('aria-selected', 'true')
       })
 
@@ -152,9 +157,14 @@ describe('Screen Reader Tests', () => {
 
         const input = screen.getByRole('combobox')
         await user.click(input)
-        await user.keyboard('{ArrowDown}')
 
+        // First ArrowDown selects first item
+        await user.keyboard('{ArrowDown}')
         const options = screen.getAllByRole('option')
+        expect(options[0]).toHaveAttribute('aria-selected', 'true')
+
+        // Second ArrowDown moves to second item
+        await user.keyboard('{ArrowDown}')
         expect(options[0]).toHaveAttribute('aria-selected', 'false')
         expect(options[1]).toHaveAttribute('aria-selected', 'true')
       })
@@ -558,6 +568,7 @@ describe('Screen Reader Workflow Integration', () => {
     await user.keyboard('{Enter}') // Select Name
 
     // Select operator
+    await user.keyboard('{ArrowDown}') // Highlight first operator
     await user.keyboard('{Enter}') // Select first operator (contains)
 
     // Enter value

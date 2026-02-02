@@ -381,10 +381,12 @@ describe('Keyboard-Only Navigation Flow', () => {
     expect(screen.getByRole('listbox')).toBeInTheDocument()
 
     // Navigate with arrow keys and select field
+    await user.keyboard('{ArrowDown}') // Highlight first field
     await user.keyboard('{ArrowDown}') // Move to second field
     await user.keyboard('{Enter}') // Select it
 
     // Select operator
+    await user.keyboard('{ArrowDown}') // Highlight first operator
     await user.keyboard('{Enter}') // Select first operator
 
     // Type value and confirm
