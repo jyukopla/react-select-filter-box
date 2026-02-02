@@ -62,24 +62,29 @@ createDateAutocompleter()           // Date picker widget
 ## Coding Guidelines
 
 ### TypeScript
+
 - Strict mode with `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
 - Types in `src/types/`, re-export from `src/index.ts`
 
 ### Components
+
 - Memoize with `memo()`, `useCallback`, `useMemo` where beneficial
 - Support controlled mode via `value` + `onChange`
 
 ### Testing
+
 - TDD: Write tests first
 - Use `@testing-library/react` for component tests
 - Every component needs Storybook stories
 
 ### Accessibility
+
 - ARIA combobox pattern, keyboard navigation
 - `aria-live` regions for announcements
 - Respect `prefers-reduced-motion`
 
 ### Styling
+
 - CSS custom properties only (no inline styles)
 - Design tokens for colors, spacing, typography
 
