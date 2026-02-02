@@ -116,10 +116,20 @@ export const Token = memo(function Token({
   }, [isEditing, display])
 
   const handleClick = () => {
+    // For selectable tokens, single click selects (for deletion)
+    // Double-click will be handled separately for editing
+    if (isSelectable && onSelect) {
+      onSelect()
+    } else if (isEditable && !isEditing) {
+      // Non-selectable editable tokens (shouldn't happen normally) can still be edited
+      onEdit()
+    }
+  }
+
+  const handleDoubleClick = () => {
+    // Double-click on editable tokens enters edit mode
     if (isEditable && !isEditing) {
       onEdit()
-    } else if (isSelectable && onSelect) {
-      onSelect()
     }
   }
 
@@ -186,6 +196,7 @@ export const Token = memo(function Token({
         className
       )}
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
     >
       {display}
       {isDeletable && (

@@ -1175,11 +1175,11 @@ export function useFilterState({
 
       setEditingTokenIndex(-1)
 
-      // Restore the step from before editing started
-      if (stepBeforeEditRef.current !== null) {
-        setState(stepBeforeEditRef.current)
-        stepBeforeEditRef.current = null
-      }
+      // After editing completes, transition to selecting-connector state
+      // This keeps the FilterBox active and allows user to continue with AND/OR
+      setState('selecting-connector')
+      setIsDropdownOpen(true)
+      stepBeforeEditRef.current = null
 
       onChange(newExpressions)
     },
