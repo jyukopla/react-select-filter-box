@@ -190,9 +190,9 @@ describe('Complete Filter Building Flow', () => {
 
     render(<FilterBox schema={createFullSchema()} value={existingValue} onChange={onChange} />)
 
-    // Click on the value token to edit
+    // Double-click on the value token to edit
     const valueToken = screen.getByText('original')
-    fireEvent.click(valueToken)
+    fireEvent.dblClick(valueToken)
 
     // Find the edit input and change the value
     const editInput = screen.getByRole('textbox', { name: /edit value/i })

@@ -78,13 +78,13 @@ describe('TokenContainer', () => {
       expect(onFocus).toHaveBeenCalled()
     })
 
-    it('should call onTokenClick when a token is clicked', () => {
-      const onTokenClick = vi.fn()
+    it('should call onTokenSelect when a token is clicked', () => {
+      const onTokenSelect = vi.fn()
       render(
-        <TokenContainer {...defaultProps} tokens={createTokens()} onTokenClick={onTokenClick} />
+        <TokenContainer {...defaultProps} tokens={createTokens()} onTokenSelect={onTokenSelect} />
       )
       fireEvent.click(screen.getByText('Active'))
-      expect(onTokenClick).toHaveBeenCalledWith(2) // position of value token
+      expect(onTokenSelect).toHaveBeenCalledWith(2) // position of value token
     })
 
     it('should call onInputChange when input value changes', () => {

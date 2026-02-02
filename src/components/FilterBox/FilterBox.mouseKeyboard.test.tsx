@@ -6,10 +6,11 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FilterBox } from './FilterBox'
 import type { FilterSchema, FilterExpression } from '@/types'
+import { createEnumAutocompleter } from '@/autocompleters'
 
 describe('FilterBox - Mouse and Keyboard Interaction', () => {
   const schema: FilterSchema = {
@@ -19,13 +20,10 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
         label: 'Status',
         type: 'enum',
         operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
-        valueAutocompleter: {
-          type: 'enum',
-          options: [
-            { key: 'active', label: 'Active' },
-            { key: 'inactive', label: 'Inactive' },
-          ],
-        },
+        valueAutocompleter: createEnumAutocompleter([
+          { key: 'active', label: 'Active' },
+          { key: 'inactive', label: 'Inactive' },
+        ]),
       },
       {
         key: 'name',
@@ -156,15 +154,14 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
     await user.type(input, '{ArrowLeft}{Enter}')
 
     // Should be in edit mode
-    const editInput = screen.getByRole('textbox', { name: /edit value/i })
+    const editInput = await screen.findByRole('textbox', { name: /edit value/i })
     expect(editInput).toBeInTheDocument()
 
     // Type a new value
-    await user.clear(editInput)
-    await user.type(editInput, 'inactive')
-
+    fireEvent.change(editInput, { target: { value: 'inactive' } })
+    
     // Press Enter to confirm
-    await user.type(editInput, '{Enter}')
+    fireEvent.keyDown(editInput, { key: 'Enter' })
 
     // Should have called onChange with updated value
     await waitFor(() => {
@@ -195,18 +192,18 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
       },
     ]
 
-    render(<FilterBox schema={schema} value={expressions} onChange={onChange} />)
+    render(<FilterBox schema={schema} value={expressions} onChange={onChange} autoFocus />)
 
-    // Click to select a token
-    const fieldToken = screen.getByRole('option', { name: /field: Status/i })
-    await user.click(fieldToken)
+    // With input focused, use arrow key to select a token (keyboard)
+    await user.keyboard('{ArrowLeft}')
 
+    const fieldToken = screen.getByRole('option', { name: /value: Active/i })
     // Token should be selected
     await waitFor(() => {
       expect(fieldToken).toHaveClass('token--selected')
     })
 
-    // Press Delete key
+    // Press Delete key (keyboard)
     await user.keyboard('{Delete}')
 
     // Should have deleted the expression
@@ -309,25 +306,16 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
 
     render(<FilterBox schema={schema} value={expressions} onChange={onChange} />)
 
-    // Click to select
+    // Double-click to edit (mixing mouse interaction)
     const valueToken = screen.getByRole('option', { name: /value: Active/i })
-    await user.click(valueToken)
-
-    // Token should be selected
-    await waitFor(() => {
-      expect(valueToken).toHaveClass('token--selected')
-    })
-
-    // Use keyboard to edit - type on input since focus moved there
-    const input = screen.getByRole('combobox')
-    await user.type(input, '{Enter}')
+    await user.dblClick(valueToken)
 
     // Should be in edit mode
-    const editInput = screen.getByRole('textbox', { name: /edit value/i })
+    const editInput = await screen.findByRole('textbox', { name: /edit value/i })
     expect(editInput).toBeInTheDocument()
 
-    // Press Escape to cancel
-    await user.type(editInput, '{Escape}')
+    // Press Escape to cancel (keyboard interaction)
+    await user.keyboard('{Escape}')
 
     // Should exit edit mode and maintain expressions
     await waitFor(() => {

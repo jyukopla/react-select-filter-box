@@ -517,7 +517,7 @@ describe('FilterBox', () => {
   })
 
   describe('Token Editing', () => {
-    it('should allow editing value tokens on click', async () => {
+    it('should allow editing value tokens on double-click', async () => {
       const user = userEvent.setup()
       const value = [
         {
@@ -532,7 +532,7 @@ describe('FilterBox', () => {
       render(<FilterBox schema={createTestSchema()} value={value} onChange={vi.fn()} />)
 
       const valueToken = screen.getByText('test')
-      await user.click(valueToken)
+      await user.dblClick(valueToken)
 
       // Value token should be in edit mode with an input
       const input = screen.getByRole('textbox', { name: /edit value/i })
@@ -555,7 +555,7 @@ describe('FilterBox', () => {
       render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
 
       const valueToken = screen.getByText('test')
-      fireEvent.click(valueToken)
+      fireEvent.dblClick(valueToken)
 
       const input = screen.getByRole('textbox', { name: /edit value/i })
       fireEvent.change(input, { target: { value: 'new value' } })
@@ -585,7 +585,7 @@ describe('FilterBox', () => {
       render(<FilterBox schema={createTestSchema()} value={value} onChange={onChange} />)
 
       const valueToken = screen.getByText('test')
-      fireEvent.click(valueToken)
+      fireEvent.dblClick(valueToken)
 
       // Get the edit input that appears in the token
       const editInput = screen.getByRole('textbox', { name: /edit value/i })

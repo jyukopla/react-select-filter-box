@@ -153,9 +153,9 @@ describe('VirtualTokenContainer', () => {
   })
 
   describe('token interaction', () => {
-    it('should call onTokenClick when value token is clicked', async () => {
+    it('should call onTokenSelect when value token is clicked', async () => {
       const user = userEvent.setup()
-      const onTokenClick = vi.fn()
+      const onTokenSelect = vi.fn()
       const tokens = generateTokens(6)
 
       render(
@@ -164,13 +164,13 @@ describe('VirtualTokenContainer', () => {
           inputValue=""
           onInputChange={vi.fn()}
           onInputKeyDown={vi.fn()}
-          onTokenClick={onTokenClick}
+          onTokenSelect={onTokenSelect}
         />
       )
 
-      // Click on value token (index 2) - value tokens are editable
+      // Click on value token (index 2) - value tokens are selectable
       await user.click(screen.getByText('Value 0'))
-      expect(onTokenClick).toHaveBeenCalledWith(2)
+      expect(onTokenSelect).toHaveBeenCalledWith(2)
     })
 
     it('should call onOperatorClick for operator tokens', async () => {
