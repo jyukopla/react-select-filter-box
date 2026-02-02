@@ -159,7 +159,7 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
 
     // Type a new value
     fireEvent.change(editInput, { target: { value: 'inactive' } })
-    
+
     // Press Enter to confirm
     fireEvent.keyDown(editInput, { key: 'Enter' })
 
