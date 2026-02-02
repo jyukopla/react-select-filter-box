@@ -1493,10 +1493,10 @@ describe('FilterBox', () => {
 
       // Select and copy
       await user.keyboard('{ArrowLeft}')
-      
+
       // Verify token was selected by checking for selection
       // (ArrowLeft on empty input with tokens selects last token)
-      
+
       await user.keyboard('{Control>}c{/Control}')
 
       // Wait for announcement

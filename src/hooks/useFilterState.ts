@@ -1048,25 +1048,40 @@ export function useFilterState({
             onChange([])
             setAnnouncement('All filters cleared.')
           } else if (selectedTokenIndex >= 0) {
-            // Delete the selected token (entire expression) - same as Delete key
             e.preventDefault()
             const token = tokens[selectedTokenIndex]
             if (token && token.expressionIndex >= 0) {
               const expressionIndex = token.expressionIndex
-              // Remove the expression and fix connectors
-              const newExpressions = value
-                .filter((_, i) => i !== expressionIndex)
-                .map((expr, i, arr) => {
-                  // If this is now the last expression, remove its connector
-                  if (i === arr.length - 1 && expr.connector) {
+
+              // Special handling for connector tokens: only remove the connector, not the expression
+              if (token.type === 'connector') {
+                const newExpressions = value.map((expr, i) => {
+                  if (i === expressionIndex && expr.connector) {
+                    // Remove only the connector
                     const { connector: _, ...rest } = expr
                     return rest
                   }
                   return expr
                 })
-              onChange(newExpressions)
-              setSelectedTokenIndex(-1)
-              setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+                onChange(newExpressions)
+                setSelectedTokenIndex(-1)
+                setAnnouncement(`Connector removed from expression ${expressionIndex + 1}.`)
+              } else {
+                // For non-connector tokens, delete the entire expression
+                const newExpressions = value
+                  .filter((_, i) => i !== expressionIndex)
+                  .map((expr, i, arr) => {
+                    // If this is now the last expression, remove its connector
+                    if (i === arr.length - 1 && expr.connector) {
+                      const { connector: _, ...rest } = expr
+                      return rest
+                    }
+                    return expr
+                  })
+                onChange(newExpressions)
+                setSelectedTokenIndex(-1)
+                setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+              }
             }
           } else if (inputValue === '' && state === 'entering-value') {
             machine.transition({ type: 'DELETE_LAST' })
@@ -1088,26 +1103,41 @@ export function useFilterState({
           }
           break
         case 'Delete':
-          // Delete the selected token (entire expression)
           if (selectedTokenIndex >= 0) {
             e.preventDefault()
             const token = tokens[selectedTokenIndex]
             if (token && token.expressionIndex >= 0) {
               const expressionIndex = token.expressionIndex
-              // Remove the expression and fix connectors
-              const newExpressions = value
-                .filter((_, i) => i !== expressionIndex)
-                .map((expr, i, arr) => {
-                  // If this is now the last expression, remove its connector
-                  if (i === arr.length - 1 && expr.connector) {
+
+              // Special handling for connector tokens: only remove the connector, not the expression
+              if (token.type === 'connector') {
+                const newExpressions = value.map((expr, i) => {
+                  if (i === expressionIndex && expr.connector) {
+                    // Remove only the connector
                     const { connector: _, ...rest } = expr
                     return rest
                   }
                   return expr
                 })
-              onChange(newExpressions)
-              setSelectedTokenIndex(-1)
-              setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+                onChange(newExpressions)
+                setSelectedTokenIndex(-1)
+                setAnnouncement(`Connector removed from expression ${expressionIndex + 1}.`)
+              } else {
+                // For non-connector tokens, delete the entire expression
+                const newExpressions = value
+                  .filter((_, i) => i !== expressionIndex)
+                  .map((expr, i, arr) => {
+                    // If this is now the last expression, remove its connector
+                    if (i === arr.length - 1 && expr.connector) {
+                      const { connector: _, ...rest } = expr
+                      return rest
+                    }
+                    return expr
+                  })
+                onChange(newExpressions)
+                setSelectedTokenIndex(-1)
+                setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+              }
             }
           }
           break
@@ -1220,7 +1250,7 @@ export function useFilterState({
                 // Serialize to JSON and copy to clipboard
                 const serialized = serialize(expressionsToCopy, schema)
                 const text = JSON.stringify(serialized, null, 2)
-                
+
                 // Use Clipboard API
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                   navigator.clipboard.writeText(text).then(
@@ -1259,7 +1289,7 @@ export function useFilterState({
 
                     // Deserialize back to expressions
                     const pastedExpressions = deserialize(parsed, schema)
-                    
+
                     if (pastedExpressions.length === 0) {
                       setAnnouncement('No valid expressions to paste.')
                       return
@@ -1267,7 +1297,7 @@ export function useFilterState({
 
                     // Append pasted expressions to current expressions
                     const newExpressions = [...value]
-                    
+
                     // If there are existing expressions, remove connector from last one
                     // and add it to pasted expressions
                     if (newExpressions.length > 0) {
@@ -1281,7 +1311,7 @@ export function useFilterState({
                         }
                       }
                     }
-                    
+
                     // Add pasted expressions
                     pastedExpressions.forEach((expr, index) => {
                       // Remove connector from last pasted expression
@@ -1294,18 +1324,18 @@ export function useFilterState({
                     })
 
                     onChange(newExpressions)
-                    
+
                     // Clear partial expression state
                     setInputValue('')
                     setCurrentField(undefined)
                     setCurrentOperator(undefined)
                     setSelectedTokenIndex(-1)
                     setAllTokensSelected(false)
-                    
+
                     // Update machine state
                     machine.loadExpressions(newExpressions)
                     setState('selecting-connector')
-                    
+
                     setAnnouncement(
                       `Pasted ${pastedExpressions.length} expression${pastedExpressions.length !== 1 ? 's' : ''}.`
                     )
