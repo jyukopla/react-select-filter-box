@@ -4,7 +4,6 @@ import { useFilterState } from './useFilterState'
 import { createTestSchema } from './useFilterState.testUtils'
 
 describe('useFilterState - Keyboard Navigation', () => {
-
   describe('Basic Navigation', () => {
     it('should highlight next item on arrow down', () => {
       const { result } = renderHook(() =>

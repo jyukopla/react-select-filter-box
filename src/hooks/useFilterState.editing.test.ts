@@ -5,7 +5,6 @@ import type { FilterExpression, ConditionValue } from '@/types'
 import { createTestSchema } from './useFilterState.testUtils'
 
 describe('useFilterState - Editing', () => {
-
   describe('Token Editing', () => {
     it('should set editingTokenIndex when handleTokenEdit is called on value token', () => {
       const initialValue = [

@@ -5,7 +5,6 @@ import type { FilterSchema, FilterExpression } from '@/types'
 import { createTestSchema } from './useFilterState.testUtils'
 
 describe('useFilterState - Advanced', () => {
-
   describe('Pending Tokens', () => {
     it('should include pending field token after field selection', () => {
       const { result } = renderHook(() =>

@@ -571,7 +571,9 @@ export function useFilterState({
             setState(machine.getState())
             // Keep dropdown open if there's a custom widget or value autocompleter
             const hasCustomWidget = opConfig.customInput !== undefined
-            const hasValueAutocompleter = opConfig.valueAutocompleter !== undefined || fieldConfig.valueAutocompleter !== undefined
+            const hasValueAutocompleter =
+              opConfig.valueAutocompleter !== undefined ||
+              fieldConfig.valueAutocompleter !== undefined
             setIsDropdownOpen(hasCustomWidget || hasValueAutocompleter)
             setAnnouncement(
               `Selected ${fieldValue.label} with ${operatorValue.label}. Now enter a value.`
@@ -594,7 +596,9 @@ export function useFilterState({
           setState(machine.getState())
           setInputValue('')
           // Keep dropdown open if there's a value autocompleter
-          const hasValueAutocompleter = opConfig.valueAutocompleter !== undefined || fieldConfig?.valueAutocompleter !== undefined
+          const hasValueAutocompleter =
+            opConfig.valueAutocompleter !== undefined ||
+            fieldConfig?.valueAutocompleter !== undefined
           setIsDropdownOpen(hasValueAutocompleter)
           setAnnouncement(`Selected ${operatorValue.label}. Now enter a value.`)
         }

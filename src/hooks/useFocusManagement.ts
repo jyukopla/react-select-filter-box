@@ -53,21 +53,24 @@ export function useFocusManagement({
   /**
    * Check if an element is inside a FilterBox portal
    */
-  const isInFilterBoxPortal = useCallback((element: Node | null): boolean => {
-    if (!element || !(element instanceof HTMLElement)) return false
-    
-    // Check if the element is inside a portal with matching ID or any FilterBox portal
-    const portalContainer = element.closest(`[${FILTER_BOX_PORTAL_ATTR}]`)
-    if (!portalContainer) return false
-    
-    // If we have a specific portal ID, check for exact match
-    if (portalId) {
-      return portalContainer.getAttribute(FILTER_BOX_PORTAL_ATTR) === portalId
-    }
-    
-    // Otherwise, consider any FilterBox portal as valid
-    return true
-  }, [portalId])
+  const isInFilterBoxPortal = useCallback(
+    (element: Node | null): boolean => {
+      if (!element || !(element instanceof HTMLElement)) return false
+
+      // Check if the element is inside a portal with matching ID or any FilterBox portal
+      const portalContainer = element.closest(`[${FILTER_BOX_PORTAL_ATTR}]`)
+      if (!portalContainer) return false
+
+      // If we have a specific portal ID, check for exact match
+      if (portalId) {
+        return portalContainer.getAttribute(FILTER_BOX_PORTAL_ATTR) === portalId
+      }
+
+      // Otherwise, consider any FilterBox portal as valid
+      return true
+    },
+    [portalId]
+  )
 
   /**
    * Store the element that currently has focus (before component activation)
@@ -108,7 +111,7 @@ export function useFocusManagement({
     const activeElement = document.activeElement
     const container = containerRef.current
     if (!container) return false
-    
+
     // Check if focus is in the main container or in the associated portal
     return container.contains(activeElement) || isInFilterBoxPortal(activeElement)
   }, [containerRef, isInFilterBoxPortal])
@@ -134,7 +137,7 @@ export function useFocusManagement({
         if (isInFilterBoxPortal(relatedTarget)) {
           return
         }
-        
+
         // Store last internal focus position
         if (e.target instanceof HTMLElement) {
           lastInternalFocusRef.current = e.target

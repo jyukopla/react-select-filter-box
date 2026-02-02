@@ -5,7 +5,6 @@ import type { FilterSchema } from '@/types'
 import { createTestSchema } from './useFilterState.testUtils'
 
 describe('useFilterState - Basic', () => {
-
   describe('Initial State', () => {
     it('should start in idle state with empty expressions', () => {
       const { result } = renderHook(() =>

@@ -43,4 +43,3 @@ export const createExpressionWithConnector = (): FilterExpression => ({
   },
   connector: 'AND',
 })
-
