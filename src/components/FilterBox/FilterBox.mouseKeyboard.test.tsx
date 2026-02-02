@@ -325,4 +325,87 @@ describe('FilterBox - Mouse and Keyboard Interaction', () => {
     // Original token should still be there
     expect(screen.getByText('Active')).toBeInTheDocument()
   })
+
+  it('should clear token selection when FilterBox loses focus (blur)', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const expressions: FilterExpression[] = [
+      {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'eq', label: 'equals', symbol: '=' },
+          value: { raw: 'active', display: 'Active', serialized: 'active' },
+        },
+      },
+    ]
+
+    render(
+      <div>
+        <FilterBox schema={schema} value={expressions} onChange={onChange} />
+        <button type="button">Outside Button</button>
+      </div>
+    )
+
+    // Select a token using keyboard
+    const input = screen.getByRole('combobox')
+    await user.type(input, '{ArrowLeft}')
+
+    const valueToken = screen.getByRole('option', { name: /value: Active/i })
+    // Token should be selected
+    await waitFor(() => {
+      expect(valueToken).toHaveClass('token--selected')
+    })
+
+    // Click outside to blur the FilterBox
+    const outsideButton = screen.getByRole('button', { name: 'Outside Button' })
+    await user.click(outsideButton)
+
+    // Token should no longer be selected after blur
+    await waitFor(() => {
+      expect(valueToken).not.toHaveClass('token--selected')
+    })
+  })
+
+  it('should clear token selection when clicking outside after mouse selection', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const expressions: FilterExpression[] = [
+      {
+        condition: {
+          field: { key: 'status', label: 'Status', type: 'enum' },
+          operator: { key: 'eq', label: 'equals', symbol: '=' },
+          value: { raw: 'active', display: 'Active', serialized: 'active' },
+        },
+      },
+    ]
+
+    render(
+      <div>
+        <FilterBox schema={schema} value={expressions} onChange={onChange} autoFocus />
+        <button type="button">Outside Button</button>
+      </div>
+    )
+
+    // Input should be focused due to autoFocus
+    const input = screen.getByRole('combobox')
+    expect(input).toHaveFocus()
+
+    // Select a token using mouse click - this will keep focus on input since we use keyboard to select
+    await user.keyboard('{ArrowLeft}')
+
+    const fieldToken = screen.getByRole('option', { name: /value: Active/i })
+    // Token should be selected
+    await waitFor(() => {
+      expect(fieldToken).toHaveClass('token--selected')
+    })
+
+    // Click outside to blur the FilterBox
+    const outsideButton = screen.getByRole('button', { name: 'Outside Button' })
+    await user.click(outsideButton)
+
+    // Token should no longer be selected after blur
+    await waitFor(() => {
+      expect(fieldToken).not.toHaveClass('token--selected')
+    })
+  })
 })

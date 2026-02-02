@@ -671,6 +671,9 @@ export function useFilterState({
     setInputValue('')
     setCurrentField(undefined)
     setCurrentOperator(undefined)
+    // Clear token selection when losing focus
+    setSelectedTokenIndex(-1)
+    setAllTokensSelected(false)
   }, [machine])
 
   const handleInputChange = useCallback((newValue: string) => {
