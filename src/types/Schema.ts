@@ -192,6 +192,54 @@ export interface ConnectorConfig {
 }
 
 // =============================================================================
+// Freeform Field Configuration
+// =============================================================================
+
+/**
+ * Configuration for freeform (user-defined) fields
+ */
+export interface FreeformFieldConfig {
+  /**
+   * Field type for freeform fields (determines default operators)
+   * @default 'string'
+   */
+  type?: FieldType
+  /**
+   * Custom operators for freeform fields
+   * If not provided, uses default operators for the specified type
+   */
+  operators?: OperatorConfig[]
+  /**
+   * Custom autocompleter for freeform field values
+   */
+  valueAutocompleter?: Autocompleter
+  /**
+   * Placeholder text shown in input when entering field name
+   * @default 'Type field name...'
+   */
+  placeholder?: string
+  /**
+   * Validation function for freeform field names
+   * Return false or a message string to reject the field name
+   */
+  validateFieldName?: (fieldName: string) => boolean | string
+  /**
+   * Custom color for freeform field tokens
+   */
+  color?: string
+  /**
+   * Group label for the "create new field" option in autocomplete
+   * @default 'Custom'
+   */
+  group?: string
+  /**
+   * Label prefix for the create option (e.g., "Create field: ")
+   * @default 'Create field: '
+   */
+  createLabel?: string
+}
+
+// =============================================================================
 // Schema Configuration
 // =============================================================================
 
@@ -211,6 +259,34 @@ export interface FilterSchema {
   serialize?: ((expressions: FilterExpression[]) => unknown) | undefined
   /** Custom deserialization */
   deserialize?: ((data: unknown) => FilterExpression[]) | undefined
+  /**
+   * Enable freeform field input where users can type custom field names
+   * that are not predefined in the schema.
+   *
+   * When enabled, users can type any field name and press Enter to create
+   * a custom field. The freeform field will use the operators and settings
+   * defined in freeformFieldConfig.
+   *
+   * @example
+   * ```ts
+   * const schema: FilterSchema = {
+   *   fields: [...],
+   *   allowFreeformFields: true,
+   *   freeformFieldConfig: {
+   *     type: 'string',
+   *     operators: [
+   *       { key: 'eq', label: 'equals', symbol: '=' },
+   *       { key: 'contains', label: 'contains' },
+   *     ],
+   *   },
+   * }
+   * ```
+   */
+  allowFreeformFields?: boolean | undefined
+  /**
+   * Configuration for freeform fields when allowFreeformFields is true
+   */
+  freeformFieldConfig?: FreeformFieldConfig | undefined
 }
 
 // =============================================================================

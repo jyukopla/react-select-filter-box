@@ -458,6 +458,103 @@ const processSchema = new SchemaBuilder()
 export default processSchema
 ```
 
+## Freeform Fields
+
+Enable users to create custom field names at runtime, rather than being limited to predefined schema fields.
+
+### Basic Usage
+
+```typescript
+const schema: FilterSchema = {
+  fields: [
+    { key: 'status', label: 'Status', type: 'enum', operators: [...] },
+  ],
+  allowFreeformFields: true,
+}
+```
+
+When enabled, users can type any field name and select "Create field: ..." to create a custom field.
+
+### Configuration Options
+
+```typescript
+const schema: FilterSchema = {
+  fields: [...],
+  allowFreeformFields: true,
+  freeformFieldConfig: {
+    // Field type for freeform fields (default: 'string')
+    type: 'string',
+
+    // Custom operators for freeform fields
+    operators: [
+      { key: 'eq', label: 'equals', symbol: '=' },
+      { key: 'contains', label: 'contains' },
+      { key: 'regex', label: 'matches regex' },
+    ],
+
+    // Placeholder text when selecting fields
+    placeholder: 'Type variable name...',
+
+    // Label prefix for the create option
+    createLabel: 'Create variable: ',
+
+    // Group name in dropdown
+    group: 'Custom Variables',
+
+    // Token color for freeform fields
+    color: '#9c27b0',
+
+    // Validate field names
+    validateFieldName: (name) => {
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
+        return 'Field name must be a valid identifier'
+      }
+      return true
+    },
+  },
+}
+```
+
+### Use Case: Process Variable Filtering
+
+```typescript
+const processFilterSchema: FilterSchema = {
+  fields: [
+    {
+      key: 'processDefinitionKey',
+      label: 'Process',
+      type: 'enum',
+      group: 'Process',
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+    },
+    {
+      key: 'state',
+      label: 'State',
+      type: 'enum',
+      group: 'Process',
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+    },
+  ],
+  allowFreeformFields: true,
+  freeformFieldConfig: {
+    placeholder: 'Type process variable name...',
+    createLabel: 'Variable: ',
+    group: 'Process Variables',
+    operators: [
+      { key: 'eq', label: 'equals', symbol: '=' },
+      { key: 'neq', label: 'not equals', symbol: '≠' },
+      { key: 'gt', label: 'greater than', symbol: '>' },
+      { key: 'lt', label: 'less than', symbol: '<' },
+      { key: 'isNull', label: 'is null', valueRequired: false },
+    ],
+  },
+}
+
+// Users can now filter by:
+// - Predefined fields: Process is "order-process" AND State is "active"
+// - Variables: customerName = "John Doe" AND orderTotal > 500
+```
+
 ## Next Steps
 
 - [Custom Autocompleters Guide](./custom-autocompleters.md)

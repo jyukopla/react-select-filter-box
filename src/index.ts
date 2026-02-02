@@ -45,6 +45,7 @@ export {
   type TokenData,
   type AutocompleteItem,
   type ValidationResult,
+  type FreeformFieldConfig,
   getDefaultOperators,
   DEFAULT_CONNECTORS,
   STRING_OPERATORS,

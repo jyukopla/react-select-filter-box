@@ -193,6 +193,45 @@ function generatePendingTokens(
 }
 
 /**
+ * Check if a field key represents a freeform field
+ */
+function isFreeformField(schema: FilterSchema, fieldKey: string): boolean {
+  if (!schema.allowFreeformFields) return false
+  return !schema.fields.some((f) => f.key === fieldKey)
+}
+
+/**
+ * Generate a freeform field config based on schema settings
+ */
+function getFreeformFieldConfig(
+  schema: FilterSchema,
+  fieldKey: string,
+  fieldLabel: string
+): FieldConfig {
+  const freeformConfig = schema.freeformFieldConfig ?? {}
+  const type = freeformConfig.type ?? 'string'
+
+  // Import getDefaultOperators dynamically to avoid circular dependency
+  const defaultOps: OperatorConfig[] = [
+    { key: 'eq', label: 'equals', symbol: '=' },
+    { key: 'neq', label: 'not equals', symbol: '≠' },
+    { key: 'contains', label: 'contains' },
+    { key: 'startsWith', label: 'starts with' },
+    { key: 'endsWith', label: 'ends with' },
+  ]
+
+  return {
+    key: fieldKey,
+    label: fieldLabel,
+    type,
+    operators: freeformConfig.operators ?? defaultOps,
+    valueAutocompleter: freeformConfig.valueAutocompleter,
+    color: freeformConfig.color,
+    group: freeformConfig.group ?? 'Custom',
+  }
+}
+
+/**
  * Get suggestions based on current state
  */
 function getSuggestions(
@@ -212,8 +251,8 @@ function getSuggestions(
   }
 
   switch (state) {
-    case 'selecting-field':
-      return filterByInput(
+    case 'selecting-field': {
+      const fieldSuggestions = filterByInput(
         schema.fields.map((field) => ({
           type: 'field' as const,
           key: field.key,
@@ -224,8 +263,76 @@ function getSuggestions(
         }))
       )
 
+      // Add freeform field option if enabled and there's input text
+      if (schema.allowFreeformFields && inputValue.trim()) {
+        const trimmedInput = inputValue.trim()
+        const freeformConfig = schema.freeformFieldConfig ?? {}
+        const createLabel = freeformConfig.createLabel ?? 'Create field: '
+
+        // Only add if the exact field doesn't already exist
+        const exactMatch = schema.fields.some(
+          (f) => f.key === trimmedInput || f.label.toLowerCase() === trimmedInput.toLowerCase()
+        )
+
+        if (!exactMatch) {
+          // Validate freeform field name if validator is provided
+          if (freeformConfig.validateFieldName) {
+            const validationResult = freeformConfig.validateFieldName(trimmedInput)
+            if (validationResult !== true && validationResult !== false) {
+              // Has error message - don't show the option
+              // Could show error message in UI in future enhancement
+            } else if (validationResult === false) {
+              // Invalid but no message - don't show the option
+            } else {
+              // Valid - add the freeform option
+              fieldSuggestions.push({
+                type: 'field' as const,
+                key: `__freeform__:${trimmedInput}`,
+                label: `${createLabel}"${trimmedInput}"`,
+                description: 'Create a custom field',
+                group: freeformConfig.group ?? 'Custom',
+              })
+            }
+          } else {
+            // No validator - always allow
+            fieldSuggestions.push({
+              type: 'field' as const,
+              key: `__freeform__:${trimmedInput}`,
+              label: `${createLabel}"${trimmedInput}"`,
+              description: 'Create a custom field',
+              group: freeformConfig.group ?? 'Custom',
+            })
+          }
+        }
+      }
+
+      return fieldSuggestions
+    }
+
     case 'selecting-operator': {
       if (!currentField) return []
+
+      // Check if this is a freeform field
+      if (isFreeformField(schema, currentField.key)) {
+        const freeformConfig = schema.freeformFieldConfig ?? {}
+        const _type = freeformConfig.type ?? 'string'
+        const operators = freeformConfig.operators ?? [
+          { key: 'eq', label: 'equals', symbol: '=' },
+          { key: 'neq', label: 'not equals', symbol: '≠' },
+          { key: 'contains', label: 'contains' },
+          { key: 'startsWith', label: 'starts with' },
+          { key: 'endsWith', label: 'ends with' },
+        ]
+        return filterByInput(
+          operators.map((op) => ({
+            type: 'operator' as const,
+            key: op.key,
+            label: op.label,
+            description: op.symbol ? `Symbol: ${op.symbol}` : undefined,
+          }))
+        )
+      }
+
       const fieldConfig = schema.fields.find((f) => f.key === currentField.key)
       if (!fieldConfig) return []
       return filterByInput(
@@ -275,9 +382,12 @@ function getValueAutocompleter(
 /**
  * Get placeholder text based on current state
  */
-function getPlaceholder(state: FilterStep): string {
+function getPlaceholder(state: FilterStep, schema?: FilterSchema): string {
   switch (state) {
     case 'selecting-field':
+      if (schema?.allowFreeformFields) {
+        return schema.freeformFieldConfig?.placeholder ?? 'Type or select field...'
+      }
       return 'Select field...'
     case 'selecting-operator':
       return 'Select operator...'
@@ -373,13 +483,20 @@ export function useFilterState({
     valueSuggestions,
   ])
 
-  const placeholder = useMemo(() => getPlaceholder(state), [state])
+  const placeholder = useMemo(() => getPlaceholder(state, schema), [state, schema])
 
   // Compute current field config (when building expression)
   const currentFieldConfig = useMemo(() => {
     if (!currentField) return undefined
-    return schema.fields.find((f) => f.key === currentField.key)
-  }, [currentField, schema.fields])
+    // Check for predefined field first
+    const predefinedConfig = schema.fields.find((f) => f.key === currentField.key)
+    if (predefinedConfig) return predefinedConfig
+    // If not found and freeform is enabled, generate a freeform config
+    if (schema.allowFreeformFields) {
+      return getFreeformFieldConfig(schema, currentField.key, currentField.label)
+    }
+    return undefined
+  }, [currentField, schema])
 
   // Compute current operator config (when building expression)
   const currentOperatorConfig = useMemo(() => {
@@ -546,6 +663,53 @@ export function useFilterState({
       const currentState = machine.getState()
 
       if (currentState === 'selecting-field') {
+        // Check if this is a freeform field selection
+        if (item.key.startsWith('__freeform__:')) {
+          const freeformFieldName = item.key.replace('__freeform__:', '')
+          const freeformConfig = schema.freeformFieldConfig ?? {}
+          const type = freeformConfig.type ?? 'string'
+
+          const fieldValue: FieldValue = {
+            key: freeformFieldName,
+            label: freeformFieldName,
+            type,
+          }
+          setCurrentField(fieldValue)
+          machine.transition({ type: 'SELECT_FIELD', payload: fieldValue })
+          setState(machine.getState())
+          setInputValue('')
+
+          // Get operators for freeform field
+          const operators = freeformConfig.operators ?? [
+            { key: 'eq', label: 'equals', symbol: '=' },
+            { key: 'neq', label: 'not equals', symbol: '≠' },
+            { key: 'contains', label: 'contains' },
+            { key: 'startsWith', label: 'starts with' },
+            { key: 'endsWith', label: 'ends with' },
+          ]
+
+          // Auto-select operator if there's only one
+          if (operators.length === 1) {
+            const opConfig = operators[0]
+            const operatorValue: OperatorValue = {
+              key: opConfig.key,
+              label: opConfig.label,
+              symbol: opConfig.symbol,
+            }
+            setCurrentOperator(operatorValue)
+            machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
+            setState(machine.getState())
+            const hasValueAutocompleter = freeformConfig.valueAutocompleter !== undefined
+            setIsDropdownOpen(hasValueAutocompleter)
+            setAnnouncement(
+              `Created field "${freeformFieldName}" with ${operatorValue.label}. Now enter a value.`
+            )
+          } else {
+            setAnnouncement(`Created field "${freeformFieldName}". Now select an operator.`)
+          }
+          return
+        }
+
         const fieldConfig = schema.fields.find((f) => f.key === item.key)
         if (fieldConfig) {
           const fieldValue: FieldValue = {
@@ -583,24 +747,54 @@ export function useFilterState({
           }
         }
       } else if (currentState === 'selecting-operator') {
-        const fieldConfig = schema.fields.find((f) => f.key === currentField?.key)
-        const opConfig = fieldConfig?.operators.find((op) => op.key === item.key)
-        if (opConfig) {
-          const operatorValue: OperatorValue = {
-            key: opConfig.key,
-            label: opConfig.label,
-            symbol: opConfig.symbol,
+        // Check if this is a freeform field
+        const isFreeform = isFreeformField(schema, currentField?.key ?? '')
+
+        if (isFreeform) {
+          // Handle freeform field operator selection
+          const freeformConfig = schema.freeformFieldConfig ?? {}
+          const operators = freeformConfig.operators ?? [
+            { key: 'eq', label: 'equals', symbol: '=' },
+            { key: 'neq', label: 'not equals', symbol: '≠' },
+            { key: 'contains', label: 'contains' },
+            { key: 'startsWith', label: 'starts with' },
+            { key: 'endsWith', label: 'ends with' },
+          ]
+          const opConfig = operators.find((op) => op.key === item.key)
+          if (opConfig) {
+            const operatorValue: OperatorValue = {
+              key: opConfig.key,
+              label: opConfig.label,
+              symbol: opConfig.symbol,
+            }
+            setCurrentOperator(operatorValue)
+            machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
+            setState(machine.getState())
+            setInputValue('')
+            const hasValueAutocompleter = freeformConfig.valueAutocompleter !== undefined
+            setIsDropdownOpen(hasValueAutocompleter)
+            setAnnouncement(`Selected ${operatorValue.label}. Now enter a value.`)
           }
-          setCurrentOperator(operatorValue)
-          machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
-          setState(machine.getState())
-          setInputValue('')
-          // Keep dropdown open if there's a value autocompleter
-          const hasValueAutocompleter =
-            opConfig.valueAutocompleter !== undefined ||
-            fieldConfig?.valueAutocompleter !== undefined
-          setIsDropdownOpen(hasValueAutocompleter)
-          setAnnouncement(`Selected ${operatorValue.label}. Now enter a value.`)
+        } else {
+          const fieldConfig = schema.fields.find((f) => f.key === currentField?.key)
+          const opConfig = fieldConfig?.operators.find((op) => op.key === item.key)
+          if (opConfig) {
+            const operatorValue: OperatorValue = {
+              key: opConfig.key,
+              label: opConfig.label,
+              symbol: opConfig.symbol,
+            }
+            setCurrentOperator(operatorValue)
+            machine.transition({ type: 'SELECT_OPERATOR', payload: operatorValue })
+            setState(machine.getState())
+            setInputValue('')
+            // Keep dropdown open if there's a value autocompleter
+            const hasValueAutocompleter =
+              opConfig.valueAutocompleter !== undefined ||
+              fieldConfig?.valueAutocompleter !== undefined
+            setIsDropdownOpen(hasValueAutocompleter)
+            setAnnouncement(`Selected ${operatorValue.label}. Now enter a value.`)
+          }
         }
       } else if (currentState === 'selecting-connector') {
         machine.transition({ type: 'SELECT_CONNECTOR', payload: item.key as 'AND' | 'OR' })

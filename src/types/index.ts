@@ -33,6 +33,7 @@ export type {
   ValidationContext,
   ConnectorConfig,
   FilterSchema,
+  FreeformFieldConfig,
 } from './Schema'
 
 export {
