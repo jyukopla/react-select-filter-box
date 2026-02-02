@@ -126,6 +126,87 @@ describe('Serialization', () => {
 
       expect(() => deserialize(serialized, testSchema)).toThrow('Unknown operator: unknown')
     })
+
+    it('should deserialize freeform field when allowFreeformFields is true', () => {
+      const schemaWithFreeform: FilterSchema = {
+        ...testSchema,
+        allowFreeformFields: true,
+        freeformFieldConfig: {
+          type: 'string',
+          operators: [
+            { key: 'eq', label: 'equals', symbol: '=' },
+            { key: 'like', label: 'like' },
+          ],
+        },
+      }
+
+      const serialized = [{ field: 'myCustomVariable', operator: 'eq', value: 'test' }]
+
+      const result = deserialize(serialized, schemaWithFreeform)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.condition.field.key).toBe('myCustomVariable')
+      expect(result[0]?.condition.field.label).toBe('myCustomVariable')
+      expect(result[0]?.condition.field.type).toBe('string')
+      expect(result[0]?.condition.operator.key).toBe('eq')
+      expect(result[0]?.condition.value.raw).toBe('test')
+    })
+
+    it('should deserialize freeform field with custom operator', () => {
+      const schemaWithFreeform: FilterSchema = {
+        ...testSchema,
+        allowFreeformFields: true,
+        freeformFieldConfig: {
+          type: 'string',
+          operators: [
+            { key: 'eq', label: 'equals', symbol: '=' },
+            { key: 'like', label: 'like', symbol: '~' },
+          ],
+        },
+      }
+
+      const serialized = [{ field: 'processVar', operator: 'like', value: 'foo%' }]
+
+      const result = deserialize(serialized, schemaWithFreeform)
+
+      expect(result).toHaveLength(1)
+      expect(result[0]?.condition.field.key).toBe('processVar')
+      expect(result[0]?.condition.operator.key).toBe('like')
+      expect(result[0]?.condition.operator.label).toBe('like')
+      expect(result[0]?.condition.operator.symbol).toBe('~')
+    })
+
+    it('should deserialize mixed predefined and freeform fields', () => {
+      const schemaWithFreeform: FilterSchema = {
+        ...testSchema,
+        allowFreeformFields: true,
+        freeformFieldConfig: {
+          type: 'string',
+          operators: [{ key: 'eq', label: 'equals' }],
+        },
+      }
+
+      const serialized = [
+        { field: 'status', operator: 'eq', value: 'active', connector: 'AND' as const },
+        { field: 'customField', operator: 'eq', value: 'customValue' },
+      ]
+
+      const result = deserialize(serialized, schemaWithFreeform)
+
+      expect(result).toHaveLength(2)
+      // Predefined field uses schema's label
+      expect(result[0]?.condition.field.label).toBe('Status')
+      expect(result[0]?.connector).toBe('AND')
+      // Freeform field uses field key as label
+      expect(result[1]?.condition.field.key).toBe('customField')
+      expect(result[1]?.condition.field.label).toBe('customField')
+    })
+
+    it('should throw for unknown field when allowFreeformFields is false', () => {
+      const serialized = [{ field: 'unknown', operator: 'eq', value: 'test' }]
+
+      expect(() => deserialize(serialized, testSchema)).toThrow('Unknown field: unknown')
+    })
   })
 
   describe('toDisplayString', () => {

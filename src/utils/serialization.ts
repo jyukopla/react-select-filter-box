@@ -8,6 +8,7 @@ import type {
   ConditionValue,
   FieldValue,
   OperatorValue,
+  FieldConfig,
 } from '@/types'
 
 /**
@@ -85,6 +86,25 @@ export function serialize(
 }
 
 /**
+ * Helper to deserialize a value
+ */
+function deserializeValue(
+  value: unknown,
+  fieldConfig: Pick<FieldConfig, 'deserialize'>,
+  useFieldDeserializers: boolean = true
+): ConditionValue {
+  if (useFieldDeserializers && fieldConfig.deserialize) {
+    return fieldConfig.deserialize(value)
+  }
+  const valueStr = String(value)
+  return {
+    raw: value,
+    display: valueStr,
+    serialized: valueStr,
+  }
+}
+
+/**
  * Deserialize from simple JSON format back to filter expressions
  * Supports custom field-level deserializers
  */
@@ -102,7 +122,28 @@ export function deserialize(
 
   return serialized.map((item) => {
     // Find field config
-    const fieldConfig = schema.fields.find((f) => f.key === item.field)
+    let fieldConfig = schema.fields.find((f) => f.key === item.field)
+    let isFreeformField = false
+
+    // If field not found in schema, check if freeform fields are enabled
+    if (!fieldConfig && schema.allowFreeformFields) {
+      // This is a freeform field - create a synthetic field config
+      const freeformConfig = schema.freeformFieldConfig ?? {}
+      isFreeformField = true
+      fieldConfig = {
+        key: item.field,
+        label: item.field,
+        type: freeformConfig.type ?? 'string',
+        operators: freeformConfig.operators ?? [
+          { key: 'eq', label: 'equals', symbol: '=' },
+          { key: 'neq', label: 'not equals', symbol: '≠' },
+          { key: 'contains', label: 'contains' },
+          { key: 'startsWith', label: 'starts with' },
+          { key: 'endsWith', label: 'ends with' },
+        ],
+      }
+    }
+
     if (!fieldConfig) {
       throw new Error(`Unknown field: ${item.field}`)
     }
@@ -110,21 +151,40 @@ export function deserialize(
     // Find operator config
     const operatorConfig = fieldConfig.operators.find((op) => op.key === item.operator)
     if (!operatorConfig) {
+      // For freeform fields, try to find operator in freeformFieldConfig
+      if (isFreeformField && schema.freeformFieldConfig?.operators) {
+        const freeformOp = schema.freeformFieldConfig.operators.find(
+          (op) => op.key === item.operator
+        )
+        if (freeformOp) {
+          // Continue with the freeform operator
+          const value = deserializeValue(item.value, fieldConfig)
+          const expression: FilterExpression = {
+            condition: {
+              field: {
+                key: fieldConfig.key,
+                label: fieldConfig.label,
+                type: fieldConfig.type,
+              },
+              operator: {
+                key: freeformOp.key,
+                label: freeformOp.label,
+                symbol: freeformOp.symbol,
+              },
+              value,
+            },
+          }
+          if (item.connector) {
+            expression.connector = item.connector
+          }
+          return expression
+        }
+      }
       throw new Error(`Unknown operator: ${item.operator} for field ${item.field}`)
     }
 
     // Apply field-level deserializer if available
-    let value: ConditionValue
-    if (useFieldDeserializers && fieldConfig.deserialize) {
-      value = fieldConfig.deserialize(item.value)
-    } else {
-      const valueStr = String(item.value)
-      value = {
-        raw: item.value,
-        display: valueStr,
-        serialized: valueStr,
-      }
-    }
+    const value = deserializeValue(item.value, fieldConfig, useFieldDeserializers)
 
     const expression: FilterExpression = {
       condition: {

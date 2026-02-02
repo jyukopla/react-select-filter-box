@@ -7,6 +7,12 @@ A Sequential Filter Box component for React that provides a Select2-like single-
 
 > ⚠️ **Notice**: This project was developed with AI coding agents. While thoroughly tested, please review the code before using in production.
 
+## 📚 Documentation
+
+- **[Live Storybook Demo](https://jyukopla.github.io/react-select-filter-box/storybook/)** - Interactive component demos
+- **[API Reference](https://jyukopla.github.io/react-select-filter-box/api/)** - TypeDoc generated API docs
+- **[Guides & Examples](https://jyukopla.github.io/react-select-filter-box/docs/)** - Tutorials and usage guides
+
 ## Features
 
 - 🎯 **Sequential Token Input** - Build filter expressions token by token (field → operator → value)

@@ -255,7 +255,7 @@ export function AutocompleteDropdown({
   }
 
   // Standard mode with groups support
-  // Group items by their group property
+  // Group items by their group property, preserving original order for keyboard navigation
   const groupedItems = items.reduce<
     { group: string | undefined; items: { item: AutocompleteItem; originalIndex: number }[] }[]
   >((acc, item, originalIndex) => {
@@ -269,11 +269,10 @@ export function AutocompleteDropdown({
     return acc
   }, [])
 
-  // Move ungrouped items (group === undefined) to the end
-  const sortedGroups = [
-    ...groupedItems.filter((g) => g.group !== undefined),
-    ...groupedItems.filter((g) => g.group === undefined),
-  ]
+  // NOTE: We intentionally do NOT reorder groups here to preserve keyboard navigation order.
+  // The highlightedIndex corresponds to the original items array order, so visual reordering
+  // would cause a mismatch between keyboard navigation (by index) and visual order.
+  // Groups are displayed in the order they first appear in the items array.
 
   return (
     <ul
@@ -284,7 +283,7 @@ export function AutocompleteDropdown({
       style={style}
       onMouseDown={handleMouseDown}
     >
-      {sortedGroups.map((groupData) => (
+      {groupedItems.map((groupData) => (
         <li key={groupData.group ?? '__ungrouped'} className="autocomplete-group">
           {groupData.group && (
             <div className="autocomplete-group__header" role="presentation">
