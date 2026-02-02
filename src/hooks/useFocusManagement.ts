@@ -21,6 +21,8 @@ export interface UseFocusManagementProps {
   onFocusTrap?: () => void
   /** Unique portal ID used to identify associated portal elements */
   portalId?: string
+  /** Whether a custom widget is currently active */
+  hasActiveCustomWidget?: boolean
 }
 
 export interface UseFocusManagementReturn {
@@ -43,6 +45,7 @@ export function useFocusManagement({
   inputRef,
   containerRef,
   portalId,
+  hasActiveCustomWidget = false,
 }: UseFocusManagementProps): UseFocusManagementReturn {
   // Store the element that had focus before the component was activated
   const focusOriginRef = useRef<HTMLElement | null>(null)
@@ -144,7 +147,8 @@ export function useFocusManagement({
         }
 
         // If dropdown is open, trap focus back to input
-        if (isDropdownOpen && inputRef.current) {
+        // BUT: Don't trap focus if a custom widget is active - allow interaction with widget
+        if (isDropdownOpen && !hasActiveCustomWidget && inputRef.current) {
           // Use requestAnimationFrame to avoid conflicts with other focus handlers
           requestAnimationFrame(() => {
             // Only refocus if still open and focus went outside (and not in portal)
@@ -162,7 +166,14 @@ export function useFocusManagement({
     return () => {
       container.removeEventListener('focusout', handleFocusOut)
     }
-  }, [isDropdownOpen, isEditing, containerRef, inputRef, isInFilterBoxPortal])
+  }, [
+    isDropdownOpen,
+    isEditing,
+    containerRef,
+    inputRef,
+    isInFilterBoxPortal,
+    hasActiveCustomWidget,
+  ])
 
   /**
    * Handle focus restoration after dropdown closes

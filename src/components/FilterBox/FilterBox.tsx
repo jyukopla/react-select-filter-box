@@ -152,6 +152,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
     inputRef,
     containerRef,
     portalId,
+    hasActiveCustomWidget: !!activeCustomWidget,
   })
 
   // Expose imperative handle
