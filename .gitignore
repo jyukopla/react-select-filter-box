@@ -34,3 +34,4 @@ devenv.local.nix
 .pre-commit-config.yaml
 TODO*
 coverage/
+/docs/api/
