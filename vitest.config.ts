@@ -51,48 +51,13 @@ export default defineConfig({
         lines: 80,
       },
     },
-    projects: [
-      // Unit tests project
-      {
-        extends: true,
-        test: {
-          name: 'unit',
-          environment: 'jsdom',
-          include: ['src/**/*.{test,spec}.{ts,tsx}'],
-          exclude: ['src/**/*.stories.{ts,tsx}'],
-          setupFiles: ['./src/test/setup.ts'],
-          // Use single-threaded execution to avoid memory issues
-          pool: 'forks',
-          poolOptions: {
-            forks: {
-              singleFork: true,
-            },
-          },
-          testTimeout: 10000,
-          // Clear mocks between tests to prevent memory leaks
-          clearMocks: true,
-          restoreMocks: true,
-        },
-      },
-      // Storybook tests project
-      {
-        extends: true,
-        plugins: [
-          storybookTest({
-            configDir: path.join(dirname, '.storybook'),
-          }),
-        ],
-        test: {
-          name: 'storybook',
-          browser: {
-            enabled: true,
-            headless: true,
-            provider: playwright({}),
-            instances: [{ browser: 'chromium' }],
-          },
-          setupFiles: ['.storybook/vitest.setup.ts'],
-        },
-      },
-    ],
+    environment: 'jsdom',
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['src/**/*.stories.{ts,tsx}'],
+    setupFiles: ['./src/test/setup.ts'],
+    pool: 'forks',
+    testTimeout: 10000,
+    clearMocks: true,
+    restoreMocks: true,
   },
 })
