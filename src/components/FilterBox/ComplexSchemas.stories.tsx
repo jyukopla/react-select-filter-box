@@ -1124,8 +1124,8 @@ export const CustomConnectors: Story = {
       <div>
         <h3 style={{ fontSize: '16px', marginBottom: '0.5rem' }}>Word-based Connectors</h3>
         <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>
-          Using "All" and "Any" instead of "AND" and "OR". Notice the placeholder updates to "All
-          or Any?" when selecting connectors.
+          Using "All" and "Any" instead of "AND" and "OR". Notice the placeholder updates to "All or
+          Any?" when selecting connectors.
         </p>
         <FilterBoxWithState schema={customConnectorsSchema} />
       </div>

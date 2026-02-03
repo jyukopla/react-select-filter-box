@@ -287,7 +287,12 @@ export const TaskFilter: Story = {
   render: () => {
     const [value, setValue] = useState<FilterExpression[]>([])
     return (
-      <FilterBox schema={taskSchema} value={value} onChange={setValue} placeholder="Filter tasks..." />
+      <FilterBox
+        schema={taskSchema}
+        value={value}
+        onChange={setValue}
+        placeholder="Filter tasks..."
+      />
     )
   },
 }

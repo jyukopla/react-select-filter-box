@@ -59,6 +59,8 @@ export interface UseFilterStateReturn {
   editingOperatorIndex: number
   /** Index of expression whose connector is being edited (-1 if not editing) */
   editingConnectorIndex: number
+  /** Index of expression whose field is being edited (-1 if not editing) */
+  editingFieldIndex: number
   /** Active custom widget to render (when in entering-value state with customInput) */
   activeCustomWidget: CustomAutocompleteWidget | undefined
   /** Initial value for custom widget when editing existing value */
@@ -99,6 +101,10 @@ export interface UseFilterStateReturn {
   handleOperatorEdit: (expressionIndex: number) => void
   /** Cancel operator editing */
   handleOperatorEditCancel: () => void
+  /** Start editing a field in an existing expression */
+  handleFieldEdit: (expressionIndex: number) => void
+  /** Cancel field editing */
+  handleFieldEditCancel: () => void
   /** Start editing a connector in an existing expression */
   handleConnectorEdit: (expressionIndex: number) => void
   /** Cancel connector editing */
@@ -399,12 +405,8 @@ function getPlaceholder(state: FilterStep, schema?: FilterSchema): string {
     case 'entering-value':
       return 'Enter value...'
     case 'selecting-connector': {
-      const connectors = schema?.connectors ?? [
-        { key: 'AND' as const, label: 'AND' },
-        { key: 'OR' as const, label: 'OR' },
-      ]
-      const labels = connectors.map((c) => c.label)
-      return labels.length === 2 ? `${labels[0]} or ${labels[1]}?` : `Select connector...`
+      // Placeholder hints at adding more conditions via ArrowDown
+      return 'Add filter... (↓ for AND/OR)'
     }
     default:
       return 'Add filter...'
@@ -435,6 +437,7 @@ export function useFilterState({
   const [announcement, setAnnouncement] = useState('')
   const [editingOperatorIndex, setEditingOperatorIndex] = useState(-1)
   const [editingConnectorIndex, setEditingConnectorIndex] = useState(-1)
+  const [editingFieldIndex, setEditingFieldIndex] = useState(-1)
   const [valueSuggestions, setValueSuggestions] = useState<AutocompleteItem[]>([])
 
   // Store the step before token editing so we can restore it after
@@ -487,8 +490,17 @@ export function useFilterState({
     return [...completedTokens, ...pendingTokens]
   }, [value, currentField, currentOperator, state])
 
-  // Get suggestions - handles both normal state and operator/connector editing mode
+  // Get suggestions - handles both normal state and operator/connector/field editing mode
   const suggestions = useMemo(() => {
+    // If editing a field, show all fields
+    if (editingFieldIndex >= 0 && value[editingFieldIndex]) {
+      return schema.fields.map((field) => ({
+        type: 'field' as const,
+        key: field.key,
+        label: field.label,
+        description: `Type: ${field.type}`,
+      }))
+    }
     // If editing a connector, show connector options
     if (editingConnectorIndex >= 0 && value[editingConnectorIndex]) {
       const connectors = schema.connectors ?? [
@@ -531,6 +543,7 @@ export function useFilterState({
     schema,
     currentField,
     inputValue,
+    editingFieldIndex,
     editingOperatorIndex,
     editingConnectorIndex,
     value,
@@ -676,7 +689,10 @@ export function useFilterState({
       newState = 'selecting-connector'
     }
     setState(newState)
-    setIsDropdownOpen(true)
+    // In selecting-connector state, don't auto-open dropdown - user presses ArrowDown to add more
+    // For other states (like selecting-field), open the dropdown to show available options
+    setIsDropdownOpen(newState !== 'selecting-connector')
+    setHighlightedIndex(newState === 'selecting-connector' ? 0 : -1)
     // Clear token selection when input gains focus (Issue 3: deselect on focus move)
     setSelectedTokenIndex(-1)
     setAllTokensSelected(false)
@@ -697,14 +713,31 @@ export function useFilterState({
     setEditingTokenIndex(-1)
     setEditingOperatorIndex(-1)
     setEditingConnectorIndex(-1)
+    setEditingFieldIndex(-1)
   }, [machine])
 
-  const handleInputChange = useCallback((newValue: string) => {
-    setInputValue(newValue)
-    // Clear token selection when typing
-    setSelectedTokenIndex(-1)
-    setAllTokensSelected(false)
-  }, [])
+  const handleInputChange = useCallback(
+    (newValue: string) => {
+      setInputValue(newValue)
+      // Clear token selection when typing
+      setSelectedTokenIndex(-1)
+      setAllTokensSelected(false)
+
+      // When typing in selecting-connector state, auto-add default connector (AND)
+      // and transition to selecting-field - user is starting a new expression
+      if (state === 'selecting-connector' && newValue.length > 0) {
+        // Use first connector as default (usually AND)
+        const defaultConnector = schema.connectors?.[0]?.key ?? 'AND'
+        machine.transition({ type: 'SELECT_CONNECTOR', payload: defaultConnector as 'AND' | 'OR' })
+        setState('selecting-field')
+        setIsDropdownOpen(true)
+      } else if (!isDropdownOpen && newValue.length > 0) {
+        // Open dropdown when user starts typing
+        setIsDropdownOpen(true)
+      }
+    },
+    [state, machine, isDropdownOpen, schema.connectors]
+  )
 
   const handleHighlight = useCallback((index: number) => {
     setHighlightedIndex(index)
@@ -712,6 +745,41 @@ export function useFilterState({
 
   const handleSelect = useCallback(
     (item: AutocompleteItem) => {
+      // Handle field editing mode
+      if (editingFieldIndex >= 0 && item.type === 'field') {
+        const expr = value[editingFieldIndex]
+        const fieldConfig = schema.fields.find((f) => f.key === item.key)
+        if (fieldConfig) {
+          const fieldValue: FieldValue = {
+            key: fieldConfig.key,
+            label: fieldConfig.label,
+            type: fieldConfig.type,
+          }
+          // Update the expression with new field
+          // Need to also update operator to a valid one for this field
+          const newOperator = fieldConfig.operators[0] // Use first operator
+          const operatorValue: OperatorValue = {
+            key: newOperator.key,
+            label: newOperator.label,
+            symbol: newOperator.symbol,
+          }
+          const newExpressions = [...value]
+          newExpressions[editingFieldIndex] = {
+            ...expr,
+            condition: {
+              field: fieldValue,
+              operator: operatorValue,
+              value: expr.condition.value, // Keep existing value
+            },
+          }
+          onChange(newExpressions)
+          setEditingFieldIndex(-1)
+          setIsDropdownOpen(false)
+          setAnnouncement(`Field changed to ${fieldValue.label}`)
+        }
+        return
+      }
+
       // Handle connector editing mode
       if (editingConnectorIndex >= 0 && item.type === 'connector') {
         const expr = value[editingConnectorIndex]
@@ -920,13 +988,23 @@ export function useFilterState({
         setInputValue('')
         setCurrentField(undefined)
         setCurrentOperator(undefined)
-        setIsDropdownOpen(true)
+        setIsDropdownOpen(false)
+        setHighlightedIndex(0)
         setAnnouncement(
-          `Filter added: value "${item.label}". Select AND, OR, or press Enter to finish.`
+          `Filter added: value "${item.label}". Press Down Arrow to add more conditions.`
         )
       }
     },
-    [machine, schema, currentField, onChange, editingOperatorIndex, editingConnectorIndex, value]
+    [
+      machine,
+      schema,
+      currentField,
+      onChange,
+      editingFieldIndex,
+      editingOperatorIndex,
+      editingConnectorIndex,
+      value,
+    ]
   )
 
   const handleConfirmValue = useCallback(() => {
@@ -943,9 +1021,10 @@ export function useFilterState({
       setInputValue('')
       setCurrentField(undefined)
       setCurrentOperator(undefined)
-      setIsDropdownOpen(true)
+      setIsDropdownOpen(false)
+      setHighlightedIndex(0)
       setAnnouncement(
-        `Filter added: value "${inputValue.trim()}". Select AND, OR, or press Enter to finish.`
+        `Filter added: value "${inputValue.trim()}". Press Down Arrow to add more conditions.`
       )
     }
   }, [machine, inputValue, onChange])
@@ -992,14 +1071,15 @@ export function useFilterState({
         })
 
         setEditingTokenIndex(-1)
-        setIsDropdownOpen(true)
+        setIsDropdownOpen(false)
+        setHighlightedIndex(0)
         setState('selecting-connector')
         setCurrentField(undefined)
         setCurrentOperator(undefined)
         stepBeforeEditRef.current = null
 
         onChange(newExpressions)
-        setAnnouncement(`Value updated to "${display}". Select AND, OR, or press Enter to finish.`)
+        setAnnouncement(`Value updated to "${display}". Press Down Arrow to add more conditions.`)
         return
       }
 
@@ -1024,8 +1104,9 @@ export function useFilterState({
       setInputValue('')
       setCurrentField(undefined)
       setCurrentOperator(undefined)
-      setIsDropdownOpen(true)
-      setAnnouncement(`Filter added: value "${display}". Select AND, OR, or press Enter to finish.`)
+      setIsDropdownOpen(false)
+      setHighlightedIndex(0)
+      setAnnouncement(`Filter added: value "${display}". Press Down Arrow to add more conditions.`)
     },
     [machine, onChange, activeCustomWidget, editingTokenIndex, tokens, value, state]
   )
@@ -1065,24 +1146,85 @@ export function useFilterState({
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       switch (e.key) {
         case 'ArrowDown':
-          e.preventDefault()
-          setHighlightedIndex((prev) => {
-            // If nothing selected, select first item
-            if (prev === -1) return suggestions.length > 0 ? 0 : -1
-            // Otherwise move down
-            return Math.min(prev + 1, suggestions.length - 1)
-          })
-          break
         case 'ArrowUp':
-          e.preventDefault()
-          setHighlightedIndex((prev) => {
-            // If at first item, deselect
-            if (prev === 0) return -1
-            // If nothing selected, do nothing
-            if (prev === -1) return -1
-            // Otherwise move up
-            return Math.max(prev - 1, 0)
-          })
+          // When a token is selected, ArrowDown/ArrowUp should open dropdown for editing
+          if (selectedTokenIndex >= 0 && !isDropdownOpen) {
+            e.preventDefault()
+            const token = tokens[selectedTokenIndex]
+
+            // Handle field token editing
+            if (token?.type === 'field' && !token.isPending && token.expressionIndex >= 0) {
+              handleFieldEdit(token.expressionIndex)
+              return
+            }
+
+            // Handle operator token editing
+            if (token?.type === 'operator' && !token.isPending && token.expressionIndex >= 0) {
+              handleOperatorEdit(token.expressionIndex)
+              return
+            }
+
+            // Handle connector token editing
+            if (token?.type === 'connector' && !token.isPending && token.expressionIndex >= 0) {
+              handleConnectorEdit(token.expressionIndex)
+              return
+            }
+
+            // Handle value token editing (for custom widgets that use dropdown)
+            if (token?.type === 'value' && !token.isPending && token.expressionIndex >= 0) {
+              const expression = value[token.expressionIndex]
+              if (expression) {
+                const fieldKey = expression.condition.field.key
+                const operatorKey = expression.condition.operator.key
+                const fieldConfig = schema.fields.find((f) => f.key === fieldKey)
+                const operatorConfig = fieldConfig?.operators.find((op) => op.key === operatorKey)
+
+                // If this operator has a custom widget, open dropdown
+                if (operatorConfig?.customInput) {
+                  setCurrentField(expression.condition.field)
+                  setCurrentOperator(expression.condition.operator)
+                  stepBeforeEditRef.current = state
+
+                  setState('editing-token')
+                  setEditingTokenIndex(selectedTokenIndex)
+                  setSelectedTokenIndex(-1)
+                  setIsDropdownOpen(true)
+                  setInputValue('')
+                  return
+                }
+              }
+            }
+          }
+
+          // In selecting-connector state with dropdown closed, ArrowDown/ArrowUp opens the connector dropdown
+          if (state === 'selecting-connector' && !isDropdownOpen && selectedTokenIndex === -1) {
+            e.preventDefault()
+            setIsDropdownOpen(true)
+            setHighlightedIndex(0) // Auto-select first connector option
+            return
+          }
+
+          // Default behavior: navigate dropdown when open
+          if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            setHighlightedIndex((prev) => {
+              // If nothing selected, select first item
+              if (prev === -1) return suggestions.length > 0 ? 0 : -1
+              // Otherwise move down
+              return Math.min(prev + 1, suggestions.length - 1)
+            })
+          } else {
+            // ArrowUp
+            e.preventDefault()
+            setHighlightedIndex((prev) => {
+              // If at first item, deselect
+              if (prev === 0) return -1
+              // If nothing selected, do nothing
+              if (prev === -1) return -1
+              // Otherwise move up
+              return Math.max(prev - 1, 0)
+            })
+          }
           break
         case 'ArrowLeft':
           // Navigate to tokens when input is empty
@@ -1228,7 +1370,7 @@ export function useFilterState({
                 onChange(newExpressions)
                 setSelectedTokenIndex(-1)
                 setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
-                
+
                 // Update machine state based on remaining expressions
                 if (newExpressions.length === 0) {
                   machine.clear()
@@ -1298,7 +1440,7 @@ export function useFilterState({
                 onChange(newExpressions)
                 setSelectedTokenIndex(-1)
                 setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
-                
+
                 // Update machine state based on remaining expressions
                 if (newExpressions.length === 0) {
                   machine.clear()
@@ -1569,6 +1711,9 @@ export function useFilterState({
           break
       }
     },
+    // Note: handleConnectorEdit, handleFieldEdit, and handleOperatorEdit are intentionally
+    // omitted to avoid circular dependencies since they're defined later
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       suggestions,
       highlightedIndex,
@@ -1707,6 +1852,7 @@ export function useFilterState({
       setEditingOperatorIndex(expressionIndex)
       setIsDropdownOpen(true)
       setHighlightedIndex(-1)
+      setSelectedTokenIndex(-1)
       setAnnouncement('Select a new operator')
     },
     [value.length]
@@ -1714,6 +1860,24 @@ export function useFilterState({
 
   const handleOperatorEditCancel = useCallback(() => {
     setEditingOperatorIndex(-1)
+    setIsDropdownOpen(false)
+  }, [])
+
+  // Field editing handlers
+  const handleFieldEdit = useCallback(
+    (expressionIndex: number) => {
+      if (expressionIndex < 0 || expressionIndex >= value.length) return
+      setEditingFieldIndex(expressionIndex)
+      setIsDropdownOpen(true)
+      setHighlightedIndex(-1)
+      setSelectedTokenIndex(-1)
+      setAnnouncement('Select a new field')
+    },
+    [value.length]
+  )
+
+  const handleFieldEditCancel = useCallback(() => {
+    setEditingFieldIndex(-1)
     setIsDropdownOpen(false)
   }, [])
 
@@ -1726,6 +1890,7 @@ export function useFilterState({
       setEditingConnectorIndex(expressionIndex)
       setIsDropdownOpen(true)
       setHighlightedIndex(-1)
+      setSelectedTokenIndex(-1)
       setAnnouncement('Select a new connector')
     },
     [value]
@@ -1755,7 +1920,7 @@ export function useFilterState({
       onChange(newExpressions)
       setSelectedTokenIndex(-1)
       setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
-      
+
       // Update machine state based on remaining expressions
       if (newExpressions.length === 0) {
         machine.clear()
@@ -1787,6 +1952,7 @@ export function useFilterState({
     allTokensSelected,
     editingOperatorIndex,
     editingConnectorIndex,
+    editingFieldIndex,
     activeCustomWidget,
     customWidgetInitialValue,
     currentFieldConfig,
@@ -1805,6 +1971,8 @@ export function useFilterState({
     handleTokenEditCancel,
     handleOperatorEdit,
     handleOperatorEditCancel,
+    handleFieldEdit,
+    handleFieldEditCancel,
     handleConnectorEdit,
     handleConnectorEditCancel,
     handleCustomWidgetConfirm,

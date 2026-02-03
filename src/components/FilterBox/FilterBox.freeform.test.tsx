@@ -259,7 +259,8 @@ describe('FilterBox - Freeform Fields', () => {
         />
       )
 
-      // 2. Add AND connector and predefined field
+      // 2. Press ArrowDown to open connector dropdown, then add AND connector and predefined field
+      await user.keyboard('{ArrowDown}')
       const andOption = screen.getByText('AND')
       await user.click(andOption)
 

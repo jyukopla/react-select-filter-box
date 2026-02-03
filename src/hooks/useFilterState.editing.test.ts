@@ -144,14 +144,30 @@ describe('useFilterState - Editing', () => {
         useFilterState({ schema: createTestSchema(), value: initialValue, onChange: vi.fn() })
       )
 
-      // Focus to open dropdown
+      // Focus - in selecting-connector state, dropdown is not auto-opened
       act(() => {
         result.current.handleFocus()
       })
 
+      // Dropdown is closed in selecting-connector state (user presses ArrowDown to open)
+      expect(result.current.isDropdownOpen).toBe(false)
+      expect(result.current.state).toBe('selecting-connector')
+
+      // Open dropdown with ArrowDown
+      act(() => {
+        result.current.handleKeyDown({
+          key: 'ArrowDown',
+          preventDefault: vi.fn(),
+          stopPropagation: vi.fn(),
+          ctrlKey: false,
+          shiftKey: false,
+          metaKey: false,
+        } as unknown as React.KeyboardEvent<HTMLInputElement>)
+      })
+
       expect(result.current.isDropdownOpen).toBe(true)
 
-      // Start editing
+      // Start editing (should close dropdown)
       act(() => {
         result.current.handleTokenEdit(2)
       })

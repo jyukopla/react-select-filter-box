@@ -39,6 +39,9 @@ Tokens follow strict order: `field → operator → value → [connector → ...
 
 - **Single-click** on token: Select for deletion (Backspace/Delete)
 - **Double-click** on value/operator/connector: Edit inline
+- **Arrow keys** when token is selected:
+  - Left/Right: Navigate between tokens
+  - Down/Up: Open dropdown to edit operator/connector/value tokens
 - Only selected tokens can be deleted; connectors only remove the link
 - Undo/Redo: Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y)
 - Copy/Paste: Ctrl+C / Ctrl+V (copies as JSON)

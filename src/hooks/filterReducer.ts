@@ -48,6 +48,10 @@ export interface FilterState {
   announcement: string
   /** Index of expression whose operator is being edited (-1 if none) */
   editingOperatorIndex: number
+  /** Index of expression whose field is being edited (-1 if none) */
+  editingFieldIndex: number
+  /** Index of expression whose connector is being edited (-1 if none) */
+  editingConnectorIndex: number
 }
 
 /**
@@ -65,6 +69,8 @@ export const initialFilterState: FilterState = {
   currentOperator: undefined,
   announcement: '',
   editingOperatorIndex: -1,
+  editingFieldIndex: -1,
+  editingConnectorIndex: -1,
 }
 
 // =============================================================================
@@ -92,6 +98,10 @@ export type FilterActionType =
   | 'CANCEL_TOKEN_EDIT'
   | 'START_OPERATOR_EDIT'
   | 'CANCEL_OPERATOR_EDIT'
+  | 'START_FIELD_EDIT'
+  | 'CANCEL_FIELD_EDIT'
+  | 'START_CONNECTOR_EDIT'
+  | 'CANCEL_CONNECTOR_EDIT'
   | 'SELECT_TOKEN'
   | 'SELECT_ALL_TOKENS'
   | 'DESELECT_TOKENS'
@@ -123,6 +133,10 @@ export type FilterAction =
   | { type: 'CANCEL_TOKEN_EDIT' }
   | { type: 'START_OPERATOR_EDIT'; payload: number }
   | { type: 'CANCEL_OPERATOR_EDIT' }
+  | { type: 'START_FIELD_EDIT'; payload: number }
+  | { type: 'CANCEL_FIELD_EDIT' }
+  | { type: 'START_CONNECTOR_EDIT'; payload: number }
+  | { type: 'CANCEL_CONNECTOR_EDIT' }
   | { type: 'SELECT_TOKEN'; payload: number }
   | { type: 'SELECT_ALL_TOKENS' }
   | { type: 'DESELECT_TOKENS' }
@@ -301,6 +315,38 @@ export function filterReducer(state: FilterState, action: FilterAction): FilterS
       return {
         ...state,
         editingOperatorIndex: -1,
+        isDropdownOpen: false,
+      }
+
+    case 'START_FIELD_EDIT':
+      return {
+        ...state,
+        editingFieldIndex: action.payload,
+        isDropdownOpen: true,
+        highlightedIndex: 0,
+        announcement: 'Select a new field.',
+      }
+
+    case 'CANCEL_FIELD_EDIT':
+      return {
+        ...state,
+        editingFieldIndex: -1,
+        isDropdownOpen: false,
+      }
+
+    case 'START_CONNECTOR_EDIT':
+      return {
+        ...state,
+        editingConnectorIndex: action.payload,
+        isDropdownOpen: true,
+        highlightedIndex: 0,
+        announcement: 'Select a new connector.',
+      }
+
+    case 'CANCEL_CONNECTOR_EDIT':
+      return {
+        ...state,
+        editingConnectorIndex: -1,
         isDropdownOpen: false,
       }
 
@@ -716,6 +762,34 @@ export function startOperatorEdit(expressionIndex: number): FilterAction {
  */
 export function cancelOperatorEdit(): FilterAction {
   return { type: 'CANCEL_OPERATOR_EDIT' }
+}
+
+/**
+ * Create a START_FIELD_EDIT action
+ */
+export function startFieldEdit(expressionIndex: number): FilterAction {
+  return { type: 'START_FIELD_EDIT', payload: expressionIndex }
+}
+
+/**
+ * Create a CANCEL_FIELD_EDIT action
+ */
+export function cancelFieldEdit(): FilterAction {
+  return { type: 'CANCEL_FIELD_EDIT' }
+}
+
+/**
+ * Create a START_CONNECTOR_EDIT action
+ */
+export function startConnectorEdit(expressionIndex: number): FilterAction {
+  return { type: 'START_CONNECTOR_EDIT', payload: expressionIndex }
+}
+
+/**
+ * Create a CANCEL_CONNECTOR_EDIT action
+ */
+export function cancelConnectorEdit(): FilterAction {
+  return { type: 'CANCEL_CONNECTOR_EDIT' }
 }
 
 /**

@@ -53,7 +53,7 @@ describe('Expression Deletion State Reset', () => {
 
     // Initial state should be idle (not actively editing)
     expect(result.current.state).toBe('idle')
-    
+
     // Focus to start interaction
     act(() => {
       result.current.handleFocus()
@@ -104,7 +104,7 @@ describe('Expression Deletion State Reset', () => {
     )
 
     expect(result.current.state).toBe('idle')
-    
+
     // Focus to enable interaction
     act(() => {
       result.current.handleFocus()

@@ -24,6 +24,8 @@ export interface TokenContainerProps {
   onTokenClick?: (position: number) => void
   /** Called when a token is clicked for selection (deletion) */
   onTokenSelect?: (position: number) => void
+  /** Called when a field token is clicked (for editing) */
+  onFieldClick?: (expressionIndex: number) => void
   /** Called when an operator token is clicked (for editing) */
   onOperatorClick?: (expressionIndex: number) => void
   /** Called when a connector token is clicked (for editing) */
@@ -72,6 +74,7 @@ export function TokenContainer({
   onInputKeyDown,
   onTokenClick,
   onTokenSelect,
+  onFieldClick,
   onOperatorClick,
   onConnectorClick,
   onInputFocus,
@@ -100,9 +103,11 @@ export function TokenContainer({
     inputRef.current?.focus()
   }
 
-  // Handle token click - operators and connectors get special handling
+  // Handle token click - fields, operators and connectors get special handling
   const handleTokenClickInternal = (token: TokenData, index: number) => {
-    if (
+    if (token.type === 'field' && !token.isPending && token.expressionIndex >= 0 && onFieldClick) {
+      onFieldClick(token.expressionIndex)
+    } else if (
       token.type === 'operator' &&
       !token.isPending &&
       token.expressionIndex >= 0 &&
@@ -121,7 +126,7 @@ export function TokenContainer({
       // This handler is for single-click, so select the token
       onTokenSelect?.(index)
     } else {
-      // Other tokens (field) are selectable for deletion
+      // Other tokens are selectable for deletion
       onTokenSelect?.(index)
     }
   }

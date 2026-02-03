@@ -417,7 +417,7 @@ describe('Keyboard-Only Navigation Flow', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it('pressing Enter in selecting-connector state closes dropdown and allows Tab to leave', async () => {
+  it('pressing Escape in selecting-connector state closes dropdown without selecting', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
     // Start with a complete expression (without connector), which puts us in selecting-connector state on focus
@@ -436,13 +436,20 @@ describe('Keyboard-Only Navigation Flow', () => {
     const input = screen.getByRole('combobox')
     await user.click(input)
 
-    // Dropdown should be open showing connector options
+    // Dropdown should NOT be open automatically (usability improvement)
+    // User needs to press ArrowDown to see connector options
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+
+    // Press ArrowDown to open the connector dropdown (first item is auto-highlighted)
+    await user.keyboard('{ArrowDown}')
+
+    // Now dropdown should be open showing connector options
     expect(screen.getByRole('listbox')).toBeInTheDocument()
     expect(screen.getByText('AND')).toBeInTheDocument()
     expect(screen.getByText('OR')).toBeInTheDocument()
 
-    // Press Enter without selecting anything - should close dropdown
-    await user.keyboard('{Enter}')
+    // Press Escape to close dropdown without selecting
+    await user.keyboard('{Escape}')
 
     // Dropdown should be closed
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()

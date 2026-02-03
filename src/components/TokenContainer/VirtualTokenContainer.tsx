@@ -28,6 +28,8 @@ export interface VirtualTokenContainerProps {
   onTokenClick?: (position: number) => void
   /** Called when a token is clicked for selection (deletion) */
   onTokenSelect?: (position: number) => void
+  /** Called when a field token is clicked (for editing) */
+  onFieldClick?: (expressionIndex: number) => void
   /** Called when an operator token is clicked (for editing) */
   onOperatorClick?: (expressionIndex: number) => void
   /** Called when input gains focus */
@@ -76,6 +78,7 @@ export function VirtualTokenContainer({
   onInputKeyDown,
   onTokenClick,
   onTokenSelect,
+  onFieldClick,
   onOperatorClick,
   onInputFocus,
   onInputBlur,
@@ -172,6 +175,13 @@ export function VirtualTokenContainer({
     (token: TokenData, localIndex: number) => {
       const actualIndex = startIndex + localIndex
       if (
+        token.type === 'field' &&
+        !token.isPending &&
+        token.expressionIndex >= 0 &&
+        onFieldClick
+      ) {
+        onFieldClick(token.expressionIndex)
+      } else if (
         token.type === 'operator' &&
         !token.isPending &&
         token.expressionIndex >= 0 &&
@@ -187,7 +197,7 @@ export function VirtualTokenContainer({
         onTokenSelect?.(actualIndex)
       }
     },
-    [startIndex, onOperatorClick, onTokenSelect]
+    [startIndex, onFieldClick, onOperatorClick, onTokenSelect]
   )
 
   // Handle token double-click for editing

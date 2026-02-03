@@ -1332,6 +1332,9 @@ describe('FilterBox', () => {
       await user.type(input, 'active')
       await user.keyboard('{Enter}')
 
+      // Dropdown is not auto-opened in selecting-connector state, press ArrowDown first
+      await user.keyboard('{ArrowDown}')
+
       // Add connector
       await user.click(screen.getByText('AND'))
 

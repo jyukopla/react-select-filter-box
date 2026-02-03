@@ -839,19 +839,24 @@ function OperatorEditingFilterBox() {
 
   return (
     <div style={{ maxWidth: '700px' }}>
-      <h4 style={{ marginBottom: '0.5rem' }}>Click on an Operator to Change It</h4>
+      <h4 style={{ marginBottom: '0.5rem' }}>Click on a Token to Change It</h4>
       <div style={{ marginBottom: '1rem', fontSize: '14px', color: '#666' }}>
-        <p>Operators can now be changed by clicking directly on them:</p>
+        <p>
+          Fields, operators, and connectors can be changed by clicking or using keyboard navigation:
+        </p>
         <ol style={{ margin: '0.5rem 0', paddingLeft: '1.2rem', lineHeight: 1.8 }}>
           <li>
-            Click on the <span style={{ color: '#c2185b', fontWeight: 'bold' }}>=</span> or{' '}
-            <span style={{ color: '#c2185b', fontWeight: 'bold' }}>contains</span> operator
+            <strong>Mouse:</strong> Click on any token (field, operator, or connector)
           </li>
-          <li>A dropdown appears with available operators for that field</li>
-          <li>Select a new operator to update the expression</li>
+          <li>
+            <strong>Keyboard:</strong> Press Left Arrow to select token, then Down/Up Arrow to open
+            dropdown
+          </li>
+          <li>A dropdown appears with available options</li>
+          <li>Select a new option to update the expression</li>
         </ol>
         <p style={{ fontStyle: 'italic', marginTop: '8px' }}>
-          Previously, you had to delete the entire expression to change an operator!
+          Previously, you had to delete the entire expression to make changes!
         </p>
       </div>
       <FilterBox schema={basicSchema} value={value} onChange={setValue} />
@@ -865,12 +870,19 @@ export const OperatorEditing: Story = {
     docs: {
       description: {
         story: `
-Demonstrates the **operator editing** feature.
+Demonstrates the **token editing** feature for fields, operators, and connectors.
 
-Users can now click on an operator token to change it without deleting the entire expression:
-- **Click on any operator** (pink/magenta tokens) to open the operator dropdown
-- **Select a different operator** to update the expression in place
-- **Press Escape** to cancel without changing
+Users can now edit any part of an expression without deleting it:
+
+**Mouse interaction:**
+- Click on any field, operator, or connector token to open the dropdown
+- Select a different option to update the expression in place
+
+**Keyboard interaction:**
+- Press Left Arrow to navigate to and select a token
+- Press Down Arrow or Up Arrow to open the dropdown for that token
+- Use Arrow keys to navigate the dropdown
+- Press Enter to select, Escape to cancel
 
 This significantly improves the editing experience for filter expressions.
         `,

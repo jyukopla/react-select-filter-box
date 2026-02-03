@@ -66,7 +66,7 @@ export interface FilterBoxProps extends UseFilterStateProps {
 export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function FilterBox(
   {
     schema,
-    value,
+    value = [],
     onChange,
     className,
     id,
@@ -120,6 +120,7 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
   }, [validationResult])
 
   const {
+    state,
     tokens,
     isDropdownOpen,
     suggestions,
@@ -275,6 +276,25 @@ export const FilterBox = forwardRef<FilterBoxHandle, FilterBoxProps>(function Fi
       inputRef.current?.focus()
     }
   }, [autoFocus, disabled])
+
+  // Focus input after editing a token completes or cancels
+  // This ensures the cursor is visible and ready for continued input
+  const prevEditingTokenIndexRef = useRef(editingTokenIndex)
+  useEffect(() => {
+    const prevEditingTokenIndex = prevEditingTokenIndexRef.current
+    prevEditingTokenIndexRef.current = editingTokenIndex
+
+    // When editingTokenIndex transitions from >= 0 to -1,
+    // it means the user just finished editing (either confirmed or cancelled)
+    // We should restore focus to the input
+    if (prevEditingTokenIndex >= 0 && editingTokenIndex === -1 && state === 'selecting-connector') {
+      // Use a small delay to ensure the DOM has updated
+      const timeoutId = setTimeout(() => {
+        focusInput()
+      }, 0)
+      return () => clearTimeout(timeoutId)
+    }
+  }, [editingTokenIndex, state, focusInput])
 
   const { position, maxHeight } = useDropdownPosition({
     anchorRef: containerRef,
