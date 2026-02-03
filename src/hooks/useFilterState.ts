@@ -1228,6 +1228,18 @@ export function useFilterState({
                 onChange(newExpressions)
                 setSelectedTokenIndex(-1)
                 setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+                
+                // Update machine state based on remaining expressions
+                if (newExpressions.length === 0) {
+                  machine.clear()
+                  setState('idle')
+                  setInputValue('')
+                  setCurrentField(undefined)
+                  setCurrentOperator(undefined)
+                } else {
+                  machine.loadExpressions(newExpressions)
+                  setState('selecting-connector')
+                }
               }
             }
           } else if (inputValue === '' && state === 'entering-value') {
@@ -1284,6 +1296,18 @@ export function useFilterState({
                 onChange(newExpressions)
                 setSelectedTokenIndex(-1)
                 setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+                
+                // Update machine state based on remaining expressions
+                if (newExpressions.length === 0) {
+                  machine.clear()
+                  setState('idle')
+                  setInputValue('')
+                  setCurrentField(undefined)
+                  setCurrentOperator(undefined)
+                } else {
+                  machine.loadExpressions(newExpressions)
+                  setState('selecting-connector')
+                }
               }
             }
           }
@@ -1727,8 +1751,20 @@ export function useFilterState({
       onChange(newExpressions)
       setSelectedTokenIndex(-1)
       setAnnouncement(`Filter expression ${expressionIndex + 1} deleted.`)
+      
+      // Update machine state based on remaining expressions
+      if (newExpressions.length === 0) {
+        machine.clear()
+        setState('idle')
+        setInputValue('')
+        setCurrentField(undefined)
+        setCurrentOperator(undefined)
+      } else {
+        machine.loadExpressions(newExpressions)
+        setState('selecting-connector')
+      }
     },
-    [value, onChange]
+    [value, onChange, machine]
   )
 
   return {
