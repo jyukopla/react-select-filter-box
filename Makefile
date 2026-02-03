@@ -19,7 +19,7 @@ build: node_modules
 build-lib: node_modules
 	npm run build:lib
 
-check: lint
+check: lint typecheck
 
 # Linting and formatting
 lint: node_modules
