@@ -7,3 +7,4 @@ inputs:
 allowUnfree: true
 imports:
   - devenv-module-devcontainer
+profile: shell

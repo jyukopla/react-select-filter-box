@@ -1,0 +1,10 @@
+{
+  profiles.devcontainer.module = {
+    devcontainer.tweaks = [ "podman" "vscode" ];
+    devcontainer.settings.customizations.vscode.extensions = [
+      "mkhl.direnv"
+      "bbenoist.Nix"
+      "vscodevim.vim"
+    ];
+  };
+}

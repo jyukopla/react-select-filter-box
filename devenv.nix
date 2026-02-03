@@ -1,18 +1,19 @@
 { pkgs, ... }:
-
+let
+  shell = { pkgs, ... }: {
+    languages.javascript = {
+      enable = true;
+      npm.enable = true;
+      package = pkgs.nodejs_20;
+    };
+  };
+in
 {
-  languages.javascript = {
-    enable = true;
-    npm.enable = true;
-    package = pkgs.nodejs_20;
+  profiles.shell.module = {
+    imports = [ shell ];
   };
 
-  devcontainer.enable = true;
-  devcontainer.tweaks = [ "podman" "vscode" "gpg-agent" ];
-  devcontainer.networkMode = "host";
-  devcontainer.settings.customizations.vscode.extensions = [
-    "mkhl.direnv"
-    "bbenoist.Nix"
-    "vscodevim.vim"
-  ];
+  profiles.devcontainer.module = {
+    devcontainer.enable = true;
+  };
 }
