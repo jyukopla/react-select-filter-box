@@ -1232,7 +1232,8 @@ export function useFilterState({
                 // Update machine state based on remaining expressions
                 if (newExpressions.length === 0) {
                   machine.clear()
-                  setState('selecting-field')
+                  machine.transition({ type: 'FOCUS' })
+                  setState(machine.getState())
                   setInputValue('')
                   setCurrentField(undefined)
                   setCurrentOperator(undefined)
@@ -1301,7 +1302,8 @@ export function useFilterState({
                 // Update machine state based on remaining expressions
                 if (newExpressions.length === 0) {
                   machine.clear()
-                  setState('selecting-field')
+                  machine.transition({ type: 'FOCUS' })
+                  setState(machine.getState())
                   setInputValue('')
                   setCurrentField(undefined)
                   setCurrentOperator(undefined)
@@ -1757,7 +1759,8 @@ export function useFilterState({
       // Update machine state based on remaining expressions
       if (newExpressions.length === 0) {
         machine.clear()
-        setState('selecting-field')
+        machine.transition({ type: 'FOCUS' })
+        setState(machine.getState())
         setInputValue('')
         setCurrentField(undefined)
         setCurrentOperator(undefined)
