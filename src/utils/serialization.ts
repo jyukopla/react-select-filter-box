@@ -9,6 +9,7 @@ import type {
   FieldValue,
   OperatorValue,
   FieldConfig,
+  FieldType,
 } from '@/types'
 
 /**
@@ -298,7 +299,7 @@ export function fromQueryString(queryString: string, schema: FilterSchema): Filt
   entries.forEach(([key, value], index) => {
     const fieldConfig = schema.fields.find((f) => f.key === key)
     let operatorConfig: { key: string; label: string; symbol?: string } | undefined
-    let fieldType: string = 'string'
+    let fieldType: FieldType = 'string'
 
     if (fieldConfig) {
       // Use first operator as default for predefined fields
