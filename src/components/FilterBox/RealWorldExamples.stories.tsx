@@ -163,11 +163,16 @@ const processInstanceSchema: FilterSchema = {
 }
 
 export const ProcessInstanceFilter: Story = {
-  args: {
-    schema: processInstanceSchema,
-    value: [],
-    onChange: () => {},
-    placeholder: 'Filter process instances...',
+  render: () => {
+    const [value, setValue] = useState<FilterExpression[]>([])
+    return (
+      <FilterBox
+        schema={processInstanceSchema}
+        value={value}
+        onChange={setValue}
+        placeholder="Filter process instances..."
+      />
+    )
   },
   parameters: {
     docs: {
@@ -279,11 +284,11 @@ const taskSchema: FilterSchema = {
 }
 
 export const TaskFilter: Story = {
-  args: {
-    schema: taskSchema,
-    value: [],
-    onChange: () => {},
-    placeholder: 'Filter tasks...',
+  render: () => {
+    const [value, setValue] = useState<FilterExpression[]>([])
+    return (
+      <FilterBox schema={taskSchema} value={value} onChange={setValue} placeholder="Filter tasks..." />
+    )
   },
 }
 
@@ -414,11 +419,16 @@ const productSchema: FilterSchema = {
 }
 
 export const EcommerceProductFilter: Story = {
-  args: {
-    schema: productSchema,
-    value: [],
-    onChange: () => {},
-    placeholder: 'Search products...',
+  render: () => {
+    const [value, setValue] = useState<FilterExpression[]>([])
+    return (
+      <FilterBox
+        schema={productSchema}
+        value={value}
+        onChange={setValue}
+        placeholder="Search products..."
+      />
+    )
   },
 }
 
@@ -571,11 +581,16 @@ const issueSchema: FilterSchema = {
 }
 
 export const IssueTrackerFilter: Story = {
-  args: {
-    schema: issueSchema,
-    value: [],
-    onChange: () => {},
-    placeholder: 'Search issues... (e.g., status = Open)',
+  render: () => {
+    const [value, setValue] = useState<FilterExpression[]>([])
+    return (
+      <FilterBox
+        schema={issueSchema}
+        value={value}
+        onChange={setValue}
+        placeholder="Search issues... (e.g., status = Open)"
+      />
+    )
   },
 }
 
@@ -701,11 +716,16 @@ const userSchema: FilterSchema = {
 }
 
 export const UserManagementFilter: Story = {
-  args: {
-    schema: userSchema,
-    value: [],
-    onChange: () => {},
-    placeholder: 'Search users...',
+  render: () => {
+    const [value, setValue] = useState<FilterExpression[]>([])
+    return (
+      <FilterBox
+        schema={userSchema}
+        value={value}
+        onChange={setValue}
+        placeholder="Search users..."
+      />
+    )
   },
 }
 
@@ -853,11 +873,16 @@ const logSchema: FilterSchema = {
 }
 
 export const LogSearchFilter: Story = {
-  args: {
-    schema: logSchema,
-    value: [],
-    onChange: () => {},
-    placeholder: 'Search logs... (level = ERROR, service = api-gateway)',
+  render: () => {
+    const [value, setValue] = useState<FilterExpression[]>([])
+    return (
+      <FilterBox
+        schema={logSchema}
+        value={value}
+        onChange={setValue}
+        placeholder="Search logs... (level = ERROR, service = api-gateway)"
+      />
+    )
   },
 }
 
