@@ -1232,10 +1232,11 @@ export function useFilterState({
                 // Update machine state based on remaining expressions
                 if (newExpressions.length === 0) {
                   machine.clear()
-                  setState('idle')
+                  setState('selecting-field')
                   setInputValue('')
                   setCurrentField(undefined)
                   setCurrentOperator(undefined)
+                  setIsDropdownOpen(true)
                 } else {
                   machine.loadExpressions(newExpressions)
                   setState('selecting-connector')
@@ -1300,10 +1301,11 @@ export function useFilterState({
                 // Update machine state based on remaining expressions
                 if (newExpressions.length === 0) {
                   machine.clear()
-                  setState('idle')
+                  setState('selecting-field')
                   setInputValue('')
                   setCurrentField(undefined)
                   setCurrentOperator(undefined)
+                  setIsDropdownOpen(true)
                 } else {
                   machine.loadExpressions(newExpressions)
                   setState('selecting-connector')
@@ -1755,10 +1757,11 @@ export function useFilterState({
       // Update machine state based on remaining expressions
       if (newExpressions.length === 0) {
         machine.clear()
-        setState('idle')
+        setState('selecting-field')
         setInputValue('')
         setCurrentField(undefined)
         setCurrentOperator(undefined)
+        setIsDropdownOpen(true)
       } else {
         machine.loadExpressions(newExpressions)
         setState('selecting-connector')

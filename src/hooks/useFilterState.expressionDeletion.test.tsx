@@ -31,7 +31,7 @@ describe('Expression Deletion State Reset', () => {
     ],
   }
 
-  it('should reset to idle state after deleting the last expression with Backspace', () => {
+  it('should show field dropdown after deleting the last expression with Backspace', () => {
     const onChange = vi.fn()
     const initialValue = [
       {
@@ -76,13 +76,14 @@ describe('Expression Deletion State Reset', () => {
       )
     })
 
-    // Bug fix: State should now be 'idle', not stuck in 'selecting-connector'
-    expect(result.current.state).toBe('idle')
-    expect(result.current.placeholder).toBe('Add filter...')
+    // Bug fix: State should now be 'selecting-field' with dropdown open
+    expect(result.current.state).toBe('selecting-field')
+    expect(result.current.isDropdownOpen).toBe(true)
+    expect(result.current.placeholder).toBe('Select field...')
     expect(onChange).toHaveBeenLastCalledWith([])
   })
 
-  it('should reset to idle state after deleting the last expression with Delete key', () => {
+  it('should show field dropdown after deleting the last expression with Delete key', () => {
     const onChange = vi.fn()
     const initialValue = [
       {
@@ -124,9 +125,10 @@ describe('Expression Deletion State Reset', () => {
       )
     })
 
-    // State should be idle
-    expect(result.current.state).toBe('idle')
-    expect(result.current.placeholder).toBe('Add filter...')
+    // State should be selecting-field with dropdown open
+    expect(result.current.state).toBe('selecting-field')
+    expect(result.current.isDropdownOpen).toBe(true)
+    expect(result.current.placeholder).toBe('Select field...')
   })
 
   it('should transition to selecting-connector when deleting one of multiple expressions', () => {
@@ -176,7 +178,7 @@ describe('Expression Deletion State Reset', () => {
     ])
   })
 
-  it('should reset to idle when using handleExpressionDelete on the last expression', () => {
+  it('should show field dropdown when using handleExpressionDelete on the last expression', () => {
     const onChange = vi.fn()
     const initialValue = [
       {
@@ -203,9 +205,10 @@ describe('Expression Deletion State Reset', () => {
       result.current.handleExpressionDelete(0)
     })
 
-    // State should still be idle
-    expect(result.current.state).toBe('idle')
-    expect(result.current.placeholder).toBe('Add filter...')
+    // State should be selecting-field with dropdown open
+    expect(result.current.state).toBe('selecting-field')
+    expect(result.current.isDropdownOpen).toBe(true)
+    expect(result.current.placeholder).toBe('Select field...')
     expect(onChange).toHaveBeenLastCalledWith([])
   })
 })
