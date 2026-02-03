@@ -297,13 +297,24 @@ export function fromQueryString(queryString: string, schema: FilterSchema): Filt
 
   entries.forEach(([key, value], index) => {
     const fieldConfig = schema.fields.find((f) => f.key === key)
-    if (!fieldConfig) {
-      // Skip unknown fields
+    let operatorConfig: { key: string; label: string; symbol?: string } | undefined
+    let fieldType: string = 'string'
+
+    if (fieldConfig) {
+      // Use first operator as default for predefined fields
+      operatorConfig = fieldConfig.operators[0]
+      fieldType = fieldConfig.type
+    } else if (schema.allowFreeformFields) {
+      // Handle as freeform field
+      const freeformConfig = schema.freeformFieldConfig ?? {}
+      const operators = freeformConfig.operators ?? [{ key: 'eq', label: 'equals', symbol: '=' }]
+      operatorConfig = operators[0]
+      fieldType = freeformConfig.type ?? 'string'
+    } else {
+      // Skip unknown fields when freeform not allowed
       return
     }
 
-    // Use first operator as default
-    const operatorConfig = fieldConfig.operators[0]
     if (!operatorConfig) {
       return
     }
@@ -311,9 +322,9 @@ export function fromQueryString(queryString: string, schema: FilterSchema): Filt
     const expression: FilterExpression = {
       condition: {
         field: {
-          key: fieldConfig.key,
-          label: fieldConfig.label,
-          type: fieldConfig.type,
+          key: key,
+          label: fieldConfig?.label ?? key,
+          type: fieldType,
         },
         operator: {
           key: operatorConfig.key,

@@ -845,5 +845,144 @@ describe('Serialization', () => {
       expect(deserialized[0]?.condition.field.key).toBe('age')
       expect(deserialized[0]?.condition.value.raw).toBe('25')
     })
+
+    it('should roundtrip freeform field expressions', () => {
+      const schemaWithFreeform: FilterSchema = {
+        ...testSchema,
+        allowFreeformFields: true,
+        freeformFieldConfig: {
+          type: 'string',
+          operators: [
+            { key: 'eq', label: 'equals', symbol: '=' },
+            { key: 'like', label: 'like' },
+          ],
+        },
+      }
+
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'myCustomVariable', label: 'myCustomVariable', type: 'string' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'testValue', display: 'testValue', serialized: 'testValue' },
+          },
+        },
+      ]
+
+      const serialized = serialize(original)
+      const deserialized = deserialize(serialized, schemaWithFreeform)
+
+      expect(deserialized).toHaveLength(1)
+      expect(deserialized[0]?.condition.field.key).toBe('myCustomVariable')
+      expect(deserialized[0]?.condition.field.label).toBe('myCustomVariable')
+      expect(deserialized[0]?.condition.field.type).toBe('string')
+      expect(deserialized[0]?.condition.operator.key).toBe('eq')
+      expect(deserialized[0]?.condition.value.raw).toBe('testValue')
+    })
+
+    it('should roundtrip mixed predefined and freeform fields', () => {
+      const schemaWithFreeform: FilterSchema = {
+        ...testSchema,
+        allowFreeformFields: true,
+        freeformFieldConfig: {
+          type: 'string',
+          operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+        },
+      }
+
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'is', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+          connector: 'AND',
+        },
+        {
+          condition: {
+            field: { key: 'processVariable', label: 'processVariable', type: 'string' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'value123', display: 'value123', serialized: 'value123' },
+          },
+        },
+      ]
+
+      const serialized = serialize(original)
+      const jsonString = JSON.stringify(serialized)
+      // Simulate saving to localStorage and loading back
+      const parsed = JSON.parse(jsonString)
+      const deserialized = deserialize(parsed, schemaWithFreeform)
+
+      expect(deserialized).toHaveLength(2)
+      // Predefined field should use schema label
+      expect(deserialized[0]?.condition.field.key).toBe('status')
+      expect(deserialized[0]?.condition.field.label).toBe('Status')
+      expect(deserialized[0]?.connector).toBe('AND')
+      // Freeform field should use key as label
+      expect(deserialized[1]?.condition.field.key).toBe('processVariable')
+      expect(deserialized[1]?.condition.field.label).toBe('processVariable')
+    })
+
+    it('should roundtrip freeform field through query string format', () => {
+      const schemaWithFreeform: FilterSchema = {
+        ...testSchema,
+        allowFreeformFields: true,
+        freeformFieldConfig: {
+          type: 'string',
+          operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+        },
+      }
+
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'customField', label: 'customField', type: 'string' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'someValue', display: 'someValue', serialized: 'someValue' },
+          },
+        },
+      ]
+
+      const queryString = toQueryString(original)
+      const parsed = fromQueryString(queryString, schemaWithFreeform)
+
+      expect(parsed).toHaveLength(1)
+      expect(parsed[0]?.condition.field.key).toBe('customField')
+      expect(parsed[0]?.condition.value.raw).toBe('someValue')
+    })
+
+    it('should handle freeform field with special characters in value', () => {
+      const schemaWithFreeform: FilterSchema = {
+        ...testSchema,
+        allowFreeformFields: true,
+        freeformFieldConfig: {
+          type: 'string',
+          operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+        },
+      }
+
+      const original: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'myVar', label: 'myVar', type: 'string' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: {
+              raw: 'test "quoted" value',
+              display: 'test "quoted" value',
+              serialized: 'test "quoted" value',
+            },
+          },
+        },
+      ]
+
+      const serialized = serialize(original)
+      const jsonString = JSON.stringify(serialized)
+      const parsed = JSON.parse(jsonString)
+      const deserialized = deserialize(parsed, schemaWithFreeform)
+
+      expect(deserialized).toHaveLength(1)
+      expect(deserialized[0]?.condition.value.raw).toBe('test "quoted" value')
+    })
   })
 })

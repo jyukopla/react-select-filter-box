@@ -389,6 +389,105 @@ describe('FilterBox - Freeform Fields', () => {
       // Should transition to operator selection
       expect(screen.getByPlaceholderText('Select operator...')).toBeInTheDocument()
     })
+
+    it('should navigate correctly when freeform option is the only matching item', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(<FilterBox schema={createFreeformSchema()} value={[]} onChange={onChange} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+      // Type something that doesn't match any predefined field
+      await user.type(input, 'xyz123')
+
+      // Only freeform option should be visible
+      expect(screen.queryByText('Status')).not.toBeInTheDocument()
+      expect(screen.queryByText('Name')).not.toBeInTheDocument()
+      expect(screen.getByText(/Create field:.*"xyz123"/)).toBeInTheDocument()
+
+      // ArrowDown once should select the freeform option
+      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{Enter}')
+
+      // Should transition to operator selection
+      expect(screen.getByPlaceholderText('Select operator...')).toBeInTheDocument()
+    })
+
+    it('should correctly highlight freeform option at the end of filtered list', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(<FilterBox schema={createFreeformSchema()} value={[]} onChange={onChange} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+      // Type something that matches "Name" but also allows freeform
+      await user.type(input, 'nam')
+
+      // Both Name and freeform option should be visible
+      expect(screen.getByText('Name')).toBeInTheDocument()
+      expect(screen.getByText(/Create field:.*"nam"/)).toBeInTheDocument()
+
+      // Navigate down twice: first to Name, then to freeform
+      await user.keyboard('{ArrowDown}') // Highlight Name
+      await user.keyboard('{ArrowDown}') // Highlight freeform option
+
+      await user.keyboard('{Enter}')
+
+      // Should transition to operator selection with freeform field
+      expect(screen.getByPlaceholderText('Select operator...')).toBeInTheDocument()
+    })
+
+    it('should handle ArrowUp from freeform option correctly', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(<FilterBox schema={createFreeformSchema()} value={[]} onChange={onChange} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+      await user.type(input, 'nam')
+
+      // Navigate to the freeform option
+      await user.keyboard('{ArrowDown}') // Name
+      await user.keyboard('{ArrowDown}') // freeform
+
+      // Navigate back up
+      await user.keyboard('{ArrowUp}') // Back to Name
+
+      await user.keyboard('{Enter}')
+
+      // Should select "Name" field (not freeform)
+      expect(screen.getByPlaceholderText('Select operator...')).toBeInTheDocument()
+    })
+
+    it('should complete full freeform expression using only keyboard', async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      render(<FilterBox schema={createFreeformSchema()} value={[]} onChange={onChange} />)
+
+      const input = screen.getByPlaceholderText('Add filter...')
+      await user.click(input)
+
+      // Type freeform field name
+      await user.type(input, 'customVar')
+
+      // Navigate to freeform option and select
+      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{Enter}')
+
+      // Select operator with keyboard
+      await user.keyboard('{ArrowDown}') // First operator (equals)
+      await user.keyboard('{Enter}')
+
+      // Type value and confirm
+      await user.type(screen.getByPlaceholderText('Enter value...'), 'myValue')
+      await user.keyboard('{Enter}')
+
+      // Verify the expression was created
+      expect(onChange).toHaveBeenCalled()
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0]
+      expect(lastCall[0].condition.field.key).toBe('customVar')
+      expect(lastCall[0].condition.value.raw).toBe('myValue')
+    })
   })
 
   describe('Display and Tokens', () => {

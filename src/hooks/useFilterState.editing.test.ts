@@ -584,7 +584,6 @@ describe('useFilterState - Editing', () => {
       act(() => {
         result.current.handleFocus()
       })
-      const stateBefore = result.current.state
 
       // Double-click on value token (index 2) to edit with custom widget
       act(() => {

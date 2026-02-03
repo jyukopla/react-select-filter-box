@@ -1,7 +1,7 @@
 # Makefile for react-select-filter-box
 # Mirrors package.json scripts with node_modules dependency
 
-.PHONY: all build build-lib lint test test-watch test-all test-coverage test-storybook \
+.PHONY: all build build-lib check lint test test-watch test-all test-coverage test-storybook \
         format format-check typecheck docs-api storybook build-storybook chromatic clean help
 
 # Default target
@@ -18,6 +18,8 @@ build: node_modules
 
 build-lib: node_modules
 	npm run build:lib
+
+check: lint
 
 # Linting and formatting
 lint: node_modules

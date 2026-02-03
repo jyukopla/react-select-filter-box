@@ -18,6 +18,11 @@ import type {
 
 /**
  * Possible states in the filter state machine
+ *
+ * Note: The 'editing-token' state is defined here but is managed by React state
+ * (useFilterState hook), not by the FilterStateMachine class. This is a known
+ * architectural split where UI editing states are handled separately from core
+ * expression building states. See docs/architecture/state-machine-diagram.md
  */
 export type FilterStep =
   | 'idle' // No input started
@@ -25,7 +30,7 @@ export type FilterStep =
   | 'selecting-operator' // Choosing an operator for current field
   | 'entering-value' // Entering/selecting a value
   | 'selecting-connector' // Choosing AND/OR or completing
-  | 'editing-token' // Editing an existing token
+  | 'editing-token' // Editing an existing token (managed by React, not state machine)
 
 /**
  * Context maintained by the state machine
@@ -116,6 +121,11 @@ export class FilterStateMachine {
 
   /**
    * Get available action types for the current state
+   *
+   * Note: For 'editing-token' state, this method returns the expected actions,
+   * but the actual state transitions are managed by React (useFilterState hook),
+   * not by this state machine. This is part of the dual state management system
+   * documented in TODO-state-machine-review.md
    */
   getAvailableActions(): FilterActionType[] {
     switch (this.state) {
@@ -130,6 +140,8 @@ export class FilterStateMachine {
       case 'selecting-connector':
         return ['SELECT_CONNECTOR', 'COMPLETE', 'BLUR', 'DELETE_LAST']
       case 'editing-token':
+        // Note: These actions are returned for completeness, but editing-token
+        // transitions are handled by React state, not this machine
         return ['CONFIRM_VALUE', 'BLUR']
       default:
         return []

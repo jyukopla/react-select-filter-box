@@ -411,4 +411,410 @@ describe('FilterStateMachine', () => {
       expect(machine.canTransition({ type: 'CONFIRM_VALUE', payload: value })).toBe(false)
     })
   })
+
+  describe('editing-token state', () => {
+    it('should return correct available actions for editing-token state', () => {
+      // Note: editing-token state is defined in FilterStep but not directly transitionable via machine
+      // This test verifies that getAvailableActions handles it correctly
+      const testMachine = new FilterStateMachine()
+      // Access private state for testing purposes
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(testMachine as any).state = 'editing-token'
+      const actions = testMachine.getAvailableActions()
+      expect(actions).toEqual(['CONFIRM_VALUE', 'BLUR'])
+    })
+
+    it('should not transition from editing-token state via CONFIRM_VALUE (managed by React)', () => {
+      // Setup: create an expression first
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+
+      // Set state to editing-token manually (simulating React state management)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(machine as any).state = 'editing-token'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(machine as any).context.currentField = field
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(machine as any).context.currentOperator = operator
+
+      const newValue: ConditionValue = { raw: 'updated', display: 'Updated', serialized: 'updated' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: newValue })
+
+      // The machine does not handle editing-token state transitions
+      // It remains in editing-token state, leaving React to manage the transition
+      expect(machine.getState()).toBe('editing-token')
+      // However, if the preconditions are met (entering-value state), it would add an expression
+      // But editing-token is not entering-value, so no expression is added
+      expect(machine.getContext().completedExpressions).toHaveLength(0)
+    })
+
+    it('should handle BLUR when in editing-token state', () => {
+      // Setup: create an expression first
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+
+      // Set state to editing-token manually
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(machine as any).state = 'editing-token'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(machine as any).context.currentField = field
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(machine as any).context.currentOperator = operator
+
+      machine.transition({ type: 'BLUR' })
+
+      // Should return to idle and clear context
+      expect(machine.getState()).toBe('idle')
+      expect(machine.getContext().currentField).toBeUndefined()
+      expect(machine.getContext().currentOperator).toBeUndefined()
+    })
+  })
+
+  describe('Reset and Clear edge cases', () => {
+    it('should reset to initial state during partial expression (field selected)', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+
+      machine.reset()
+
+      expect(machine.getState()).toBe('idle')
+      expect(machine.getContext().currentField).toBeUndefined()
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should reset to initial state during partial expression (operator selected)', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+
+      machine.reset()
+
+      expect(machine.getState()).toBe('idle')
+      expect(machine.getContext().currentField).toBeUndefined()
+      expect(machine.getContext().currentOperator).toBeUndefined()
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should clear expressions during mid-transition', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+
+      machine.clear()
+
+      expect(machine.getState()).toBe('idle')
+      expect(machine.getContext().currentField).toBeUndefined()
+      expect(machine.getContext().currentOperator).toBeUndefined()
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should clear pendingConnector on clear', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+      machine.transition({ type: 'SELECT_CONNECTOR', payload: 'AND' })
+
+      machine.clear()
+
+      expect(machine.getContext().pendingConnector).toBeUndefined()
+    })
+  })
+
+  describe('loadExpressions edge cases', () => {
+    it('should load empty array of expressions', () => {
+      // First add some expressions
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+
+      // Load empty array
+      machine.loadExpressions([])
+
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should load expressions while in mid-transition', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+      ]
+
+      machine.loadExpressions(expressions)
+
+      expect(machine.getContext().completedExpressions).toEqual(expressions)
+      // Should preserve current state and partial context
+      expect(machine.getState()).toBe('selecting-operator')
+      expect(machine.getContext().currentField).toEqual(field)
+    })
+
+    it('should replace existing expressions when loading new ones', () => {
+      const expression1: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      machine.loadExpressions(expression1)
+      expect(machine.getContext().completedExpressions).toHaveLength(1)
+
+      const expression2: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'name', label: 'Name', type: 'string' },
+            operator: { key: 'contains', label: 'contains' },
+            value: { raw: 'test', display: 'test', serialized: 'test' },
+          },
+        },
+        {
+          condition: {
+            field: { key: 'age', label: 'Age', type: 'number' },
+            operator: { key: 'gt', label: 'greater than', symbol: '>' },
+            value: { raw: '18', display: '18', serialized: '18' },
+          },
+        },
+      ]
+
+      machine.loadExpressions(expression2)
+      expect(machine.getContext().completedExpressions).toEqual(expression2)
+    })
+
+    it('should not mutate loaded expressions array', () => {
+      const expressions: FilterExpression[] = [
+        {
+          condition: {
+            field: { key: 'status', label: 'Status', type: 'enum' },
+            operator: { key: 'eq', label: 'equals', symbol: '=' },
+            value: { raw: 'active', display: 'Active', serialized: 'active' },
+          },
+        },
+      ]
+
+      machine.loadExpressions(expressions)
+
+      // Modify the internal state
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'name', label: 'Name', type: 'string' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'contains', label: 'contains' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'test', display: 'test', serialized: 'test' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+
+      // Original array should remain unchanged
+      expect(expressions).toHaveLength(1)
+    })
+  })
+
+  describe('DELETE_LAST edge cases', () => {
+    it('should handle DELETE_LAST from selecting-field with no completed expressions', () => {
+      machine.transition({ type: 'FOCUS' })
+      // In selecting-field state with no expressions
+      expect(machine.getState()).toBe('selecting-field')
+
+      machine.transition({ type: 'DELETE_LAST' })
+
+      // Should remain in selecting-field state
+      expect(machine.getState()).toBe('selecting-field')
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should handle DELETE_LAST from selecting-field with completed expressions', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+      machine.transition({ type: 'SELECT_CONNECTOR', payload: 'AND' })
+      // Now in selecting-field for next expression
+
+      machine.transition({ type: 'DELETE_LAST' })
+
+      // Should go to selecting-connector of the last expression
+      expect(machine.getState()).toBe('selecting-connector')
+      // Last expression should have connector removed
+      expect(machine.getContext().completedExpressions[0]?.connector).toBeUndefined()
+    })
+
+    it('should restore field and operator when deleting from selecting-connector', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+
+      machine.transition({ type: 'DELETE_LAST' })
+
+      expect(machine.getState()).toBe('entering-value')
+      expect(machine.getContext().currentField).toEqual(field)
+      expect(machine.getContext().currentOperator).toEqual(operator)
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should handle multiple rapid DELETE_LAST operations', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+
+      // Rapid deletes
+      machine.transition({ type: 'DELETE_LAST' }) // selecting-connector → entering-value
+      machine.transition({ type: 'DELETE_LAST' }) // entering-value → selecting-operator
+      machine.transition({ type: 'DELETE_LAST' }) // selecting-operator → selecting-field
+
+      expect(machine.getState()).toBe('selecting-field')
+      expect(machine.getContext().currentField).toBeUndefined()
+      expect(machine.getContext().currentOperator).toBeUndefined()
+    })
+
+    it('should handle DELETE_LAST from selecting-connector when it is the only expression', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+      const value: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+      // Now in selecting-connector with 1 expression
+
+      machine.transition({ type: 'DELETE_LAST' })
+
+      expect(machine.getState()).toBe('entering-value')
+      expect(machine.getContext().completedExpressions).toEqual([])
+      expect(machine.getContext().currentField).toEqual(field)
+      expect(machine.getContext().currentOperator).toEqual(operator)
+    })
+
+    it('should delete correct expression when multiple expressions exist', () => {
+      // Create two expressions
+      machine.transition({ type: 'FOCUS' })
+      const field1: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field1 })
+      const operator1: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator1 })
+      const value1: ConditionValue = { raw: 'active', display: 'Active', serialized: 'active' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value1 })
+      machine.transition({ type: 'SELECT_CONNECTOR', payload: 'AND' })
+
+      const field2: FieldValue = { key: 'name', label: 'Name', type: 'string' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field2 })
+      const operator2: OperatorValue = { key: 'contains', label: 'contains' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator2 })
+      const value2: ConditionValue = { raw: 'test', display: 'test', serialized: 'test' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value2 })
+      // Now have 2 expressions, in selecting-connector
+
+      machine.transition({ type: 'DELETE_LAST' })
+
+      expect(machine.getState()).toBe('entering-value')
+      expect(machine.getContext().completedExpressions).toHaveLength(1)
+      expect(machine.getContext().completedExpressions[0]?.condition.field).toEqual(field1)
+      expect(machine.getContext().currentField).toEqual(field2)
+      expect(machine.getContext().currentOperator).toEqual(operator2)
+    })
+  })
+
+  describe('Invalid transition behavior', () => {
+    it('should silently ignore invalid SELECT_FIELD from idle state', () => {
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+
+      // State should remain unchanged
+      expect(machine.getState()).toBe('idle')
+      expect(machine.getContext().currentField).toBeUndefined()
+    })
+
+    it('should silently ignore invalid CONFIRM_VALUE from selecting-field', () => {
+      machine.transition({ type: 'FOCUS' })
+      const value: ConditionValue = { raw: 'test', display: 'test', serialized: 'test' }
+      machine.transition({ type: 'CONFIRM_VALUE', payload: value })
+
+      // State should remain unchanged
+      expect(machine.getState()).toBe('selecting-field')
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should silently ignore COMPLETE from non-selecting-connector state', () => {
+      machine.transition({ type: 'FOCUS' })
+      machine.transition({ type: 'COMPLETE' })
+
+      expect(machine.getState()).toBe('selecting-field')
+    })
+
+    it('should handle DELETE_LAST from idle state', () => {
+      machine.transition({ type: 'DELETE_LAST' })
+
+      // Should remain in idle state
+      expect(machine.getState()).toBe('idle')
+    })
+  })
+
+  describe('CLEAR and RESET actions always work', () => {
+    it('should allow CLEAR from any state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+
+      machine.transition({ type: 'CLEAR' })
+
+      expect(machine.getState()).toBe('idle')
+      expect(machine.getContext().completedExpressions).toEqual([])
+    })
+
+    it('should allow RESET from any state', () => {
+      machine.transition({ type: 'FOCUS' })
+      const field: FieldValue = { key: 'status', label: 'Status', type: 'enum' }
+      machine.transition({ type: 'SELECT_FIELD', payload: field })
+      const operator: OperatorValue = { key: 'eq', label: 'equals', symbol: '=' }
+      machine.transition({ type: 'SELECT_OPERATOR', payload: operator })
+
+      machine.transition({ type: 'RESET' })
+
+      expect(machine.getState()).toBe('idle')
+      expect(machine.getContext()).toEqual({
+        completedExpressions: [],
+        currentField: undefined,
+        currentOperator: undefined,
+        pendingConnector: undefined,
+      })
+    })
+  })
 })
