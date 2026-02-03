@@ -579,6 +579,36 @@ describe('selectors', () => {
       expect(selectPlaceholder('entering-value')).toBe('Enter value...')
       expect(selectPlaceholder('selecting-connector')).toBe('AND or OR?')
     })
+
+    it('should generate connector placeholder from schema', () => {
+      const schema: FilterSchema = {
+        fields: [],
+        connectors: [
+          { key: 'AND', label: '&' },
+          { key: 'OR', label: '|' },
+        ],
+      }
+      expect(selectPlaceholder('selecting-connector', schema)).toBe('& or |?')
+    })
+
+    it('should handle custom connector labels', () => {
+      const schema: FilterSchema = {
+        fields: [],
+        connectors: [
+          { key: 'AND', label: 'All of' },
+          { key: 'OR', label: 'Any of' },
+        ],
+      }
+      expect(selectPlaceholder('selecting-connector', schema)).toBe('All of or Any of?')
+    })
+
+    it('should fall back to generic placeholder if not exactly 2 connectors', () => {
+      const schema: FilterSchema = {
+        fields: [],
+        connectors: [{ key: 'AND', label: 'AND' }],
+      }
+      expect(selectPlaceholder('selecting-connector', schema)).toBe('Select connector...')
+    })
   })
 
   describe('selectIsTokenEditable', () => {

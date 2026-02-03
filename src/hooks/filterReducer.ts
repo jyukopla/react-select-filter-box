@@ -558,7 +558,7 @@ export function selectSuggestions(
 /**
  * Get placeholder text based on current step
  */
-export function selectPlaceholder(step: FilterStep): string {
+export function selectPlaceholder(step: FilterStep, schema?: FilterSchema): string {
   switch (step) {
     case 'selecting-field':
       return 'Select field...'
@@ -566,8 +566,14 @@ export function selectPlaceholder(step: FilterStep): string {
       return 'Select operator...'
     case 'entering-value':
       return 'Enter value...'
-    case 'selecting-connector':
-      return 'AND or OR?'
+    case 'selecting-connector': {
+      const connectors = schema?.connectors ?? [
+        { key: 'AND' as const, label: 'AND' },
+        { key: 'OR' as const, label: 'OR' },
+      ]
+      const labels = connectors.map((c) => c.label)
+      return labels.length === 2 ? `${labels[0]} or ${labels[1]}?` : `Select connector...`
+    }
     default:
       return 'Add filter...'
   }

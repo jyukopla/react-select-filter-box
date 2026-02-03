@@ -1065,3 +1065,102 @@ export const SchemaWithIcons: Story = {
     },
   },
 }
+
+// =============================================================================
+// Custom Connectors
+// =============================================================================
+
+const customConnectorsSchema: FilterSchema = {
+  fields: [
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'enum',
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+    },
+    {
+      key: 'priority',
+      label: 'Priority',
+      type: 'enum',
+      operators: [{ key: 'eq', label: 'is', symbol: '=' }],
+    },
+    {
+      key: 'assignee',
+      label: 'Assignee',
+      type: 'string',
+      operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+    },
+  ],
+  connectors: [
+    { key: 'AND', label: 'All' },
+    { key: 'OR', label: 'Any' },
+  ],
+}
+
+const symbolConnectorsSchema: FilterSchema = {
+  fields: [
+    {
+      key: 'category',
+      label: 'Category',
+      type: 'string',
+      operators: [{ key: 'eq', label: 'equals', symbol: '=' }],
+    },
+    {
+      key: 'price',
+      label: 'Price',
+      type: 'number',
+      operators: [{ key: 'gt', label: 'greater than', symbol: '>' }],
+    },
+  ],
+  connectors: [
+    { key: 'AND', label: '&' },
+    { key: 'OR', label: '|' },
+  ],
+}
+
+export const CustomConnectors: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '750px' }}>
+      <div>
+        <h3 style={{ fontSize: '16px', marginBottom: '0.5rem' }}>Word-based Connectors</h3>
+        <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>
+          Using "All" and "Any" instead of "AND" and "OR". Notice the placeholder updates to "All
+          or Any?" when selecting connectors.
+        </p>
+        <FilterBoxWithState schema={customConnectorsSchema} />
+      </div>
+
+      <div>
+        <h3 style={{ fontSize: '16px', marginBottom: '0.5rem' }}>Symbol Connectors</h3>
+        <p style={{ marginBottom: '1rem', color: '#666', fontSize: '14px' }}>
+          Using "&" and "|" symbols. The placeholder shows "& or |?" to reflect the custom labels.
+        </p>
+        <FilterBoxWithState schema={symbolConnectorsSchema} />
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Custom connector labels allow you to use alternative terminology that better matches your domain or user base.
+The placeholder text dynamically reflects the connector labels you provide in the schema.
+
+Default connectors are \`AND\` and \`OR\`, but you can customize them:
+
+\`\`\`typescript
+const schema: FilterSchema = {
+  fields: [...],
+  connectors: [
+    { key: 'AND', label: 'All' },
+    { key: 'OR', label: 'Any' },
+  ],
+}
+\`\`\`
+
+The connector placeholder will automatically update from "AND or OR?" to match your custom labels.
+        `,
+      },
+    },
+  },
+}
